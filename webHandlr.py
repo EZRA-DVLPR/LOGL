@@ -20,8 +20,8 @@ def beginWebScrape(gamelist):
         #add a new entry in data_all with the title of the game
         data_all.append([gamelist[i]])
 
-        #turns any spaces into '+'
-        gamelist[i] = gamelist[i].replace(' ', '+')
+        #fix name of game
+        gamelist[i] = fixGamename(gamelist[i])
         
         #extracts hltbURL
         hltbURL = googleSearch(gamelist[i])
@@ -86,7 +86,7 @@ def hltbExtract(url):
         #otherwise it will be ['no data']
         hours = []
 
-        match = soup.find_all('li', class_='GameStats_short__mnFjd time_100')
+        match = soup.find('div', class_='GameStats_game_times__5LFEc')
 
         if (not match):
             #this game is not a standard single-player experience, and thus no data will not be grabbed
@@ -94,13 +94,37 @@ def hltbExtract(url):
             print('no info, check manually')
             print()
         else:
-            #we will grab only the main story and completionist lengths
-            hours = [match[0].find('h5').text, match[3].find('h5').text]
-            print()
+            #check for main story
+            if (len(match.find_all('h4')) > 0) and (match.find_all('h4')[0].text == 'Main Story'):
+                hours.append(match.find_all('h5')[0].text)
+
+            #check for completionist
+            if (len(match.find_all('h4')) > 2) and (match.find_all('h4')[2].text == 'Completionist'):
+                hours.append(match.find_all('h5')[2].text)
+
+            #if no such fields exist then there is no relevant data
+            if hours == []:
+                hours = ['no data']
+                print('no info, check manually')
+                print()
             '''
             print(hours)
             print()
             '''
-            
         
         return hours
+
+def fixGamename(gamename):
+    #first check for non-alphanumeric characters
+    #then replace all spaces
+
+    gamename = gamename.replace('\'','%27')
+
+    gamename = gamename.replace('&','%26')
+    
+    gamename = gamename.replace(':','%3A')
+
+    #turns any spaces into '+'
+    gamename = gamename.replace(' ', '+')
+    
+    return gamename
