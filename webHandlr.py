@@ -106,7 +106,8 @@ def hltbExtract(url):
             if hours == []:
                 hours = ['no data']
                 print('no info, check manually')
-                print()
+            
+            print()
             '''
             print(hours)
             print()
