@@ -126,6 +126,8 @@ def fixGamename(gamename):
     
     gamename = gamename.replace(':','%3A')
 
+    gamename = gamename.replace(',','%2C')
+
     #turns any spaces into '+'
     gamename = gamename.replace(' ', '+')
     
