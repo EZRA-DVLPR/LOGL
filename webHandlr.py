@@ -108,6 +108,7 @@ def hltbExtract(url):
                 print('no info, check manually')
             
             print()
+            
             '''
             print(hours)
             print()
