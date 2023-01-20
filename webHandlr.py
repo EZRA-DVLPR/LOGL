@@ -116,10 +116,9 @@ def hltbExtract(url):
         
         return hours
 
+#corrects the gamename for special characters
 def fixGamename(gamename):
-    #first check for non-alphanumeric characters
-    #then replace all spaces
-
+    #first replace all non-alphanumeric characters that have different formats
     gamename = gamename.replace('\'','%27')
 
     gamename = gamename.replace('&','%26')
@@ -134,3 +133,4 @@ def fixGamename(gamename):
     gamename = gamename.replace(' ', '+')
     
     return gamename
+

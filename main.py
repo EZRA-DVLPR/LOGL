@@ -10,3 +10,7 @@ data_all = webHandlr.beginWebScrape(gamelist)
 
 #open the excel workbook and add it to the workbook
 fileHandlr.addToWB(fileHandlr.wbChecker(), data_all, 0)
+
+#color code the data
+fileHandlr.colorCoder(fileHandlr.wbChecker(), 0)
+
