@@ -1,4 +1,12 @@
 import fileHandlr
 import webHandlr
 
-fileHandlr.wbChecker()
+#read a txt file and insert it into an array (gamelist)
+gamelist = fileHandlr.fileReader()
+
+#begin web scraping with the gamelist
+#save the returned data into data_all
+data_all = webHandlr.beginWebScrape(gamelist)
+
+#open the excel workbook and add it to the workbook
+fileHandlr.addToWB(fileHandlr.wbChecker(), data_all, 0)

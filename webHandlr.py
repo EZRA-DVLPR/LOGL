@@ -1,37 +1,106 @@
-# this file will handle all web connections and functions related to the web
+#this file will handle all web connections and functions related to the web
 
+from bs4 import BeautifulSoup
 import requests
-import json
 
-url = 'https://howlongtobeat.com/'
-header = {"User-Agent" : "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.1 Safari/605.1.15"}
-cookie = {"cto_bidid" : "3fGYkV9kWkxDSWYwTyUyRmlUVUY1a2dTbTdsaG1ob3o0eHEzcXJNT0lydlc4V1dqYVpnMDJ4SzUwdndaVzJkSWlBRFJlbHhsMzM0aFZDNWlpWm9IaEJ6dWxaMCUyRnclM0QlM0Q",
-    "cto_bundle" : "bByyW19leUVocDlHZDJZeDZ3NVZ2UEM5YlZ0cXpyeU8yMVclMkJlUUNBUWliSE96QTRrUExMQlVtUEZ4RXI0RXpmODhkSm1mOUdnSHFOUWtGY3J1WnNtUTE5VG9ZMUpCR1RFc21NaXVKZVVucnFkT3JMNCUyQjVKRkZTWlZEc29Qa2c4VGNZOGI",
-    "_ga" : "GA1.2.137075115.1670704387",
-    "_gid" : "GA1.2.762652137.1671044747",
-    "_pbjs_userid_consent_data" : "3524755945110770"}
+#initiates the entire web scraping for the entire gameslist
+def beginWebScrape(gamelist):
+    print('Webscraping has begun!')
 
-query = {"q" : "pokemon"}
+    #data_all will hold the titles and the hours array
+    #hours: main, completionist
+    # OR
+    #hours: 'no data'
+    data_all = []
 
-dataa = {"searchType":"games","searchTerms":["elden"],"searchPage":1,"size":20,"searchOptions":{"games":{"userId":0,"platform":"","sortCategory":"popular","rangeCategory":"main","rangeTime":{"min":"null","max":"null"},"gameplay":{"perspective":"","flow":"","genre":""},"rangeYear":{"min":"","max":""},"modifier":""},"users":{"sortCategory":"postcount"},"filter":"","sort":0,"randomizer":0}}
+    #iterate through given list
+    for i in range (len(gamelist)):
+        print('Working on game ' + str(i+1) + ' of ' + str(len(gamelist)))
+        
+        #add a new entry in data_all with the title of the game
+        data_all.append([gamelist[i]])
 
-r = requests.get(url, headers=header, params=query)    #, cookies=cookie)
+        #turns any spaces into '+'
+        gamelist[i] = gamelist[i].replace(' ', '+')
+        
+        #extracts hltbURL
+        hltbURL = googleSearch(gamelist[i])
+        
+        #checks validity of connection and only proceeds with extraction if google connection is good
+        if (not (hltbURL == 'ERROR ON GOOGLE CONNECTION')):
+            #extracts stats on game and appends them to data_all[i]
+            data_all[i].append(hltbExtract(hltbURL))
 
-print(r.url)
-print("\n\n")
+    print('Webscraping process has ended!')
+    return data_all
 
-print(r.status_code)
-print("\n\n")
+#gets the url of the hltb for the specified game
+def googleSearch(gamename):
 
-r = requests.get(url + '?q=ninja', headers=header)
+    #make the google search with the given name
+    googleurl = 'https://www.google.com/search?q=hltb+' + gamename
+    try:
+        googlereq = requests.get(googleurl)
+        if (googlereq.status_code == '200'):
+            raise InterruptedError('No valid connection')
 
-print(r.status_code)
-print("\n\n")
+    except:
+        #if error with connection then say so
+        print('ERROR CONNECTING FOR ' + gamename)
+        print()
+        return 'ERROR ON GOOGLE CONNECTION'
 
-print(r.history)
+    else:
+        #make a soup then search for the first hit on google
+        soup = BeautifulSoup(googlereq.text, 'lxml')
+        match = soup.find('div', class_='egMi0 kCrYT')
 
-with open('file.txt', 'w') as f:
-    f.write(r.text)
+        #get the link of the first hit and then return that link
+        link = match.find('a')
+        newlink = link.get('href')
+        newurl = newlink[7:newlink.find('&')]
+        return newurl
 
-#if cant get it to work then instead search google for results and pick the one with the 
-# HLTB as the webpage
+#connects to hltb and gets the gamedata
+#default timeout to 2 seconds
+def hltbExtract(url):
+    #assign header for connecting to hltb.com
+    header = {"User-Agent" : "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.1 Safari/605.1.15"}
+
+    try:
+        HLTBreq = requests.get(url, headers=header, timeout=2)
+        if (HLTBreq.status_code == '200'):
+            raise InterruptedError('No valid connection')
+
+    except:
+        #if error with connection then say so
+        print('ERROR CONNECTING to HLTB ')
+        print()
+        return 'ERROR ON HLTB CONNECTION'
+
+    else:
+        #make a soup and then connect to HLTB website
+        soup = BeautifulSoup(HLTBreq.text, 'lxml')
+
+        #hours will be the extracted data if it exists
+        #otherwise it will be ['no data']
+        hours = []
+
+        match = soup.find_all('li', class_='GameStats_short__mnFjd time_100')
+
+        if (not match):
+            #this game is not a standard single-player experience, and thus no data will not be grabbed
+            hours = ['no data']
+            print('no info, check manually')
+            print()
+        else:
+            #we will grab only the main story and completionist lengths
+            hours = [match[0].find('h5').text, match[3].find('h5').text]
+            print()
+            '''
+            print(hours)
+            print()
+            '''
+            
+        
+        return hours
