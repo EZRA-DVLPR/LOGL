@@ -92,8 +92,9 @@ def addToWB(wb, wsnum, data_all):
 
         #data_all[index][0 = gamename, 1 = array of hours][which value of hours we want: 0 = main story, 1 = completionist]
         if str(type(data_all[i][1][0])) == '<class \'str\'>':
+            #both the cells will contain the same data, since it doesn't matter
             ws.cell(row = i+2, column = 2, value = data_all[i][1][0])
-            ws.cell(row = i+2, column = 3, value = data_all[i][1][1])
+            ws.cell(row = i+2, column = 3, value = data_all[i][1][0])
         else:
             ws.cell(row = i+2, column = 2, value = float(data_all[i][1][0]))
             ws.cell(row = i+2, column = 3, value = float(data_all[i][1][1]))
@@ -220,7 +221,7 @@ def uncolorCoder(wb, wsnum):
 
 #checks if a string contains only numerical characters
 #i.e. 0-9    
-#returns a 0,1:
+#returns 0 or 1:
 #       1 -> all numbers
 #       0 -> not all numbers     
 def onlyNum(string):
@@ -675,9 +676,3 @@ def platformSort(list):
 #uncolorCoder(wbChecker(), 0)
 #sorter(wbChecker(), 0, 1, 2)
 #platformSort([['OW', 11.5, '12', 'PS4'], ['Overwatch 2', 10, '120', 'SWITCH'], ['HK', 1, '2', 'PS4'], ['PP', 10, '102', 'PC']])   
-
-'''
-New column of data called 'In progress' which demonstrates which games are being played
-
-change so that when data is copied, it copies to max_col instead of grabbing each one by index
-'''
