@@ -4,8 +4,10 @@ from bs4 import BeautifulSoup
 import requests
 
 #initiates the entire web scraping for the entire gameslist
+#returns the web-scraped data in an array
 def beginWebScrape(gamelist):
     print('Webscraping has begun!')
+    print()
 
     #data_all will hold the titles and the hours array
     #hours: main, completionist
@@ -16,6 +18,7 @@ def beginWebScrape(gamelist):
     #iterate through given list
     for i in range (len(gamelist)):
         print('Working on game ' + str(i+1) + ' of ' + str(len(gamelist)))
+        print()
         
         #add a new entry in data_all with the title of the game
         data_all.append([gamelist[i]])
@@ -32,9 +35,11 @@ def beginWebScrape(gamelist):
             data_all[i].append(hltbExtract(hltbURL))
 
     print('Webscraping process has ended!')
+    print()
     return data_all
 
 #gets the url of the hltb for the specified game
+#returns the url as a string
 def googleSearch(gamename):
 
     #make the google search with the given name
@@ -63,6 +68,7 @@ def googleSearch(gamename):
 
 #connects to hltb and gets the gamedata
 #default timeout to 2 seconds
+#returns the extracted data (hours) for the game in an array
 def hltbExtract(url):
     #assign header for connecting to hltb.com
     header = {"User-Agent" : "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.1 Safari/605.1.15"}
@@ -94,29 +100,31 @@ def hltbExtract(url):
             print('no info, check manually')
             print()
         else:
+            #only grabs the numbers and not the hours
+
+
             #check for main story
             if (len(match.find_all('h4')) > 0) and (match.find_all('h4')[0].text == 'Main Story'):
-                hours.append(match.find_all('h5')[0].text)
+                hours.append(fixGameHours(match.find_all('h5')[0].text[:match.find_all('h5')[0].text.find(' ')]))
+                
 
             #check for completionist
             if (len(match.find_all('h4')) > 2) and (match.find_all('h4')[2].text == 'Completionist'):
-                hours.append(match.find_all('h5')[2].text)
+                hours.append(fixGameHours(match.find_all('h5')[2].text[:match.find_all('h5')[2].text.find(' ')]))
+
 
             #if no such fields exist then there is no relevant data
             if hours == []:
                 hours = ['no data']
                 print('no info, check manually')
             
-            print()
-            
-            '''
-            print(hours)
-            print()
-            '''
+            #print(hours)
+            #print()
         
         return hours
 
 #corrects the gamename for special characters
+#returns a string that is properly formatted for google searches
 def fixGamename(gamename):
     #first replace all non-alphanumeric characters that have different formats
     gamename = gamename.replace('\'','%27')
@@ -133,4 +141,10 @@ def fixGamename(gamename):
     gamename = gamename.replace(' ', '+')
     
     return gamename
+
+#corrects the hours if they have the single character containing '1/2' by replacing with '.5' instead
+#returns a properly formatted string
+def fixGameHours(gamehours):
+    gamehours = gamehours.replace('½','.5')
+    return gamehours
 

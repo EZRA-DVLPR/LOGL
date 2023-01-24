@@ -2,15 +2,18 @@ import fileHandlr
 import webHandlr
 
 #read a txt file and insert it into an array (gamelist)
-gamelist = fileHandlr.fileReader()
+gamelist = fileHandlr.fileReader('games.txt')
 
 #begin web scraping with the gamelist
 #save the returned data into data_all
 data_all = webHandlr.beginWebScrape(gamelist)
 
 #open the excel workbook and add it to the workbook
-fileHandlr.addToWB(fileHandlr.wbChecker(), data_all, 0)
+fileHandlr.addToWB(fileHandlr.wbChecker(), 0, data_all)
 
 #color code the data
 fileHandlr.colorCoder(fileHandlr.wbChecker(), 0)
 
+fileHandlr.addNewCol(fileHandlr.wbChecker(), 0, 'newcol.txt')
+fileHandlr.addNewRow(fileHandlr.wbChecker(), 0, 'newrow.txt')
+fileHandlr.sorter(fileHandlr.wbChecker(), 0, 1)
