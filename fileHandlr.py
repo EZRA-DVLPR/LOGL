@@ -99,6 +99,8 @@ def addToWB(wb, wsnum, data_all):
             ws.cell(row = i+2, column = 2, value = float(data_all[i][1][0]))
             ws.cell(row = i+2, column = 3, value = float(data_all[i][1][1]))
 
+        ws.cell(row = i + 2, column = 5, value = None)
+
     #save work at the end
     wb.save(filename = 'gamelist_wb.xlsx')
 
@@ -439,7 +441,7 @@ def sorter(*args):
                     partitioned_in_progress = platformSort(in_progress)
             else:
                 #invalid sort
-                print('Invalid Sort' + args[2])
+                print('Invalid Sort ' + str(args[2]))
                 return
 
             #clear data_all for inputting of the data
@@ -468,7 +470,7 @@ def sorter(*args):
                         elif args[3] == 3:
                             i = platformSort(i)
                         else:
-                            print('Invalid Sort' + args[3])
+                            print('Invalid Sort ' + str(args[3]))
                             return
 
                         for j in i:
@@ -484,7 +486,7 @@ def sorter(*args):
                     elif args[3] == 3:
                         i = platformSort(i)
                     else:
-                        print('Invalid Sort' + args[3])
+                        print('Invalid Sort ' + str(args[3]))
                         return
 
                     for j in i:
@@ -548,6 +550,8 @@ def sorter(*args):
                 
                 #input platform
                 ws.cell(row = i + 2 + len(in_progress), column = 4, value = data_all[i][3])
+
+                ws.cell(row = i + 2 + len(in_progress), column = 5, value = '')
         else:
             for i in range(len(data_all)):
                 #input gamename
@@ -567,6 +571,8 @@ def sorter(*args):
                 
                 #input platform
                 ws.cell(row = i + 2, column = 4, value = data_all[i][3])
+
+                ws.cell(row = i + 2 + len(in_progress), column = 5, value = '')
 
         #color code the worksheet
         colorCoder(wb, wsnum)
