@@ -19,10 +19,8 @@ fileHandlr.addNewCol(fileHandlr.wbChecker(), 0, 'newcol.txt')
 fileHandlr.addNewRow(fileHandlr.wbChecker(), 0, 'newrow.txt')
 '''
 #sort with the new data that has been added
-#alphabetically
-#main story     -alphabetically, completionist, platform
-#completionist  -alphabetically, main story, platform
-#platform       -alphabetically, completionist, main story
-fileHandlr.sorter(fileHandlr.wbChecker(), 0, 1, 2)
+fileHandlr.uncolorCoder(fileHandlr.wbChecker(), 0)
+
+fileHandlr.sorter(fileHandlr.wbChecker(), 0, 2, 3)
 
 fileHandlr.colorCoder(fileHandlr.wbChecker(), 0)

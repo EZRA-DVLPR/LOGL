@@ -458,7 +458,10 @@ def sorter(*args):
                     for j in range(len(partitioned_data_all[i])):
                         data_all.append(partitioned_data_all[i][j])
                 if not(partitioned_in_progress == []):
-                    in_progress = alphanumeriSort(partitioned_in_progress)
+                    for i in range(len(partitioned_in_progress)):
+                        partitioned_in_progress[i] = alphanumeriSort(partitioned_in_progress[i])
+                        for j in range(len(partitioned_in_progress[i])):
+                            in_progress.append(partitioned_in_progress[i][j])
             else:
                 if not(partitioned_in_progress == []):
                     for i in partitioned_in_progress:
