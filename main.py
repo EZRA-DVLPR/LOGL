@@ -14,6 +14,10 @@ fileHandlr.addToWB(fileHandlr.wbChecker(), 0, data_all)
 #color code the data
 fileHandlr.colorCoder(fileHandlr.wbChecker(), 0)
 
+#add platform column and new games to list
 fileHandlr.addNewCol(fileHandlr.wbChecker(), 0, 'newcol.txt')
 fileHandlr.addNewRow(fileHandlr.wbChecker(), 0, 'newrow.txt')
-fileHandlr.sorter(fileHandlr.wbChecker(), 0, 1)
+
+#sort with the new data that has been added
+fileHandlr.sorter(fileHandlr.wbChecker(), 0, 1, 3)
+

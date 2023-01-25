@@ -1,7 +1,6 @@
 #this file handles all functions for files
 #including excel files and txt files
 
- 
 import webHandlr
 from openpyxl import Workbook
 from openpyxl import load_workbook
@@ -49,6 +48,7 @@ def wbChecker():
 
 #looks at the workbook given, worksheet number, and inputs all data into the workbook
 #next parameter is an integer: 0 = add to first worksheet, 1 = add to second worksheet
+#data_all is of the form: [['gamename', [hours]], ...]
 #the hours are floats
 def addToWB(wb, wsnum, data_all):
     print('Adding game data to Excel sheet')
@@ -159,7 +159,7 @@ def colorCoder(wb, wsnum):
 
                 #if val is a number then it will be color coded
                 #otherwise will be flagged for manual completion
-                if ((onlyNum(str(val)) == 1) and (len(str(val)) > 0)):
+                if not (str(type(val)) == '<class \'str\'>'):
                     #color code the cell
                     if val > 79:
                         ws[curr].fill = red
@@ -345,7 +345,7 @@ def addNewRow(wb, wsnum, name):
         ws.cell(row = ws.max_row + 1, column = 1, value = hours[i][0])
 
         #hours
-        if hours[i][1][0] == 'no data':
+        if str(type(hours[i][1][0])) == '<class \'str\'>':
             ws.cell(row = ws.max_row, column = 2, value = hours[i][1][0])
             ws.cell(row = ws.max_row, column = 3, value = hours[i][1][0])
         else:
@@ -420,8 +420,7 @@ def sorter(*args):
         else:
             #perform the first sort
             partitioned_data_all = []
-            if not(in_progress == []):
-                partitioned_in_progress = []
+            partitioned_in_progress = []
 
             if args[2] == 1:
                 #Main story
@@ -445,13 +444,17 @@ def sorter(*args):
 
             #clear data_all for inputting of the data
             data_all = []
+            
             if not(in_progress == []):
                 in_progress = []
 
             #perform the secondary sort if specified and isn't same as primary sort
             #otherwise perform alphanumeric sort by default
             if len(args) == 3 or args[3] == 0 or args[2] == args[3]:
-                data_all = alphanumeriSort(partitioned_data_all)
+                for i in range(len(partitioned_data_all)):
+                    partitioned_data_all[i] = alphanumeriSort(partitioned_data_all[i])
+                    for j in range(len(partitioned_data_all[i])):
+                        data_all.append(partitioned_data_all[i][j])
                 if not(partitioned_in_progress == []):
                     in_progress = alphanumeriSort(partitioned_in_progress)
             else:
@@ -581,7 +584,7 @@ def alphanumeriSort(list):
     for i in range(1, len(list)):
         #insertion sort
         j = i - 1
-        while not (j == -1):            
+        while not (j == -1):   
             if list[i][0].casefold() <= list[j][0].casefold():
                 list.insert(j, list.pop(i))
                 i -= 1
@@ -669,10 +672,6 @@ def platformSort(list):
     #print(partitionedList)
     return partitionedList
 
-#colorCoder(wbChecker(), 0)
-#addNewCol(wbChecker(), 0, 'newcol.txt')
-#addNewRow(wbChecker(), 0, 'newrow.txt')
-#hoursSort([['OW', 10, '12', 'PS4'], ['Overwatch 2', 15, '120', 'SWITCH'], ['HK', 'no data', '2', 'PS4'], ['PP', '--', '102', 'PC']], 0)
-#uncolorCoder(wbChecker(), 0)
+###################################################################
+#                   Commands Section
 #sorter(wbChecker(), 0, 1, 2)
-#platformSort([['OW', 11.5, '12', 'PS4'], ['Overwatch 2', 10, '120', 'SWITCH'], ['HK', 1, '2', 'PS4'], ['PP', 10, '102', 'PC']])   

@@ -98,28 +98,26 @@ def hltbExtract(url):
             #this game is not a standard single-player experience, and thus no data will not be grabbed
             hours = ['no data']
             print('no info, check manually')
-            print()
         else:
             #only grabs the numbers and not the hours
 
+            try:
+                #check for main story
+                if (len(match.find_all('h4')) > 0) and (match.find_all('h4')[0].text == 'Main Story'):
+                    hours.append(float(fixGameHours(match.find_all('h5')[0].text[:match.find_all('h5')[0].text.find(' ')])))
+            
+                #check for completionist
+                if (len(match.find_all('h4')) > 2) and (match.find_all('h4')[2].text == 'Completionist'):
+                    hours.append(float(fixGameHours(match.find_all('h5')[2].text[:match.find_all('h5')[2].text.find(' ')])))
 
-            #check for main story
-            if (len(match.find_all('h4')) > 0) and (match.find_all('h4')[0].text == 'Main Story'):
-                hours.append(fixGameHours(match.find_all('h5')[0].text[:match.find_all('h5')[0].text.find(' ')]))
-                
+                #if no such fields exist then there is no relevant data
+                if hours == []:
+                    hours = ['no data']
+                    print('no info, check manually')
 
-            #check for completionist
-            if (len(match.find_all('h4')) > 2) and (match.find_all('h4')[2].text == 'Completionist'):
-                hours.append(fixGameHours(match.find_all('h5')[2].text[:match.find_all('h5')[2].text.find(' ')]))
-
-
-            #if no such fields exist then there is no relevant data
-            if hours == []:
+            except:
                 hours = ['no data']
                 print('no info, check manually')
-            
-            #print(hours)
-            #print()
         
         return hours
 
