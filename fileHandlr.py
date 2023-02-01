@@ -318,20 +318,21 @@ def addNewRow(wb, wsnum, name):
     toAdd = fileReader(name)
     allGames = []
     allPlatforms = []
+    inProg = ''
 
     for i in range(len(toAdd)):
         #check if there is a space before the minus and grab the gamename
         if toAdd[i].find(' -') == -1:
-            gamename = toAdd[i][0:toAdd[i].find('-')]
+            gamename = toAdd[i][:toAdd[i].find('-')]
         else:
-            gamename = toAdd[i][0:toAdd[i].find('-') - 1]
+            gamename = toAdd[i][:toAdd[i].find('-') - 1]
 
         if toAdd[i].find('+') == -1:
             platform = toAdd[i][toAdd[i].find('-') + 1:]
-            inProg = 'x'
+            inProg = ''
         else:
             platform = toAdd[i][toAdd[i].find('-') + 1:toAdd[i].find('+') - 1]
-            inProg = ''
+            inProg = 'x'
         
 
         allGames.append(gamename)
@@ -358,8 +359,8 @@ def addNewRow(wb, wsnum, name):
         ws.cell(row = ws.max_row, column = 4, value = allPlatforms[i])
 
         #in progress
-        if (not (inProg == '')):
-            ws.cell(row = ws.max_row, column = 4, value = inProg)
+        if inProg == 'x':
+            ws.cell(row = ws.max_row, column = 5, value = inProg)
         
     #we will colorcode it too
     colorCoder(wb, wsnum)
@@ -593,6 +594,7 @@ def alphanumeriSort(list):
     for i in range(1, len(list)):
         #insertion sort
         j = i - 1
+        print(list[i])
         while not (j == -1):   
             if list[i][0].casefold() <= list[j][0].casefold():
                 list.insert(j, list.pop(i))
