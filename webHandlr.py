@@ -21,9 +21,8 @@ def beginWebScrape(gamelist):
         data_all.append([gamelist[i]])
 
         #generates query based on game name
+        #then extracts hltb URL via the generated query
         gamelist[i] = queryGenerator(gamelist[i])
-        
-        #extracts hltbURL
         hltbURL = googleSearch(gamelist[i])
         
         #if valid google connection was established then appends extracted data
@@ -93,12 +92,14 @@ def hltbExtract(url):
         #otherwise it will be ['no data']
         hours = []
 
-        match = soup.find('div', class_='GameStats_game_times__5LFEc')
+        #should be the parent div of each section (Main Story, Main Story +, ...)
+        #this is subject to change by the developers at HLTB and requires attention for each run
+        match = soup.find('div', class_='GameStats_game_times__KHrRY')
 
         if (not match):
             #this game is not a standard single-player experience, and thus no data will not be grabbed
             hours = ['no data']
-            print('no info, check manually')
+            print('no matching div, check manually')
         else:
             #only grabs the numbers and not the hours
 
@@ -114,7 +115,7 @@ def hltbExtract(url):
                 #if no such fields exist then there is no relevant data
                 if hours == []:
                     hours = ['no data']
-                    print('no info, check manually')
+                    print('no hours information available despite match, check manually')
 
             except:
                 hours = ['no data']

@@ -1,8 +1,8 @@
-README
+# README
 
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-Description
+## Description
 
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -14,28 +14,28 @@ There are additional functions that allow for sorting, color coding, appendnig c
 
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-What running this program does:
+## What running this program does:
 
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------
 The file to be run is 'main.py'.
 
-It begins by reading the txt file named 'games.txt', which then gets searched on 'www.google.com' where it looks at the first link for the link to the 'www.howlongtobeat.com' URL containing the desired game's information
+It begins by reading the txt file named 'games.txt', which then gets searched on 'www.google.com' where it looks at the first matching link to the 'www.howlongtobeat.com' URL containing the desired game's information
 
-After obtaining the URL from HLTB, it grabs the amount of hours needed for 'Main Story' and 'Completionist' if available.
+After obtaining the URL from HLTB, it grabs the amount of hours needed for 'Main Story' and 'Completionist', if available.
 
-Now with this information, it will input it into an excel file titled 'gamelist_wb.xlsx'.
+With this information inputs it into an excel file titled 'gamelist_wb.xlsx'.
 
-From there it will colorcode the data.
+From there it will color-code the data.
 
-Afterwards, it adds a new column (this contains the platforms for each one).
+Further functionality includes:
+    new columns being added (`Platform`)
+    new rows being added (new games)
 
-After the new column, it adds new rows to append to the end.
-
-Once this information is input, the data is then sorted by the time to complete the main story
+Once this information is input, the data may be sorted
 
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-LEGAL
+# LEGAL
 
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------
 This is program is not associated with Google or Howlongtobeat in any way.

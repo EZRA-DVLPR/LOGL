@@ -1,6 +1,6 @@
 import fileHandlr
 import webHandlr
-'''
+
 #read a txt file and insert it into an array (gamelist)
 gamelist = fileHandlr.fileReader('games.txt')
 
@@ -13,14 +13,15 @@ fileHandlr.addToWB(fileHandlr.wbChecker(), 1, data_all)
 
 #color code the data
 fileHandlr.colorCoder(fileHandlr.wbChecker(), 1)
-
+'''
 #add platform column and new games to list
 
 fileHandlr.addNewCol(fileHandlr.wbChecker(), 1, 'newcol.txt')
 
 fileHandlr.addNewRow(fileHandlr.wbChecker(), 0, 'newrow.txt')
-'''
+
 #sort with the new data that has been added
 fileHandlr.uncolorCoder(fileHandlr.wbChecker(), 0)
 
 fileHandlr.sorter(fileHandlr.wbChecker(), 0, 1, 2)
+'''
