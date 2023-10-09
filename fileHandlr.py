@@ -65,7 +65,7 @@ def addToWB(wb, wsnum, data_all):
         return -1
 
     #adjust first 3 columns to be wider for legibility
-    ws.column_dimensions['A'].width = 20
+    ws.column_dimensions['A'].width = 40
     ws.column_dimensions['B'].width = 20
     ws.column_dimensions['C'].width = 20
 
@@ -98,8 +98,6 @@ def addToWB(wb, wsnum, data_all):
         else:
             ws.cell(row = i+2, column = 2, value = float(data_all[i][1][0]))
             ws.cell(row = i+2, column = 3, value = float(data_all[i][1][1]))
-
-        ws.cell(row = i + 2, column = 5, value = None)
 
     #save work at the end
     wb.save(filename = 'gamelist_wb.xlsx')
@@ -183,7 +181,8 @@ def colorCoder(wb, wsnum):
         print()
         
         #save work at the end
-        wb.save(filename = 'gamelist_wb.xlsx')  
+        wb.save(filename = 'gamelist_wb.xlsx')
+        return
                     
 #gets rid of all the colors of 'Main Story' and 'Completionist' cells
 def uncolorCoder(wb, wsnum):
@@ -220,6 +219,7 @@ def uncolorCoder(wb, wsnum):
         
         #save work at the end
         wb.save(filename = 'gamelist_wb.xlsx') 
+        return
 
 #checks if a string contains only numerical characters
 #i.e. 0-9    
@@ -373,7 +373,7 @@ def addNewRow(wb, wsnum, name):
 
 #given a workbook, worksheet number, and sort number, will sort the data
 #sort: 0 - gamename alphabetical order, 1 - Main story least to greatest, 2 - Completionist least to greatest, 3 - platform alphabetical
-#0 = wb, 1 = wsnum, 2 = sort(1), 3 = sort2 
+#0 = wb, 1 = wsnum, 2 = sort(1), 3 = sort(2) 
 def sorter(*args):
     if (len(args) < 3):
         print('ERROR - NOT ENOUGH ARGUMENTS')
@@ -586,6 +586,7 @@ def sorter(*args):
 
         print('Done sorting!')
         print()
+        return
 
 #sorts the given list's elements first element alphanumerically: special characters, 0-9, a-z, A-Z
 #eg. [['Overwatch 2', ...], ['Final Fantasy', ...], ...]
@@ -594,7 +595,6 @@ def alphanumeriSort(list):
     for i in range(1, len(list)):
         #insertion sort
         j = i - 1
-        print(list[i])
         while not (j == -1):   
             if list[i][0].casefold() <= list[j][0].casefold():
                 list.insert(j, list.pop(i))
@@ -682,6 +682,40 @@ def platformSort(list):
     #partitionedList now contains each of the games separated into categories based off of the platform they are    
     #print(partitionedList)
     return partitionedList
+
+#adds clean formatting and spacing based on the current size of the given ws for a wb.
+#Can't handle more than 24 columns!
+def wsFormatter(wb, wsnum):
+    #finds max # rows, cols.
+    #sets spacing for all cells
+
+    #switches wsnum for the selected worksheet for the data to be input into
+    if (wsnum == 0):
+        wb.active = wb['Owned Games']
+        ws = wb['Owned Games']
+    elif (wsnum == 1):
+        wb.active = wb['Wishlist']
+        ws = wb['Wishlist']
+    else:
+        print('invalid worksheet')
+        return
+
+    colNames = ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z']
+
+    #i = col, j = row
+    for i in range(0, ws.max_column):
+        if i == 0:
+            ws.column_dimensions[colNames[i]].width = 60
+        else:
+            ws.column_dimensions[colNames[i]].width = 20
+        
+    for j in range(0, ws.max_row + 1):
+        ws.row_dimensions[j].height = 20
+
+    #save changes
+    wb.save(filename = 'gamelist_wb.xlsx')
+
+    return
 
 ###################################################################
 #                   Commands Section
