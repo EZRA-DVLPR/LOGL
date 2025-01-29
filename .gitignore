@@ -1,5 +1,3 @@
-gamelist_wb.xlsx
-games.txt
-newcol.txt
-newrow.txt
-allgames.txt
+.DS_Store
+Python_Stuff/*
+Python_Stuff/__pycache__/*
