@@ -7,7 +7,9 @@ import (
 )
 
 func main() {
-	fmt.Println("Hello World!")
+	fmt.Println("Program Start")
 
-	scraper.FetchPage()
+	// scraper.TestScraper()
+
+	scraper.FetchHLTB()
 }
