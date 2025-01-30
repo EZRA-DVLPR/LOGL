@@ -13,7 +13,9 @@ type Product struct {
 }
 
 type Game struct {
-	Main, MainPl, Comp, All string
+	Name, Url string
+	Labels    []string
+	Lengths   []string
 }
 
 func TestScraper() {
@@ -61,56 +63,61 @@ func TestScraper() {
 	c.Visit("https://www.scrapingcourse.com/ecommerce")
 }
 
-func FetchHLTB() {
-	// declare the collector object
+func FetchHLTBRunner() {
+	var games []Game
+
+	games = append(games, FetchHLTB("https://howlongtobeat.com/game/68151"))
+	games = append(games, FetchHLTB("https://howlongtobeat.com/game/64753"))
+	games = append(games, FetchHLTB("https://howlongtobeat.com/game/80199"))
+	games = append(games, FetchHLTB("https://howlongtobeat.com/game/4249"))
+	games = append(games, FetchHLTB("https://howlongtobeat.com/game/147712"))
+
+	for index, game := range games {
+		fmt.Printf("Game %d: Name: %s URL:%s \n", index+1, game.Name, game.Url)
+		fmt.Printf("Labels %s: \n", game.Labels)
+		fmt.Printf("Lengths %s: \n", game.Lengths)
+		fmt.Println()
+	}
+}
+
+func FetchHLTB(link string) (game Game) {
+	// declare the collector object so the scraping process can begin
 	c := colly.NewCollector(
 	// TODO: Need to check how it works with different User Agents
 	)
 
+	// establish connection to HLTB
 	c.OnRequest(func(r *colly.Request) {
-		fmt.Println("HLTB connection made, r.URL")
+		fmt.Println("Connection made to HLTB")
 	})
 
+	// log that there was a problem accessing the URL
 	c.OnError(func(_ *colly.Response, err error) {
 		log.Println("Something went wrong:", err)
 	})
 
-	c.OnResponse(func(r *colly.Response) {
+	// obtain the game name from the link
+	c.OnHTML("div.GameHeader_profile_header__q_PID", func(e *colly.HTMLElement) {
+		game.Name = e.Text
+	})
+
+	// obtain the label and time associated
+	c.OnHTML("div.GameStats_game_times__KHrRY", func(e *colly.HTMLElement) {
+		e.ForEach("li", func(_ int, el *colly.HTMLElement) {
+			game.Labels = append(game.Labels, el.ChildText("h4"))   // get the label for the time eg. "Main Story"
+			game.Lengths = append(game.Lengths, el.ChildText("h5")) // get the time eg. "4 Hours"
+		})
+	})
+
+	// when the deed is done, log it and attach URL
+	c.OnScraped(func(r *colly.Response) {
+		// attach the url to the game
+		game.Url = link
+
 		fmt.Println("Data Obtained!", r.Request.URL)
 	})
 
-	var games []Game
+	c.Visit(link)
 
-	c.OnHTML("li.GameStats_short__tSJ6I", func(e *colly.HTMLElement) {
-		// make new game instance
-		game := Game{}
-
-		// scrape data
-		game.Main = e.ChildText("h5")
-		// game.MainPl = e.ChildAttr("img", "src")
-		// game.Comp = e.ChildAttr("img", "src")
-		// game.All = e.ChildAttr("img", "src")
-
-		game.MainPl = "MainPlus"
-		game.Comp = ""
-		game.All = ""
-
-		fmt.Println(game.Main)
-		fmt.Println(game.MainPl)
-		fmt.Println("Comp")
-
-		// add product instance with scraped data to the list of products
-		games = append(games, game)
-	})
-
-	c.OnScraped(func(r *colly.Response) {
-		fmt.Println("Finished", r.Request.URL)
-
-		for _, game := range games {
-			fmt.Println(game.Main)
-			fmt.Println(game.MainPl)
-		}
-	})
-
-	c.Visit("https://howlongtobeat.com/game/68151")
+	return
 }

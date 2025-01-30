@@ -11,5 +11,7 @@ func main() {
 
 	// scraper.TestScraper()
 
-	scraper.FetchHLTB()
+	scraper.FetchHLTBRunner()
+
+	// scraper.GPTTest()
 }
