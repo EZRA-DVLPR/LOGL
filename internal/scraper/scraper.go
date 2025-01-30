@@ -1,4 +1,3 @@
-// https://www.zenrows.com/blog/web-scraping-golang#build-first-golang-scraper
 package scraper
 
 import (

@@ -11,7 +11,8 @@ func main() {
 
 	// scraper.TestScraper()
 
-	scraper.FetchHLTBRunner()
+	// scraper.FetchHLTBRunner()
 
-	// scraper.GPTTest()
+	fmt.Println(scraper.SearchHLTB("cookie"))
+	fmt.Println(scraper.SearchHLTB("nonsensegame that wont result in anything"))
 }
