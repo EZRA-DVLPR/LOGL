@@ -7,7 +7,7 @@ import (
 	"github.com/EZRA-DVLPR/GameList/internal/scraper"
 )
 
-func TestMyFunction(t *testing.T) {
+func TestScraperFetchHLTB(t *testing.T) {
 	actual := scraper.FetchHLTB("https://howlongtobeat.com/game/42069")
 
 	expected := scraper.Game{
