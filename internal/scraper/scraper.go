@@ -3,6 +3,7 @@ package scraper
 import (
 	"fmt"
 	"log"
+	"strings"
 
 	"github.com/gocolly/colly"
 )
@@ -55,7 +56,7 @@ func FetchHLTB(link string) (game Game) {
 
 	// obtain the game name from the page
 	c.OnHTML("div.GameHeader_profile_header__q_PID", func(e *colly.HTMLElement) {
-		game.Name = e.Text
+		game.Name = strings.TrimSpace(e.Text)
 	})
 
 	// obtain the label and time associated
