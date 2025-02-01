@@ -3,7 +3,9 @@ package database
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"os"
+	// "github.com/EZRA-DVLPR/GameList/internal/scraper"
 )
 
 type Salary struct {
@@ -45,4 +47,23 @@ func CreateDB() {
 	file, _ := json.MarshalIndent(data, "", " ")
 
 	_ = os.WriteFile("test.json", file, 0644)
+}
+
+func ReadDB() {
+	content, err := os.ReadFile("test.json")
+	if err != nil {
+		log.Fatal("Error when opening file: ", err)
+	}
+
+	var payload Employee
+	err = json.Unmarshal(content, &payload)
+	if err != nil {
+		log.Fatal("Error during Unmarshal(): ", err)
+	}
+
+	log.Printf("FirstName %s\n", payload.FirstName)
+	log.Printf("LastName %s\n", payload.LastName)
+	log.Printf("Email %s\n", payload.Email)
+	log.Printf("Age %d\n", payload.Age)
+	log.Println(payload.MonthlySalary)
 }

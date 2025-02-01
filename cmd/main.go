@@ -11,4 +11,6 @@ func main() {
 	fmt.Println("Program Start")
 
 	database.CreateDB()
+
+	database.ReadDB()
 }
