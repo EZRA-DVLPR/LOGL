@@ -10,8 +10,9 @@ import (
 
 type Game struct {
 	Name, Url string
-	Labels    []string
-	Lengths   []string
+	TimeData  map[string]string
+	// Labels    []string
+	// Lengths   []string
 }
 
 var games []Game
@@ -33,8 +34,13 @@ func FetchHLTBRunner(gameLink string) {
 
 	for index, game := range games {
 		fmt.Printf("Game %d: Name: %s URL:%s \n", index+1, game.Name, game.Url)
-		fmt.Printf("Labels %s: \n", game.Labels)
-		fmt.Printf("Lengths %s: \n", game.Lengths)
+
+		for label, length := range game.TimeData {
+			fmt.Println(label, length)
+		}
+
+		// fmt.Printf("Labels %s: \n", game.Labels)
+		// fmt.Printf("Lengths %s: \n", game.Lengths)
 		fmt.Println()
 	}
 }
@@ -60,10 +66,16 @@ func FetchHLTB(link string) (game Game) {
 	})
 
 	// obtain the label and time associated
+	game.TimeData = make(map[string]string)
 	c.OnHTML("div.GameStats_game_times__KHrRY", func(e *colly.HTMLElement) {
 		e.ForEach("li", func(_ int, el *colly.HTMLElement) {
-			game.Labels = append(game.Labels, el.ChildText("h4"))   // get the label for the time eg. "Main Story"
-			game.Lengths = append(game.Lengths, el.ChildText("h5")) // get the time eg. "4 Hours"
+			// TODO: Make it a setting such that if the setting is set, it will accept `All Styles` and add the data to the Game
+			if el.ChildText("h4") != "All Styles" {
+				game.TimeData[el.ChildText("h4")] = el.ChildText("h5")
+			}
+
+			// game.Labels = append(game.Labels, el.ChildText("h4"))   // get the label for the time eg. "Main Story"
+			// game.Lengths = append(game.Lengths, el.ChildText("h5")) // get the time eg. "4 Hours"
 		})
 	})
 

@@ -5,7 +5,8 @@ import (
 	"fmt"
 	"log"
 	"os"
-	// "github.com/EZRA-DVLPR/GameList/internal/scraper"
+
+	"github.com/EZRA-DVLPR/GameList/internal/scraper"
 )
 
 type Salary struct {
@@ -20,32 +21,14 @@ type Employee struct {
 
 func CreateDB() {
 	fmt.Println("Creating the DB")
-	data := Employee{
-		FirstName: "Mark",
-		LastName:  "Jones",
-		Email:     "mark@gmail.com",
-		Age:       25,
-		MonthlySalary: []Salary{
-			{
-				Basic: 15000.00,
-				HRA:   5000.00,
-				TA:    2000.00,
-			},
-			{
-				Basic: 16000.00,
-				HRA:   5000.00,
-				TA:    2100.00,
-			},
-			{
-				Basic: 17000.00,
-				HRA:   5000.00,
-				TA:    2200.00,
-			},
-		},
-	}
 
+	// obtain the data for adding to the DB
+	data := scraper.FetchHLTB("https://howlongtobeat.com/game/42069")
+
+	// format the data for the file
 	file, _ := json.MarshalIndent(data, "", " ")
 
+	// write the data to the file
 	_ = os.WriteFile("test.json", file, 0644)
 }
 
@@ -55,15 +38,15 @@ func ReadDB() {
 		log.Fatal("Error when opening file: ", err)
 	}
 
-	var payload Employee
+	var payload scraper.Game
 	err = json.Unmarshal(content, &payload)
 	if err != nil {
 		log.Fatal("Error during Unmarshal(): ", err)
 	}
 
-	log.Printf("FirstName %s\n", payload.FirstName)
-	log.Printf("LastName %s\n", payload.LastName)
-	log.Printf("Email %s\n", payload.Email)
-	log.Printf("Age %d\n", payload.Age)
-	log.Println(payload.MonthlySalary)
+	log.Printf("Name %s\n", payload.Name)
+	log.Printf("Url %s\n", payload.Url)
+	for key, val := range payload.TimeData {
+		log.Println(key, val)
+	}
 }
