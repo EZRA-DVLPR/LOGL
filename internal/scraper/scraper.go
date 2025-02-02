@@ -65,7 +65,7 @@ func FetchHLTB(link string) (game Game) {
 		game.Name = strings.TrimSpace(e.Text)
 	})
 
-	// obtain the label and time associated
+	// obtain the label and time associateD
 	game.TimeData = make(map[string]string)
 	c.OnHTML("div.GameStats_game_times__KHrRY", func(e *colly.HTMLElement) {
 		e.ForEach("li", func(_ int, el *colly.HTMLElement) {
