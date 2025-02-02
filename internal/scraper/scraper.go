@@ -36,9 +36,6 @@ func FetchHLTBRunner(gameLink string) {
 		for label, length := range game.TimeData {
 			fmt.Println(label, length)
 		}
-
-		// fmt.Printf("Labels %s: \n", game.Labels)
-		// fmt.Printf("Lengths %s: \n", game.Lengths)
 		fmt.Println()
 	}
 }
@@ -67,17 +64,39 @@ func FetchHLTB(link string) (game Game) {
 	game.TimeData = make(map[string]string)
 	c.OnHTML("div.GameStats_game_times__KHrRY", func(e *colly.HTMLElement) {
 		e.ForEach("li", func(_ int, el *colly.HTMLElement) {
-			// TODO: Make it a setting such that if the setting is set, it will accept `All Styles` and add the data to the Game
-			if el.ChildText("h4") != "All Styles" {
+			// dont grab the data that is from the following categories:
+			// 		"All Styles"
+			// 		"Vs."
+			if (el.ChildText("h4") != "All Styles") && (el.ChildText("h4") != "Vs.") {
+				// if the current label is "Co-Op" or "Single-Player"
+				// check if there is a value for "Main Story"
+				// 			if true: compare the values and take the higher
+				// 			else: make "Main Story" data
+				// else write the the data as is
+
+				mainStoryData, mainStoryDataExists := game.TimeData["Main Story"]
+				if (el.ChildText("h4") == "Co-Op") || (el.ChildText("h4") == "Single-Player") {
+					// if main story data exists, overwrite only if new data is greater
+					if (mainStoryDataExists) && (mainStoryData < el.ChildText("h5")) {
+						game.TimeData["Main Story"] = el.ChildText("h5")
+					} else if !mainStoryDataExists {
+						// There's no Main Story data so write it
+						game.TimeData["Main Story"] = el.ChildText("h5")
+					}
+					return
+				}
+				// the label is not any of the following:
+				//		"All Styles"
+				//		"Vs."
+				//		"Co-Op"
+				//		"Single-Player"
+				// and we simply write the data as is
 				game.TimeData[el.ChildText("h4")] = el.ChildText("h5")
 			}
-
-			// game.Labels = append(game.Labels, el.ChildText("h4"))   // get the label for the time eg. "Main Story"
-			// game.Lengths = append(game.Lengths, el.ChildText("h5")) // get the time eg. "4 Hours"
 		})
 	})
 
-	// when the deed is done, log it and attach URL
+	// when the data is acquired, log it and attach URL
 	c.OnScraped(func(r *colly.Response) {
 		// attach the url to the game
 		game.Url = link
