@@ -59,9 +59,10 @@ func DeleteFromDB(game scraper.Game) {
 		log.Fatal("Failed to access db")
 	}
 
+	// delete from the games table
 	res, err := db.Exec("DELETE FROM games WHERE name = ?", game.Name)
 	if err != nil {
-		log.Fatal("Error deleting game: ", err)
+		log.Fatal("Error deleting game from games table: ", err)
 	}
 
 	// check if there was a deletion
@@ -72,6 +73,11 @@ func DeleteFromDB(game scraper.Game) {
 	if rowsAffected == 0 {
 		fmt.Printf("Game `%s` not found in database\n", game.Name)
 		return
+	}
+
+	res, err = db.Exec("DELETE FROM times WHERE game_name = ?", game.Name)
+	if err != nil {
+		log.Fatal("Error deleting game from times table: ", err)
 	}
 
 	fmt.Println("Game deleted: ", game.Name)
@@ -86,10 +92,6 @@ func AddToDB(game scraper.Game) {
 		return
 	}
 
-	for key, val := range game.TimeData {
-		fmt.Println(key, val)
-	}
-
 	// open the DB
 	db, err := sql.Open("sqlite3", "games.db")
 	if err != nil {
@@ -97,19 +99,32 @@ func AddToDB(game scraper.Game) {
 	}
 	defer db.Close()
 
+	// if the given game already exists in the db, then dont add it
+
+	var exists bool
+	err = db.QueryRow("SELECT EXISTS(SELECT 1 FROM games WHERE name = ?)", game.Name).Scan(&exists)
+	if err != nil {
+		log.Fatal("Error checking game existence", err)
+	}
+
+	if exists {
+		fmt.Println("Game already exists in database!\nSkipping insertion")
+		return
+	}
+
 	fmt.Println("Adding the game data to the DB")
 
 	// insert into games table: name, url
-	db.Exec("INSERT INTO games (name, url) VALUES (?,?)", game.Name, game.Url)
+	_, err = db.Exec("INSERT OR IGNORE INTO games (name, url) VALUES (?,?)", game.Name, game.Url)
 	if err != nil {
 		log.Fatal("Error inserting game: ", err)
 	}
 
 	// insert into times table: label, length based on game name associated
 	for label, length := range game.TimeData {
-		_, err := db.Exec("INSERT INTO times (game_name, label, length) VALUES (?, ?, ?)", game.Name, label, length)
+		_, err = db.Exec("INSERT INTO times (game_name, label, length) VALUES (?, ?, ?)", game.Name, label, length)
 		if err != nil {
-			log.Fatal("Error inserting times")
+			log.Fatal("Error inserting times", game.Name, label, length)
 		}
 	}
 

@@ -11,13 +11,9 @@ func main() {
 	fmt.Println("Program Start")
 
 	database.CreateDB()
-
-	data := scraper.FetchHLTB("https://howlongtobeat.com/game/42069")
-	database.AddToDB(data)
-
 	database.PrintAllGames()
 
-	data = scraper.FetchHLTB("https://howlongtobeat.com/game/155106")
+	data := scraper.FetchHLTB("https://howlongtobeat.com/game/155106")
 	database.AddToDB(data)
 
 	database.PrintAllGames()
@@ -48,6 +44,9 @@ func main() {
 	database.PrintAllGames()
 
 	database.DeleteFromDB(data)
+
+	data = scraper.FetchHLTB("https://howlongtobeat.com/game/42069")
+	database.AddToDB(data)
 
 	database.PrintAllGames()
 }
