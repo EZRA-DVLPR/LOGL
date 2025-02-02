@@ -55,12 +55,7 @@ func FetchHLTB(link string) (game Game) {
 		log.Println("Something went wrong:", err)
 	})
 
-	// obtain the game name from the page
-	c.OnHTML("div.GameHeader_profile_header__q_PID", func(e *colly.HTMLElement) {
-		game.Name = strings.TrimSpace(e.Text)
-	})
-
-	// obtain the label and time associateD
+	// obtain the label and time associated
 	game.TimeData = make(map[string]string)
 	c.OnHTML("div.GameStats_game_times__KHrRY", func(e *colly.HTMLElement) {
 		e.ForEach("li", func(_ int, el *colly.HTMLElement) {
@@ -96,13 +91,27 @@ func FetchHLTB(link string) (game Game) {
 		})
 	})
 
-	// when the data is acquired, log it and attach URL
-	c.OnScraped(func(r *colly.Response) {
-		// attach the url to the game
-		game.Url = link
+	// if the map is empty, return an empty Game Object
+	// o/w grab all the rest of the data
 
-		fmt.Println("Data Obtained!", r.Request.URL)
-	})
+	if len(game.TimeData) == 0 {
+		game.Name = ""
+		game.Url = ""
+	} else {
+		// obtain the game name from the page
+
+		c.OnHTML("div.GameHeader_profile_header__q_PID", func(e *colly.HTMLElement) {
+			game.Name = strings.TrimSpace(e.Text)
+		})
+
+		// when the data is acquired, log it and attach URL
+		c.OnScraped(func(r *colly.Response) {
+			// attach the url to the game
+			game.Url = link
+
+			fmt.Println("Data Obtained!", r.Request.URL)
+		})
+	}
 
 	c.Visit(link)
 

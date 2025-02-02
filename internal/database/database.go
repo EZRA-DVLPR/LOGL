@@ -78,6 +78,14 @@ func DeleteFromDB(game scraper.Game) {
 }
 
 func AddToDB(game scraper.Game) {
+	// if the given game is not empty, then add to the DB
+	if (game.Name == "") &&
+		(game.Url == "") &&
+		(len(game.TimeData) == 0) {
+		fmt.Println("No game data received for associate game.")
+		return
+	}
+
 	// open the DB
 	db, err := sql.Open("sqlite3", "games.db")
 	if err != nil {
