@@ -11,8 +11,6 @@ import (
 type Game struct {
 	Name, Url string
 	TimeData  map[string]string
-	// Labels    []string
-	// Lengths   []string
 }
 
 var games []Game
