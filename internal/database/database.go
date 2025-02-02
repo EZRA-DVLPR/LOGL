@@ -86,6 +86,10 @@ func AddToDB(game scraper.Game) {
 		return
 	}
 
+	for key, val := range game.TimeData {
+		fmt.Println(key, val)
+	}
+
 	// open the DB
 	db, err := sql.Open("sqlite3", "games.db")
 	if err != nil {
@@ -118,6 +122,8 @@ func PrintAllGames() {
 		log.Fatal("Error accessing local dB: ", err)
 	}
 	defer db.Close()
+
+	// TODO:Handle the case in which the db is empty to indicate it is empty
 
 	rows, err := db.Query("SELECT name, url FROM games")
 	if err != nil {
