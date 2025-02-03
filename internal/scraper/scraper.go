@@ -89,6 +89,20 @@ func FetchHLTB(link string) (game Game) {
 				game.TimeData[el.ChildText("h4")] = el.ChildText("h5")
 			}
 		})
+		// when finished obtaining all the data, fill all empty values with "--"
+		// for "Main Story", "Main + Sides", and "Completionist"
+		_, exists := game.TimeData["Main Story"]
+		if !exists {
+			game.TimeData["Main Story"] = "--"
+		}
+		_, exists = game.TimeData["Main + Sides"]
+		if !exists {
+			game.TimeData["Main + Sides"] = "--"
+		}
+		_, exists = game.TimeData["Completionist"]
+		if !exists {
+			game.TimeData["Completionist"] = "--"
+		}
 	})
 
 	c.OnHTML("div.GameHeader_profile_header__q_PID", func(e *colly.HTMLElement) {
