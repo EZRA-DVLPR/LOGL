@@ -15,8 +15,9 @@ import (
 // 		url }
 // times {
 // 		game_name
-// 		label
-// 		length }
+// 		main
+//		mainPlus
+// 		comp }
 // where game_name is the same (references) the name of the game in the games table
 
 func CreateDB() {
@@ -39,9 +40,10 @@ func CreateDB() {
 	);
 	CREATE TABLE IF NOT EXISTS times (
 		game_name TEXT,
-		label TEXT,
-		length TEXT,
-		PRIMARY KEY (game_name, label),
+		main TEXT,
+		mainPlus TEXT,
+		comp TEXT,
+		PRIMARY KEY (game_name),
 		FOREIGN KEY (game_name) REFERENCES games(name) ON DELETE CASCADE
 	);
 	`)
@@ -87,7 +89,9 @@ func AddToDB(game scraper.Game) {
 	// if the given game is not empty, then add to the DB
 	if (game.Name == "") &&
 		(game.Url == "") &&
-		(len(game.TimeData) == 0) {
+		(game.Main == "") &&
+		(game.MainPlus == "") &&
+		(game.Comp == "") {
 		fmt.Println("No game data received for associate game.")
 		return
 	}
@@ -100,13 +104,11 @@ func AddToDB(game scraper.Game) {
 	defer db.Close()
 
 	// if the given game already exists in the db, then dont add it
-
 	var exists bool
 	err = db.QueryRow("SELECT EXISTS(SELECT 1 FROM games WHERE name = ?)", game.Name).Scan(&exists)
 	if err != nil {
 		log.Fatal("Error checking game existence", err)
 	}
-
 	if exists {
 		fmt.Println("Game already exists in database!\nSkipping insertion")
 		return
@@ -120,12 +122,10 @@ func AddToDB(game scraper.Game) {
 		log.Fatal("Error inserting game: ", err)
 	}
 
-	// insert into times table: label, length based on game name associated
-	for label, length := range game.TimeData {
-		_, err = db.Exec("INSERT INTO times (game_name, label, length) VALUES (?, ?, ?)", game.Name, label, length)
-		if err != nil {
-			log.Fatal("Error inserting times", game.Name, label, length)
-		}
+	// insert into times table: Main, MainPlus, Comp based on game name associated
+	_, err = db.Exec("INSERT INTO times (game_name, main, mainPlus, comp) VALUES (?, ?, ?, ?)", game.Name, game.Main, game.MainPlus, game.Comp)
+	if err != nil {
+		log.Fatal("Error inserting times", game.Name, game.Main, game.MainPlus, game.Comp)
 	}
 
 	fmt.Println("Finished adding the game data to the DB")
@@ -155,18 +155,18 @@ func PrintAllGames() {
 		}
 		fmt.Printf("Name: %s \nURL %s,\n", name, url)
 
-		timesrows, err := db.Query("SELECT label, length FROM times WHERE game_name = ?", name)
+		timesrows, err := db.Query("SELECT main, mainPlus, comp FROM times WHERE game_name = ?", name)
 		if err != nil {
 			log.Fatal("Error retrieving times: ", err)
 		}
 		defer timesrows.Close()
 
 		for timesrows.Next() {
-			var label, length string
-			if err := timesrows.Scan(&label, &length); err != nil {
+			var main, mainPlus, comp string
+			if err := timesrows.Scan(&main, &mainPlus, &comp); err != nil {
 				log.Fatal("Error scanning timesrow: ", err)
 			}
-			fmt.Printf("\t%s:\t%s\n", label, length)
+			fmt.Printf("\t%s:\t%s\t%s\n", main, mainPlus, comp)
 		}
 	}
 }

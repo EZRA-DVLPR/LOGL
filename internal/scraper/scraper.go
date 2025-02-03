@@ -9,8 +9,7 @@ import (
 )
 
 type Game struct {
-	Name, Url string
-	TimeData  map[string]string
+	Name, Url, Main, MainPlus, Comp string
 }
 
 var games []Game
@@ -31,16 +30,15 @@ func FetchHLTBRunner(gameLink string) {
 	games = append(games, FetchHLTB("https://howlongtobeat.com/"+gameLink))
 
 	for index, game := range games {
-		fmt.Printf("Game %d: Name: %s URL:%s \n", index+1, game.Name, game.Url)
-
-		for label, length := range game.TimeData {
-			fmt.Println(label, length)
-		}
+		fmt.Printf("Game %d: Name: %s URL: %s\n", index+1, game.Name, game.Url)
+		fmt.Println("Main Story:\t", game.Main)
+		fmt.Println("Main + Sides:\t", game.MainPlus)
+		fmt.Println("Completionist:\t", game.Comp)
 		fmt.Println()
 	}
 }
 
-// given the entire proper link for HLTB, obtain labels and lengths for the game
+// given the entire proper link for HLTB, obtain information for the game
 func FetchHLTB(link string) (game Game) {
 	// declare the collector object so the scraping process can begin
 	c := colly.NewCollector()
@@ -55,8 +53,7 @@ func FetchHLTB(link string) (game Game) {
 		log.Println("Something went wrong:", err)
 	})
 
-	// obtain the label and time associated
-	game.TimeData = make(map[string]string)
+	// update the Main Story, Main + Sides, and Completionist fields of the game struct
 	c.OnHTML("div.GameStats_game_times__KHrRY", func(e *colly.HTMLElement) {
 		e.ForEach("li", func(_ int, el *colly.HTMLElement) {
 			// dont grab the data that is from the following categories:
@@ -69,42 +66,43 @@ func FetchHLTB(link string) (game Game) {
 				// 			else: make "Main Story" data
 				// else write the the data as is
 
-				mainStoryData, mainStoryDataExists := game.TimeData["Main Story"]
 				if (el.ChildText("h4") == "Co-Op") || (el.ChildText("h4") == "Single-Player") {
 					// if main story data exists, overwrite only if new data is greater
-					if (mainStoryDataExists) && (mainStoryData < el.ChildText("h5")) {
-						game.TimeData["Main Story"] = el.ChildText("h5")
-					} else if !mainStoryDataExists {
+
+					if (game.Main != "") && (game.Main < el.ChildText("h5")) {
 						// There's no Main Story data so write it
-						game.TimeData["Main Story"] = el.ChildText("h5")
+						game.Main = el.ChildText("h5")
+					} else if game.Main == "" {
+						game.Main = el.ChildText("h5")
 					}
-					return
 				}
-				// the label is not any of the following:
-				//		"All Styles"
-				//		"Vs."
-				//		"Co-Op"
-				//		"Single-Player"
-				// and we simply write the data as is
-				game.TimeData[el.ChildText("h4")] = el.ChildText("h5")
+
+				// write the data for Main Story, Main + Sides, and Completionist
+				if el.ChildText("h4") == "Main Story" {
+					game.Main = el.ChildText("h5")
+				}
+				if el.ChildText("h4") == "Main + Sides" {
+					game.MainPlus = el.ChildText("h5")
+				}
+				if el.ChildText("h4") == "Completionist" {
+					game.Comp = el.ChildText("h5")
+				}
 			}
 		})
 		// when finished obtaining all the data, fill all empty values with "--"
-		// for "Main Story", "Main + Sides", and "Completionist"
-		_, exists := game.TimeData["Main Story"]
-		if !exists {
-			game.TimeData["Main Story"] = "--"
+
+		if game.Main == "" {
+			game.Main = "--"
 		}
-		_, exists = game.TimeData["Main + Sides"]
-		if !exists {
-			game.TimeData["Main + Sides"] = "--"
+		if game.MainPlus == "" {
+			game.MainPlus = "--"
 		}
-		_, exists = game.TimeData["Completionist"]
-		if !exists {
-			game.TimeData["Completionist"] = "--"
+		if game.Comp == "" {
+			game.Comp = "--"
 		}
 	})
 
+	// set the game name
 	c.OnHTML("div.GameHeader_profile_header__q_PID", func(e *colly.HTMLElement) {
 		game.Name = strings.TrimSpace(e.Text)
 	})
