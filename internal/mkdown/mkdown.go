@@ -48,10 +48,7 @@ func WriteToMarkdown() {
 			log.Fatal("Error retrieving times: ", err)
 		}
 
-		// | name | Main Story | Main + Sides | Completionist
-		fmt.Println(name, main, mainPlus, comp)
-
+		// | name | Main Story | Main + Sides | Completionist |
 		_, err = mdfile.WriteString(fmt.Sprintf("| %s | %s | %s | %s |\n", name, main, mainPlus, comp))
-
 	}
 }
