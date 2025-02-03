@@ -1,4 +1,4 @@
-package database
+package mkdown
 
 import (
 	"database/sql"
@@ -6,7 +6,6 @@ import (
 	"log"
 	"os"
 
-	"github.com/EZRA-DVLPR/GameList/internal/scraper"
 	_ "github.com/mattn/go-sqlite3"
 )
 
@@ -30,29 +29,29 @@ func WriteToMarkdown() {
 	}
 	defer mdfile.Close()
 
+	_, err = mdfile.WriteString("| **Game Name** | **Main Story** | **Main + Sides** | **Completionist** |\n")
+	_, err = mdfile.WriteString("| :---- | ---- | ---- | ---- |\n")
+	if err != nil {
+		log.Fatal("Failed to begin writing to markdown file")
+	}
+
 	// for each row in games, add a line in the markdown file
 	for rows.Next() {
 		var name, url string
 		if err := rows.Scan(&name, &url); err != nil {
 			log.Fatal("Error scanning row: ", err)
 		}
-		fmt.Printf("Name: %s \nURL %s,\n", name, url)
 
-		timesrows, err := db.Query("SELECT label, length FROM times WHERE game_name = ?", name)
+		var main, mainPlus, comp string
+		err := db.QueryRow("SELECT main, mainPlus, comp FROM times WHERE game_name = ?", name).Scan(&main, &mainPlus, &comp)
 		if err != nil {
 			log.Fatal("Error retrieving times: ", err)
 		}
-		defer timesrows.Close()
 
-		for timesrows.Next() {
-			var label, length string
-			if err := timesrows.Scan(&label, &length); err != nil {
-				log.Fatal("Error scanning timesrow: ", err)
-			}
-			fmt.Printf("\t%s:\t%s\n", label, length)
-		}
+		// | name | Main Story | Main + Sides | Completionist
+		fmt.Println(name, main, mainPlus, comp)
 
-		// | name | length (Main Story) | length (Main + Sides) | length (Completionist)
+		_, err = mdfile.WriteString(fmt.Sprintf("| %s | %s | %s | %s |\n", name, main, mainPlus, comp))
 
 	}
 }
