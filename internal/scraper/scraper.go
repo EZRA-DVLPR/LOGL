@@ -10,6 +10,7 @@ import (
 
 type Game struct {
 	Name, Url, Main, MainPlus, Comp string
+	Favorite                        int
 }
 
 var games []Game
@@ -29,13 +30,14 @@ func SearchGame(gameName string) {
 func FetchHLTBRunner(gameLink string) {
 	games = append(games, FetchHLTB("https://howlongtobeat.com/"+gameLink))
 
-	for index, game := range games {
-		fmt.Printf("Game %d: Name: %s URL: %s\n", index+1, game.Name, game.Url)
-		fmt.Println("Main Story:\t", game.Main)
-		fmt.Println("Main + Sides:\t", game.MainPlus)
-		fmt.Println("Completionist:\t", game.Comp)
-		fmt.Println()
-	}
+	// for index, game := range games {
+	// 	fmt.Printf("Game %d: Name: %s URL: %s\n", index+1, game.Name, game.Url)
+	// 	fmt.Println("Main Story:\t", game.Main)
+	// 	fmt.Println("Main + Sides:\t", game.MainPlus)
+	// 	fmt.Println("Completionist:\t", game.Comp)
+	//	fmt.Println("Favorited:\t", game.Favorite)
+	// 	fmt.Println()
+	// }
 }
 
 // given the entire proper link for HLTB, obtain information for the game
@@ -68,7 +70,6 @@ func FetchHLTB(link string) (game Game) {
 
 				if (el.ChildText("h4") == "Co-Op") || (el.ChildText("h4") == "Single-Player") {
 					// if main story data exists, overwrite only if new data is greater
-
 					if (game.Main != "") && (game.Main < el.ChildText("h5")) {
 						// There's no Main Story data so write it
 						game.Main = el.ChildText("h5")
@@ -111,6 +112,9 @@ func FetchHLTB(link string) (game Game) {
 	c.OnScraped(func(r *colly.Response) {
 		// attach the url to the game
 		game.Url = link
+
+		// make the game not favorited
+		game.Favorite = 0
 
 		fmt.Println("Data Obtained!", r.Request.URL)
 	})

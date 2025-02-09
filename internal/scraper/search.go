@@ -61,7 +61,7 @@ func ExtractLink(pageHTML string) (gameLink string) {
 
 	// grab the first link for game data that we find
 	// we add 8 to cut off the `a href="` from the search
-	// we also subtract add 7 for the same reason as above, but also subtract 1
+	// we also add 7 for the same reason as above, but also subtract 1
 	// so that it can remove the `"`
 	return pageHTML[firstindex+ahrefindex+8 : firstindex+ahrefindex+7+suffindex-1]
 }

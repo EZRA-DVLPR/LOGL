@@ -16,7 +16,8 @@ func WriteToMarkdown() {
 	}
 	defer db.Close()
 
-	rows, err := db.Query("SELECT name, url FROM games")
+	// select everything except the url to be grabbed
+	rows, err := db.Query("SELECT name, favorite, main, mainPlus, comp FROM games")
 	if err != nil {
 		log.Fatal("Error retrieving games: ", err)
 	}
@@ -29,26 +30,23 @@ func WriteToMarkdown() {
 	}
 	defer mdfile.Close()
 
-	_, err = mdfile.WriteString("| **Game Name** | **Main Story** | **Main + Sides** | **Completionist** |\n")
-	_, err = mdfile.WriteString("| :---- | ---- | ---- | ---- |\n")
+	_, err = mdfile.WriteString("| No. | **Game Name** | **Main Story** | **Main + Sides** | **Completionist** | Favorite |\n")
+	_, err = mdfile.WriteString("| :----: | :---- | ---- | ---- | ---- | ---- |\n")
 	if err != nil {
 		log.Fatal("Failed to begin writing to markdown file")
 	}
 
+	id := 1
 	// for each row in games, add a line in the markdown file
 	for rows.Next() {
-		var name, url string
-		if err := rows.Scan(&name, &url); err != nil {
+		var name, main, mainPlus, comp string
+		var favorite int
+		if err := rows.Scan(&name, &favorite, &main, &mainPlus, &comp); err != nil {
 			log.Fatal("Error scanning row: ", err)
 		}
 
-		var main, mainPlus, comp string
-		err := db.QueryRow("SELECT main, mainPlus, comp FROM times WHERE game_name = ?", name).Scan(&main, &mainPlus, &comp)
-		if err != nil {
-			log.Fatal("Error retrieving times: ", err)
-		}
-
-		// | name | Main Story | Main + Sides | Completionist |
-		_, err = mdfile.WriteString(fmt.Sprintf("| %s | %s | %s | %s |\n", name, main, mainPlus, comp))
+		//  | No. | name | Main Story | Main + Sides | Completionist |
+		_, err = mdfile.WriteString(fmt.Sprintf("| %d. | %s | %s | %s | %s | %d |\n", id, name, main, mainPlus, comp, favorite))
+		id += 1
 	}
 }

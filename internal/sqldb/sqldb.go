@@ -11,14 +11,13 @@ import (
 
 // INFO: STRUCTURE OF THE DB
 // games {
-// 		name
-// 		url }
-// times {
-// 		game_name
-// 		main
+// 		name		PRIMARY KEY
+// 		url
+//		favorite
+//		main
 //		mainPlus
-// 		comp }
-// where game_name is the same (references) the name of the game in the games table
+//		comp
+//	}
 
 func CreateDB() {
 	fmt.Println("Creating the DB")
@@ -36,19 +35,15 @@ func CreateDB() {
 	_, err = db.Exec(`
 	CREATE TABLE IF NOT EXISTS games (
 		name TEXT PRIMARY KEY,
-		url TEXT
-	);
-	CREATE TABLE IF NOT EXISTS times (
-		game_name TEXT,
+		url TEXT,
+		favorite INTEGER,
 		main TEXT,
 		mainPlus TEXT,
-		comp TEXT,
-		PRIMARY KEY (game_name),
-		FOREIGN KEY (game_name) REFERENCES games(name) ON DELETE CASCADE
+		comp TEXT
 	);
 	`)
 	if err != nil {
-		log.Fatal("Error creating tables: ", err)
+		log.Fatal("Error creating table: ", err)
 	}
 
 	fmt.Println("Created the local DB successfully")
@@ -73,13 +68,8 @@ func DeleteFromDB(game scraper.Game) {
 		log.Fatal("Error checking affected rows: ", err)
 	}
 	if rowsAffected == 0 {
-		fmt.Printf("Game `%s` not found in database\n", game.Name)
+		fmt.Printf("Game `%s` not found in local database\n", game.Name)
 		return
-	}
-
-	res, err = db.Exec("DELETE FROM times WHERE game_name = ?", game.Name)
-	if err != nil {
-		log.Fatal("Error deleting game from times table: ", err)
 	}
 
 	fmt.Println("Game deleted: ", game.Name)
@@ -110,25 +100,18 @@ func AddToDB(game scraper.Game) {
 		log.Fatal("Error checking game existence", err)
 	}
 	if exists {
-		fmt.Println("Game already exists in database!\nSkipping insertion")
+		fmt.Println("Game already exists in local DB!\nSkipping insertion")
 		return
 	}
 
-	fmt.Println("Adding the game data to the DB")
+	fmt.Println("Adding the game data to the local DB")
 
-	// insert into games table: name, url
-	_, err = db.Exec("INSERT OR IGNORE INTO games (name, url) VALUES (?,?)", game.Name, game.Url)
+	_, err = db.Exec("INSERT OR IGNORE INTO games (name, url, favorite, main, mainPlus, comp) VALUES (?,?,?,?,?,?)", game.Name, game.Url, game.Favorite, game.Main, game.MainPlus, game.Comp)
 	if err != nil {
 		log.Fatal("Error inserting game: ", err)
 	}
 
-	// insert into times table: Main, MainPlus, Comp based on game name associated
-	_, err = db.Exec("INSERT INTO times (game_name, main, mainPlus, comp) VALUES (?, ?, ?, ?)", game.Name, game.Main, game.MainPlus, game.Comp)
-	if err != nil {
-		log.Fatal("Error inserting times", game.Name, game.Main, game.MainPlus, game.Comp)
-	}
-
-	fmt.Println("Finished adding the game data to the DB")
+	fmt.Println("Finished adding the game data to the local DB")
 }
 
 func PrintAllGames() {
@@ -140,7 +123,7 @@ func PrintAllGames() {
 
 	// TODO:Handle the case in which the db is empty to indicate it is empty
 
-	rows, err := db.Query("SELECT name, url FROM games")
+	rows, err := db.Query("SELECT * FROM games")
 	if err != nil {
 		log.Fatal("Error retrieving games: ", err)
 	}
@@ -149,24 +132,11 @@ func PrintAllGames() {
 	fmt.Println("Games in DB:")
 
 	for rows.Next() {
-		var name, url string
-		if err := rows.Scan(&name, &url); err != nil {
+		var name, url, main, mainPlus, comp string
+		var favorite int
+		if err := rows.Scan(&name, &url, &favorite, &main, &mainPlus, &comp); err != nil {
 			log.Fatal("Error scanning row: ", err)
 		}
-		fmt.Printf("Name: %s \nURL %s,\n", name, url)
-
-		timesrows, err := db.Query("SELECT main, mainPlus, comp FROM times WHERE game_name = ?", name)
-		if err != nil {
-			log.Fatal("Error retrieving times: ", err)
-		}
-		defer timesrows.Close()
-
-		for timesrows.Next() {
-			var main, mainPlus, comp string
-			if err := timesrows.Scan(&main, &mainPlus, &comp); err != nil {
-				log.Fatal("Error scanning timesrow: ", err)
-			}
-			fmt.Printf("\t%s:\t%s\t%s\n", main, mainPlus, comp)
-		}
+		fmt.Printf("Name: %s\nURL: %s\nFavorite: %d\nMain:\t%s\nMain+:\t%s\nComp:\t%s\n", name, url, favorite, main, mainPlus, comp)
 	}
 }
