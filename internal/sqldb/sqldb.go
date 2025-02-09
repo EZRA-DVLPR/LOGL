@@ -2,8 +2,10 @@ package sqldb
 
 import (
 	"database/sql"
+	"encoding/csv"
 	"fmt"
 	"log"
+	"os"
 
 	"github.com/EZRA-DVLPR/GameList/internal/scraper"
 	_ "github.com/mattn/go-sqlite3"
@@ -47,6 +49,28 @@ func CreateDB() {
 	}
 
 	fmt.Println("Created the local DB successfully")
+}
+
+func ImportSQL() {
+	db, err := sql.Open("sqlite3", "games.db")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer db.Close()
+
+	// read the "export.sql" file
+	sqlDump, err := os.ReadFile("export.sql")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	// perform the import
+	_, err = db.Exec(string(sqlDump))
+	if err != nil {
+		log.Fatal("Error importing sql database:", err)
+	}
+
+	fmt.Println("SQL database imported successfully")
 }
 
 func DeleteFromDB(game scraper.Game) {
@@ -139,4 +163,208 @@ func PrintAllGames() {
 		}
 		fmt.Printf("Name: %s\nURL: %s\nFavorite: %d\nMain:\t%s\nMain+:\t%s\nComp:\t%s\n", name, url, favorite, main, mainPlus, comp)
 	}
+}
+
+func Export(choice int) {
+	switch choice {
+	case 1:
+		exportSQL()
+	case 2:
+		exportCSV()
+	default:
+		log.Fatal("No such export exists!")
+	}
+}
+
+func exportSQL() {
+	fmt.Println("Exporting to SQL file")
+
+	outputFile := "export.sql"
+	db, err := sql.Open("sqlite3", "games.db")
+	if err != nil {
+		log.Fatal("Error opening database for copying", err)
+	}
+	defer db.Close()
+
+	// open file for writing sql dump
+	file, err := os.Create(outputFile)
+	if err != nil {
+		log.Fatal("Error creating SQL (dump) file:", err)
+	}
+	defer file.Close()
+
+	// begin dump
+	fmt.Println("Exporting database to", outputFile)
+	file.WriteString("PRAGMA foreign_keys=OFF;\nBEGIN TRANSACTION;\n")
+
+	//export scheme
+	rows, err := db.Query("SELECT sql FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%';")
+	if err != nil {
+		log.Fatal("Error retrieving schema:", err)
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var schema string
+		if err := rows.Scan(&schema); err != nil {
+			log.Fatal("Error scanning schema row:", err)
+		}
+		if schema != "" {
+			file.WriteString(schema + ";\n")
+		}
+	}
+
+	//export data
+	tables, err := db.Query("SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%';")
+	if err != nil {
+		log.Fatal("Error retrieving table names:", err)
+	}
+	defer tables.Close()
+
+	for tables.Next() {
+		var tableName string
+		if err := tables.Scan(&tableName); err != nil {
+			log.Fatal("Error scanning table name:", err)
+		}
+
+		// Fetch all rows from the table
+		rows, err := db.Query(fmt.Sprintf("SELECT * FROM %s;", tableName))
+		if err != nil {
+			log.Fatalf("Error retrieving data from %s: %v", tableName, err)
+		}
+
+		// Get column names
+		cols, err := rows.Columns()
+		if err != nil {
+			log.Fatal("Error getting columns:", err)
+		}
+		numCols := len(cols)
+
+		// Prepare for value scanning
+		values := make([]interface{}, numCols)
+		valuePtrs := make([]interface{}, numCols)
+		for i := range values {
+			valuePtrs[i] = &values[i]
+		}
+
+		// Iterate through rows and generate INSERT statements
+		for rows.Next() {
+			if err := rows.Scan(valuePtrs...); err != nil {
+				log.Fatal("Error scanning row:", err)
+			}
+
+			// Convert values to SQL format
+			insertValues := make([]string, numCols)
+			for i, val := range values {
+				switch v := val.(type) {
+				case nil:
+					insertValues[i] = "NULL"
+				case int, int64, float64:
+					insertValues[i] = fmt.Sprintf("%v", v)
+				case string:
+					insertValues[i] = fmt.Sprintf("'%s'", fmt.Sprintf("%s", v))
+				default:
+					insertValues[i] = fmt.Sprintf("'%v'", v)
+				}
+			}
+
+			// Write the INSERT statement
+			insertStmt := fmt.Sprintf("INSERT INTO %s (%s) VALUES (%s);\n",
+				tableName,
+				joinColumns(cols),
+				joinColumns(insertValues))
+			file.WriteString(insertStmt)
+		}
+		rows.Close()
+	}
+
+	// end dump
+	file.WriteString("COMMIT;\nPRAGMA foreign_keys=ON;\n")
+	fmt.Println("Export to SQL completed successfully.")
+
+	return
+}
+
+func exportCSV() {
+	fmt.Println("Exporting to CSV")
+
+	db, err := sql.Open("sqlite3", "games.db")
+	if err != nil {
+		log.Fatal("Error opening database for export", err)
+	}
+	defer db.Close()
+
+	// get all data from table
+	rows, err := db.Query("SELECT * FROM games")
+	if err != nil {
+		log.Fatal("Error retrieving data:", err)
+	}
+	defer rows.Close()
+
+	// get col names
+	cols, err := rows.Columns()
+	if err != nil {
+		log.Fatal("Error getting column names:", err)
+	}
+
+	// open csv
+	file, err := os.Create("export.csv")
+	if err != nil {
+		log.Fatal("Error creating csv file", err)
+	}
+	defer file.Close()
+
+	writer := csv.NewWriter(file)
+	defer writer.Flush()
+
+	// write col headers
+	if err := writer.Write(cols); err != nil {
+		log.Fatal("Error writing CSV headers")
+	}
+
+	// write rows of data
+	for rows.Next() {
+		values := make([]interface{}, len(cols))
+		valuePtrs := make([]interface{}, len(cols))
+		for i := range values {
+			valuePtrs[i] = &values[i]
+		}
+
+		// scan row into value ptrs
+		if err := rows.Scan(valuePtrs...); err != nil {
+			log.Fatal("Error scanning row:", err)
+		}
+
+		// convert values to string
+		stringVals := make([]string, len(cols))
+		for i, val := range values {
+			if val == nil {
+				stringVals[i] = ""
+			} else {
+				stringVals[i] = fmt.Sprintf("%v", val)
+			}
+		}
+
+		// write row to csv
+		if err := writer.Write(stringVals); err != nil {
+			log.Fatal("Error writing row to CSV:", err)
+		}
+	}
+
+	fmt.Println("Export to CSV completed successfully")
+}
+
+func joinColumns(cols []string) string {
+	return fmt.Sprintf("%s", join(cols, ", "))
+}
+
+func join(elements []string, sep string) string {
+	if len(elements) == 0 {
+		return ""
+	}
+	result := elements[0]
+	for _, element := range elements[1:] {
+		result += sep + element
+	}
+	return result
 }

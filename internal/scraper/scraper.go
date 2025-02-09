@@ -68,6 +68,8 @@ func FetchHLTB(link string) (game Game) {
 				// 			else: make "Main Story" data
 				// else write the the data as is
 
+				// TODO: want to change all "1/2" to ".5" for proper handling
+
 				if (el.ChildText("h4") == "Co-Op") || (el.ChildText("h4") == "Single-Player") {
 					// if main story data exists, overwrite only if new data is greater
 					if (game.Main != "") && (game.Main < el.ChildText("h5")) {
