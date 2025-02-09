@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	// "github.com/EZRA-DVLPR/GameList/internal/mkdown"
-	// "github.com/EZRA-DVLPR/GameList/internal/scraper"
+	"github.com/EZRA-DVLPR/GameList/internal/scraper"
 	"github.com/EZRA-DVLPR/GameList/internal/sqldb"
 	// "github.com/EZRA-DVLPR/GameList/internal/ui"
 )
@@ -63,6 +63,15 @@ func main() {
 
 	// sqldb.ImportSQL()
 	// sqldb.ImportCSV()
+
+	sqldb.AddFavorite(scraper.FetchHLTB("https://howlongtobeat.com/game/80199"))
+
+	sqldb.SortDB("name", "ASC")
+	sqldb.SortDB("name", "DESC")
+	sqldb.SortDB("main", "ASC")
+	sqldb.SortDB("main", "DESC")
+
+	sqldb.RemoveFavorite(scraper.FetchHLTB("https://howlongtobeat.com/game/80199"))
 
 	sqldb.SortDB("name", "ASC")
 	sqldb.SortDB("name", "DESC")

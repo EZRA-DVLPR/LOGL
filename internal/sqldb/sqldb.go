@@ -21,6 +21,11 @@ import (
 //		comp
 //	}
 
+// TODO: refactor the code to make more simple
+// 1. make a function for checking affected rows
+// 2. validate that each function cannot use a helper function for simpler processing
+// 3. determine if this file should be broken into several other files for simplistic overhead
+
 func CreateDB() {
 	fmt.Println("Creating the DB")
 
@@ -209,6 +214,74 @@ func AddToDB(game scraper.Game) {
 	}
 
 	fmt.Println("Finished adding the game data to the local DB")
+}
+
+func AddFavorite(game scraper.Game) {
+	// if the given game is not empty, then add favorite
+	if (game.Name == "") &&
+		(game.Url == "") &&
+		(game.Main == "") &&
+		(game.MainPlus == "") &&
+		(game.Comp == "") {
+		fmt.Println("No game data received for associate game.")
+		return
+	}
+
+	// open the DB
+	db, err := sql.Open("sqlite3", "games.db")
+	if err != nil {
+		log.Fatal("Failed to access db")
+	}
+	defer db.Close()
+
+	res, err := db.Exec("UPDATE games SET favorite = 1 WHERE name = ?", game.Name)
+	if err != nil {
+		log.Fatal("Error updating game to be favorite", err)
+	}
+
+	// check if there was a change
+	rowsAffected, err := res.RowsAffected()
+	if err != nil {
+		log.Fatal("Error checking affected rows: ", err)
+	}
+	if rowsAffected == 0 {
+		fmt.Printf("Game `%s` not found in local database\n", game.Name)
+		return
+	}
+}
+
+func RemoveFavorite(game scraper.Game) {
+	// if the given game is not empty, then add favorite
+	if (game.Name == "") &&
+		(game.Url == "") &&
+		(game.Main == "") &&
+		(game.MainPlus == "") &&
+		(game.Comp == "") {
+		fmt.Println("No game data received for associate game.")
+		return
+	}
+
+	// open the DB
+	db, err := sql.Open("sqlite3", "games.db")
+	if err != nil {
+		log.Fatal("Failed to access db")
+	}
+	defer db.Close()
+
+	res, err := db.Exec("UPDATE games SET favorite = 0 WHERE name = ?", game.Name)
+	if err != nil {
+		log.Fatal("Error updating game to be favorite")
+	}
+
+	// check if there was a change
+	rowsAffected, err := res.RowsAffected()
+	if err != nil {
+		log.Fatal("Error checking affected rows: ", err)
+	}
+	if rowsAffected == 0 {
+		fmt.Printf("Game `%s` not found in local database\n", game.Name)
+		return
+	}
 }
 
 // defaults to sort by name
