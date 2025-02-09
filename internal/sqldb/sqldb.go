@@ -211,31 +211,40 @@ func AddToDB(game scraper.Game) {
 	fmt.Println("Finished adding the game data to the local DB")
 }
 
-func PrintAllGames() {
+// defaults to sort by name
+// o/w sorts based on these criteria:
+//
+//	sort == name
+//	sort == main
+//	sort == mainPlus
+//	sort == comp
+//
+// in all cases, it will sort the list based on favorites first, then non-favorited entries
+func SortDB(sort string, sortOpt string) {
 	db, err := sql.Open("sqlite3", "games.db")
 	if err != nil {
 		log.Fatal("Error accessing local dB: ", err)
 	}
 	defer db.Close()
 
-	// TODO:Handle the case in which the db is empty to indicate it is empty
+	// sort by sortCat
 
-	rows, err := db.Query("SELECT * FROM games")
+	// TODO: handle case where DB is empty
+	rows, err := db.Query(fmt.Sprintf("SELECT name, main, mainPlus, comp FROM games ORDER BY favorite DESC, %s %s;", sort, sortOpt))
 	if err != nil {
-		log.Fatal("Error retrieving games: ", err)
+		log.Fatal("Error sorting games from games table: ", err)
 	}
-	defer rows.Close()
 
-	fmt.Println("Games in DB:")
+	fmt.Println("Games in DB sorted by ", sort, sortOpt)
 
 	for rows.Next() {
-		var name, url, main, mainPlus, comp string
-		var favorite int
-		if err := rows.Scan(&name, &url, &favorite, &main, &mainPlus, &comp); err != nil {
+		var name, main, mainPlus, comp string
+		if err := rows.Scan(&name, &main, &mainPlus, &comp); err != nil {
 			log.Fatal("Error scanning row: ", err)
 		}
-		fmt.Printf("Name: %s\nURL: %s\nFavorite: %d\nMain:\t%s\nMain+:\t%s\nComp:\t%s\n", name, url, favorite, main, mainPlus, comp)
+		fmt.Printf("Name: %s\nMain:\t%s\nMain+:\t%s\nComp:\t%s\n", name, main, mainPlus, comp)
 	}
+	fmt.Println()
 }
 
 func Export(choice int) {
