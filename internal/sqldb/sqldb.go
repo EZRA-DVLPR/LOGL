@@ -51,6 +51,79 @@ func CreateDB() {
 	fmt.Println("Created the local DB successfully")
 }
 
+func ImportCSV() {
+	db, err := sql.Open("sqlite3", "games.db")
+	if err != nil {
+		log.Fatal("Error opening db:", err)
+	}
+	defer db.Close()
+
+	// open csv
+	file, err := os.Open("export.csv")
+	if err != nil {
+		log.Fatal("error opening CSV:", err)
+	}
+	defer file.Close()
+
+	// read from csv
+	reader := csv.NewReader(file)
+	rows, err := reader.ReadAll()
+	if err != nil {
+		log.Fatal("Error reading CSV:", err)
+	}
+
+	if len(rows) < 1 {
+		log.Fatal("CSV file is empty or improperly formatted")
+	}
+
+	cols := rows[0]
+
+	// create the table
+	var name string
+	query := "SELECT name FROM sqlite_master WHERE type='table' AND name=?"
+	err = db.QueryRow(query, "games").Scan(&name)
+	if err != nil {
+		createStmt := fmt.Sprintf("CREATE TABLE games (name TEXT PRIMARY KEY, url TEXT, favorite INTEGER, main TEXT, mainPlus TEXT, comp TEXT)")
+		_, err := db.Exec(createStmt)
+		if err != nil {
+			log.Fatal("Error creating table:", err)
+		}
+		fmt.Println("Table created")
+	} else {
+		log.Fatal("Error with query for table creation")
+	}
+
+	temp := make([]string, len(cols))
+	for i := range temp {
+		temp[i] = "?"
+	}
+
+	insertStmt := fmt.Sprintf("INSERT INTO games (%s) VALUES (%s);",
+		join(cols, ", "), join(temp, ", "))
+
+	// start transaction
+	tx, err := db.Begin()
+	if err != nil {
+		log.Fatal("Error starting transaction:", err)
+	}
+
+	// insert the data
+	for _, row := range rows[1:] {
+		_, err := tx.Exec(insertStmt, convertRowToInterface(row)...)
+		if err != nil {
+			tx.Rollback()
+			log.Fatal("Error inserting data:", err)
+		}
+	}
+
+	// commit transaction
+	if err := tx.Commit(); err != nil {
+		log.Fatal("Error committing transaction:", err)
+	}
+
+	fmt.Println("Import completed successfully")
+}
+
 func ImportSQL() {
 	db, err := sql.Open("sqlite3", "games.db")
 	if err != nil {
@@ -174,6 +247,14 @@ func Export(choice int) {
 	default:
 		log.Fatal("No such export exists!")
 	}
+}
+
+func convertRowToInterface(row []string) []interface{} {
+	result := make([]interface{}, len(row))
+	for i, v := range row {
+		result[i] = v
+	}
+	return result
 }
 
 func exportSQL() {

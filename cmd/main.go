@@ -58,10 +58,11 @@ func main() {
 	//
 	// ui.StartGUI()
 
-	sqldb.Export(1)
-	sqldb.Export(2)
+	// sqldb.Export(1)
+	// sqldb.Export(2)
 
 	// sqldb.ImportSQL()
+	sqldb.ImportCSV()
 
 	// sqldb.PrintAllGames()
 }
