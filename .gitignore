@@ -1,3 +1,7 @@
 .DS_Store
-Python_Stuff/*
-Python_Stuff/__pycache__/*
+.env
+
+# hide the files used when testing
+export.csv
+export.sql
+games.db
