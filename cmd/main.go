@@ -4,9 +4,10 @@ import (
 	"fmt"
 
 	// "github.com/EZRA-DVLPR/GameList/internal/mkdown"
-	"github.com/EZRA-DVLPR/GameList/internal/dbhandler"
-	"github.com/EZRA-DVLPR/GameList/internal/scraper"
+	// "github.com/EZRA-DVLPR/GameList/internal/dbhandler"
+	// "github.com/EZRA-DVLPR/GameList/internal/scraper"
 	// "github.com/EZRA-DVLPR/GameList/internal/ui"
+	"github.com/EZRA-DVLPR/GameList/internal/integration"
 )
 
 func main() {
@@ -64,17 +65,19 @@ func main() {
 	// dbhandler.ImportSQL()
 	// dbhandler.ImportCSV()
 
-	dbhandler.AddFavorite(scraper.FetchHLTB("https://howlongtobeat.com/game/80199"))
+	// dbhandler.AddFavorite(scraper.FetchHLTB("https://howlongtobeat.com/game/80199"))
+	//
+	// dbhandler.SortDB("name", "ASC")
+	// dbhandler.SortDB("name", "DESC")
+	// dbhandler.SortDB("main", "ASC")
+	// dbhandler.SortDB("main", "DESC")
+	//
+	// dbhandler.RemoveFavorite(scraper.FetchHLTB("https://howlongtobeat.com/game/80199"))
+	//
+	// dbhandler.SortDB("name", "ASC")
+	// dbhandler.SortDB("name", "DESC")
+	// dbhandler.SortDB("main", "ASC")
+	// dbhandler.SortDB("main", "DESC")
 
-	dbhandler.SortDB("name", "ASC")
-	dbhandler.SortDB("name", "DESC")
-	dbhandler.SortDB("main", "ASC")
-	dbhandler.SortDB("main", "DESC")
-
-	dbhandler.RemoveFavorite(scraper.FetchHLTB("https://howlongtobeat.com/game/80199"))
-
-	dbhandler.SortDB("name", "ASC")
-	dbhandler.SortDB("name", "DESC")
-	dbhandler.SortDB("main", "ASC")
-	dbhandler.SortDB("main", "DESC")
+	integration.GetAllGamesGOG("")
 }
