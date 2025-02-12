@@ -82,4 +82,5 @@ func main() {
 	// integration.GetAllGamesGOG("")
 	// integration.GetAllEpicGamesFile()
 	// integration.GetAllGamesPS("")
+	integration.GetAllGamesSteam("")
 }
