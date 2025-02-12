@@ -79,5 +79,6 @@ func main() {
 	// dbhandler.SortDB("main", "ASC")
 	// dbhandler.SortDB("main", "DESC")
 
-	integration.GetAllGamesGOG("")
+	// integration.GetAllGamesGOG("")
+	integration.GetAllEpicGamesFile()
 }

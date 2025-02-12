@@ -5,3 +5,6 @@
 export.csv
 export.sql
 games.db
+
+# file for epic games export of games
+epicgames.txt
