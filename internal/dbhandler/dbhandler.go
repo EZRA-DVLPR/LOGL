@@ -305,7 +305,6 @@ func SortDB(sort string, sortOpt string) {
 	// sort by sortCat
 
 	// TODO: handle case where DB is empty
-	// TODO: Handle case where values are -1. sort them last if possible
 	rows, err := db.Query(fmt.Sprintf("SELECT name, main, mainPlus, comp FROM games ORDER BY favorite DESC, %s %s;", sort, sortOpt))
 	if err != nil {
 		log.Fatal("Error sorting games from games table: ", err)
