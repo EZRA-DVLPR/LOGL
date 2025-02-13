@@ -44,9 +44,9 @@ func CreateDB() {
 		name TEXT PRIMARY KEY,
 		url TEXT,
 		favorite INTEGER,
-		main TEXT,
-		mainPlus TEXT,
-		comp TEXT
+		main REAL,
+		mainPlus REAL,
+		comp REAL
 	);
 	`)
 	if err != nil {
@@ -85,10 +85,9 @@ func ImportCSV() {
 
 	// create the table
 	var name string
-	query := "SELECT name FROM sqlite_master WHERE type='table' AND name=?"
-	err = db.QueryRow(query, "games").Scan(&name)
+	err = db.QueryRow("SELECT name FROM sqlite_master WHERE type='table' AND name=?", "games").Scan(&name)
 	if err != nil {
-		createStmt := fmt.Sprintf("CREATE TABLE games (name TEXT PRIMARY KEY, url TEXT, favorite INTEGER, main TEXT, mainPlus TEXT, comp TEXT)")
+		createStmt := fmt.Sprintf("CREATE TABLE games (name TEXT PRIMARY KEY, url TEXT, favorite INTEGER, main REAL, mainPlus REAL, comp REAL)")
 		_, err := db.Exec(createStmt)
 		if err != nil {
 			log.Fatal("Error creating table:", err)
@@ -98,6 +97,7 @@ func ImportCSV() {
 		log.Fatal("Error with query for table creation")
 	}
 
+	// setup transaction with dummy values
 	temp := make([]string, len(cols))
 	for i := range temp {
 		temp[i] = "?"
@@ -181,9 +181,9 @@ func AddToDB(game scraper.Game) {
 	// if the given game is not empty, then add to the DB
 	if (game.Name == "") &&
 		(game.Url == "") &&
-		(game.Main == "") &&
-		(game.MainPlus == "") &&
-		(game.Comp == "") {
+		(game.Main == -1) &&
+		(game.MainPlus == -1) &&
+		(game.Comp == -1) {
 		fmt.Println("No game data received for associate game.")
 		return
 	}
@@ -220,9 +220,9 @@ func AddFavorite(game scraper.Game) {
 	// if the given game is not empty, then add favorite
 	if (game.Name == "") &&
 		(game.Url == "") &&
-		(game.Main == "") &&
-		(game.MainPlus == "") &&
-		(game.Comp == "") {
+		(game.Main == -1) &&
+		(game.MainPlus == -1) &&
+		(game.Comp == -1) {
 		fmt.Println("No game data received for associate game.")
 		return
 	}
@@ -234,6 +234,7 @@ func AddFavorite(game scraper.Game) {
 	}
 	defer db.Close()
 
+	// update given game name to favorite = 1 (true)
 	res, err := db.Exec("UPDATE games SET favorite = 1 WHERE name = ?", game.Name)
 	if err != nil {
 		log.Fatal("Error updating game to be favorite", err)
@@ -254,9 +255,9 @@ func RemoveFavorite(game scraper.Game) {
 	// if the given game is not empty, then add favorite
 	if (game.Name == "") &&
 		(game.Url == "") &&
-		(game.Main == "") &&
-		(game.MainPlus == "") &&
-		(game.Comp == "") {
+		(game.Main == -1) &&
+		(game.MainPlus == -1) &&
+		(game.Comp == -1) {
 		fmt.Println("No game data received for associate game.")
 		return
 	}
@@ -268,6 +269,7 @@ func RemoveFavorite(game scraper.Game) {
 	}
 	defer db.Close()
 
+	// update given game name to favorite = 0 (false)
 	res, err := db.Exec("UPDATE games SET favorite = 0 WHERE name = ?", game.Name)
 	if err != nil {
 		log.Fatal("Error updating game to be favorite")
@@ -303,6 +305,7 @@ func SortDB(sort string, sortOpt string) {
 	// sort by sortCat
 
 	// TODO: handle case where DB is empty
+	// TODO: Handle case where values are -1. sort them last if possible
 	rows, err := db.Query(fmt.Sprintf("SELECT name, main, mainPlus, comp FROM games ORDER BY favorite DESC, %s %s;", sort, sortOpt))
 	if err != nil {
 		log.Fatal("Error sorting games from games table: ", err)
@@ -311,11 +314,12 @@ func SortDB(sort string, sortOpt string) {
 	fmt.Println("Games in DB sorted by ", sort, sortOpt)
 
 	for rows.Next() {
-		var name, main, mainPlus, comp string
+		var name string
+		var main, mainPlus, comp float32
 		if err := rows.Scan(&name, &main, &mainPlus, &comp); err != nil {
 			log.Fatal("Error scanning row: ", err)
 		}
-		fmt.Printf("Name: %s\nMain:\t%s\nMain+:\t%s\nComp:\t%s\n", name, main, mainPlus, comp)
+		fmt.Printf("Name: %s\nMain:\t%v\nMain+:\t%v\nComp:\t%v\n", name, main, mainPlus, comp)
 	}
 	fmt.Println()
 }
@@ -422,7 +426,7 @@ func exportSQL() {
 				switch v := val.(type) {
 				case nil:
 					insertValues[i] = "NULL"
-				case int, int64, float64:
+				case int, float32:
 					insertValues[i] = fmt.Sprintf("%v", v)
 				case string:
 					insertValues[i] = fmt.Sprintf("'%s'", fmt.Sprintf("%s", v))

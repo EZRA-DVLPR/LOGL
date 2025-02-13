@@ -3,14 +3,16 @@ package scraper
 import (
 	"fmt"
 	"log"
+	"strconv"
 	"strings"
 
 	"github.com/gocolly/colly"
 )
 
 type Game struct {
-	Name, Url, Main, MainPlus, Comp string
-	Favorite                        int
+	Name, Url            string
+	Favorite             int
+	Main, MainPlus, Comp float32
 }
 
 var games []Game
@@ -68,40 +70,38 @@ func FetchHLTB(link string) (game Game) {
 				// 			else: make "Main Story" data
 				// else write the the data as is
 
-				// TODO: want to change all "1/2" to ".5" for proper handling
-
 				if (el.ChildText("h4") == "Co-Op") || (el.ChildText("h4") == "Single-Player") {
 					// if main story data exists, overwrite only if new data is greater
-					if (game.Main != "") && (game.Main < el.ChildText("h5")) {
+					if (game.Main != 0) && (game.Main < cleanTime(el.ChildText("h5"))) {
 						// There's no Main Story data so write it
-						game.Main = el.ChildText("h5")
-					} else if game.Main == "" {
-						game.Main = el.ChildText("h5")
+						game.Main = cleanTime(el.ChildText("h5"))
+					} else if game.Main == 0 {
+						game.Main = cleanTime(el.ChildText("h5"))
 					}
 				}
 
 				// write the data for Main Story, Main + Sides, and Completionist
 				if el.ChildText("h4") == "Main Story" {
-					game.Main = el.ChildText("h5")
+					game.Main = cleanTime(el.ChildText("h5"))
 				}
 				if el.ChildText("h4") == "Main + Sides" {
-					game.MainPlus = el.ChildText("h5")
+					game.MainPlus = cleanTime(el.ChildText("h5"))
 				}
 				if el.ChildText("h4") == "Completionist" {
-					game.Comp = el.ChildText("h5")
+					game.Comp = cleanTime(el.ChildText("h5"))
 				}
 			}
 		})
-		// when finished obtaining all the data, fill all empty values with "--"
+		// when finished obtaining all the data, fill all empty values with "-1"
 
-		if game.Main == "" {
-			game.Main = "--"
+		if game.Main == 0 {
+			game.Main = -1
 		}
-		if game.MainPlus == "" {
-			game.MainPlus = "--"
+		if game.MainPlus == 0 {
+			game.MainPlus = -1
 		}
-		if game.Comp == "" {
-			game.Comp = "--"
+		if game.Comp == 0 {
+			game.Comp = -1
 		}
 	})
 
@@ -123,5 +123,31 @@ func FetchHLTB(link string) (game Game) {
 
 	c.Visit(link)
 
+	return
+}
+
+func cleanTime(time string) (cleanTime float32) {
+	// if no time recorded, then return -1
+	if time == "--" {
+		return -1
+	}
+
+	// immediately cut out all non-numeric values
+	// eg. Hours
+	time, _, _ = strings.Cut(time, " ")
+
+	// if time contains "½", then add .5 to cleantime
+	if strings.Contains(time, "½") {
+		cleanTime = 0.5
+		time, _, _ = strings.Cut(time, "½")
+	}
+
+	// convert the whole number portion to a float 32
+	cleanTimeWhole, err := strconv.ParseFloat(time, 32)
+	if err != nil {
+		fmt.Println("error converting given clean time to float", err)
+	}
+
+	cleanTime = cleanTime + float32(cleanTimeWhole)
 	return
 }

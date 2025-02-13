@@ -39,14 +39,15 @@ func WriteToMarkdown() {
 	id := 1
 	// for each row in games, add a line in the markdown file
 	for rows.Next() {
-		var name, main, mainPlus, comp string
+		var name string
+		var main, mainPlus, comp float32
 		var favorite int
 		if err := rows.Scan(&name, &favorite, &main, &mainPlus, &comp); err != nil {
 			log.Fatal("Error scanning row: ", err)
 		}
 
-		//  | No. | name | Main Story | Main + Sides | Completionist |
-		_, err = mdfile.WriteString(fmt.Sprintf("| %d. | %s | %s | %s | %s | %d |\n", id, name, main, mainPlus, comp, favorite))
+		//  | No. | name | Main Story | Main + Sides | Completionist | Favorite |
+		_, err = mdfile.WriteString(fmt.Sprintf("| %d. | %s | %v | %v | %v | %d |\n", id, name, main, mainPlus, comp, favorite))
 		id += 1
 	}
 }
