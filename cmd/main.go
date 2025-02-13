@@ -68,9 +68,10 @@ func main() {
 	// dbhandler.SortDB("main", "DESC")
 	// dbhandler.SortDB("comp", "ASC")
 	// dbhandler.SortDB("comp", "DESC")
-	integration.GetAllGamesGOG()
+
+	// integration.GetAllGamesGOG()
 	// integration.GetAllGamesEpicFile()
-	// integration.GetAllGamesEpicString()
+	// integration.GetAllGamesEpicString("")
 	// integration.GetAllGamesPS("")
 	// integration.GetAllGamesSteam("")
 

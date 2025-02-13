@@ -16,18 +16,18 @@ func GetAllGamesPS(profile string) {
 	fmt.Println("Getting games for PSN...")
 
 	// final list holding all games from all pages
-	var gamelist []string
+	var gameList []string
 
 	// get games from first page, append them into gamelist, and continue grabbing until the last page
 	gamepartlist, nextpage := getAllGamesPS(profile, "1")
 	for nextpage != "0" {
-		gamelist = append(gamelist, gamepartlist...)
-		gamepartlist, nextpage = getAllGamesPS(profile, nextpage)
+		gameList = append(gameList, gamepartlist...)              // unpack and append each elt from part to gameList
+		gamepartlist, nextpage = getAllGamesPS(profile, nextpage) // get next page
 	}
 
-	// append the games retrieved from the last page
-	gamelist = append(gamelist, gamepartlist...)
-	for _, game := range gamelist {
+	// append the games retrieved from the last page retrieved
+	gameList = append(gameList, gamepartlist...)
+	for _, game := range gameList {
 		fmt.Println(game)
 	}
 }
@@ -35,26 +35,21 @@ func GetAllGamesPS(profile string) {
 func getAllGamesPS(profile string, pagenum string) (gamelist []string, nextPageNum string) {
 	url := "https://psnprofiles.com/" + profile + "?ajax=1&page=" + pagenum
 
-	// Define a custom user agent
 	userAgent := "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
 
-	// Set Chrome options for headless execution
 	opts := append(chromedp.DefaultExecAllocatorOptions[:],
-		chromedp.Flag("headless", true),    // Ensure Chrome runs headless
-		chromedp.Flag("disable-gpu", true), // Disable GPU to avoid issues
-		chromedp.Flag("no-sandbox", true),  // Required for some environments
-		chromedp.UserAgent(userAgent),      // Set custom user agent
+		chromedp.Flag("headless", true),
+		chromedp.Flag("disable-gpu", true),
+		chromedp.Flag("no-sandbox", true),
+		chromedp.UserAgent(userAgent),
 	)
 
-	// Create an allocator with the defined options
 	allocCtx, cancel := chromedp.NewExecAllocator(context.Background(), opts...)
 	defer cancel()
 
-	// Create a new Chrome context
 	ctx, cancel := chromedp.NewContext(allocCtx)
 	defer cancel()
 
-	// Perform the search on psnprofiles
 	var pageHTML string
 	err := chromedp.Run(ctx,
 		chromedp.Navigate(url),
@@ -77,8 +72,8 @@ func getAllGamesPS(profile string, pagenum string) (gamelist []string, nextPageN
 	return gamelist, getNextPage(pageHTML)
 }
 
+// look for the next game. if exists then true. o/w false
 func isAnotherGame(pageHTML string) (isAnother bool) {
-	// look for the next game name
 	indexGameNameStart := strings.Index(pageHTML, `alt=\"`)
 
 	if indexGameNameStart == -1 {
@@ -87,6 +82,7 @@ func isAnotherGame(pageHTML string) (isAnother bool) {
 	return true
 }
 
+// will get the game name for the next game, returns the name and index after the game name
 func getAnotherGame(pageHTML string) (gameName string, nextStartIndex int) {
 	// find where the game name exists
 	indexGameNameStart := strings.Index(pageHTML, `alt=\"`) + 6
@@ -104,15 +100,15 @@ func getAnotherGame(pageHTML string) (gameName string, nextStartIndex int) {
 	return gameName, indexGameNameEnd
 }
 
+// find NextPage and returns the value for it as a string
 func getNextPage(pageHTML string) (nextPage string) {
-	// find NextPage
 	indexNP := strings.Index(pageHTML, "nextPage = ") + 11
-	// find the first characters after the index from nextpage
 	indexEndNP := strings.Index(pageHTML[indexNP:], "\\r") + indexNP
 
 	return pageHTML[indexNP:indexEndNP]
 }
 
+// cleans text to remove wonky representations of characters (\u###), (&amp;####;), etc.
 func decodeHTMLEnts(text string) string {
 	// unescape common html entities
 	text = html.UnescapeString(text)
@@ -123,7 +119,7 @@ func decodeHTMLEnts(text string) string {
 	// replaces the numerical character subset (unicode) with the characters that they represent
 	// eg. #039 becomes '
 	return regex.ReplaceAllStringFunc(text, func(entity string) string {
-		// get the numbers
+		// get the numbers then return the character they represent
 		numStr := strings.Trim(entity, "&#;")
 		num, err := strconv.Atoi(numStr)
 		if err != nil {
