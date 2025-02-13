@@ -149,7 +149,7 @@ func FetchCompletionator(link string) (game Game) {
 			// dont grab the data that is from the following categories:
 			// 		"speed run"
 			if el.ChildText("h5") != "speed run" {
-				// check if the game has special categories like "Co-op" or "single-player"
+				// TODO: check if the game has special categories like "Co-op" or "single-player"
 
 				// if the current label is "Co-Op" or "Single-Player"
 				// check if there is a value for "Main Story"
