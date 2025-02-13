@@ -18,7 +18,7 @@ type Game struct {
 var games []Game
 
 // given the name of a game as a string, search HLTB, then get its data
-func SearchGame(gameName string) {
+func SearchGameHLTB(gameName string) {
 	// TODO: Check if the game exists in the current database
 	// if not then add a new entry to the database
 
@@ -31,15 +31,6 @@ func SearchGame(gameName string) {
 // eg. /game/42069
 func FetchHLTBRunner(gameLink string) {
 	games = append(games, FetchHLTB("https://howlongtobeat.com/"+gameLink))
-
-	// for index, game := range games {
-	// 	fmt.Printf("Game %d: Name: %s URL: %s\n", index+1, game.Name, game.Url)
-	// 	fmt.Println("Main Story:\t", game.Main)
-	// 	fmt.Println("Main + Sides:\t", game.MainPlus)
-	// 	fmt.Println("Completionist:\t", game.Comp)
-	//	fmt.Println("Favorited:\t", game.Favorite)
-	// 	fmt.Println()
-	// }
 }
 
 // given the entire proper link for HLTB, obtain information for the game
@@ -126,13 +117,122 @@ func FetchHLTB(link string) (game Game) {
 	return
 }
 
+func SearchGameCompletionator(gameName string) {
+	FetchCompletionatorRunner(SearchCompletionator(gameName))
+}
+
+func FetchCompletionatorRunner(gameLink string) {
+	// given the partial link `Game/Details/3441` or something of the sort, performs the data scraping
+	// games = append(games, FetchCompletionator("https://completionator.com/"+gameLink))
+	newGame := FetchCompletionator("https://completionator.com/" + gameLink)
+	fmt.Println(newGame.Name)
+}
+
+func FetchCompletionator(link string) (game Game) {
+	// div class = row
+	// 		div class = col-6 col-md-3
+	// 			div class = bg-info text-white
+	// 				h3 = TIME
+	// 				h5 = CATEGORY
+	// 		div class = col-6 col-md-3
+	// 			div class = bg-info text-white
+	// 				h3 = TIME
+	// 				h5 = CATEGORY
+
+	// if h5 == "core + few" => Main Story
+	// if h5 == "core + lots" ==> Main + Sides
+	// if h5 == "completionated" ==> Completionist
+
+	// declare the collector object so the scraping process can begin
+	c := colly.NewCollector()
+
+	// establish connection to Completionator
+	c.OnRequest(func(r *colly.Request) {
+		fmt.Println("Connection made to HLTB")
+	})
+
+	// log that there was a problem accessing the URL
+	c.OnError(func(_ *colly.Response, err error) {
+		log.Println("Something went wrong:", err)
+	})
+
+	// update the Main Story, Main + Sides, and Completionist fields of the game struct
+	c.OnHTML("div.row", func(e *colly.HTMLElement) {
+		e.ForEach("div.bg-info text-white", func(_ int, el *colly.HTMLElement) {
+			// dont grab the data that is from the following categories:
+			// 		"speed run"
+			if el.ChildText("h5") != "speed run" {
+				// check if the game has special categories like "Co-op" or "single-player"
+
+				// if the current label is "Co-Op" or "Single-Player"
+				// check if there is a value for "Main Story"
+				// 			if true: compare the values and take the higher
+				// 			else: make "Main Story" data
+				// else write the the data as is
+
+				if (el.ChildText("h5") == "Co-Op") || (el.ChildText("h5") == "Single-Player") {
+					// if main story data exists, overwrite only if new data is greater
+					if (game.Main != 0) && (game.Main < cleanTime(el.ChildText("h3"))) {
+						// There's no Main Story data so write it
+						game.Main = cleanTime(el.ChildText("h3"))
+					} else if game.Main == 0 {
+						game.Main = cleanTime(el.ChildText("h3"))
+					}
+				}
+
+				// write the data for Main Story, Main + Sides, and Completionist
+				if el.ChildText("h5") == "core + few" {
+					game.Main = cleanTime(el.ChildText("h3"))
+				}
+				if el.ChildText("h5") == "core + lots" {
+					game.MainPlus = cleanTime(el.ChildText("h3"))
+				}
+				if el.ChildText("h5") == "completionated" {
+					game.Comp = cleanTime(el.ChildText("h3"))
+				}
+			}
+		})
+		// when finished obtaining all the data, fill all empty values with "-1"
+
+		if game.Main == 0 {
+			game.Main = -1
+		}
+		if game.MainPlus == 0 {
+			game.MainPlus = -1
+		}
+		if game.Comp == 0 {
+			game.Comp = -1
+		}
+	})
+
+	// set the game name
+	c.OnHTML("h2.game-details-title", func(e *colly.HTMLElement) {
+		game.Name = strings.TrimSpace(e.Text)
+	})
+
+	// when the data is acquired, log it and attach URL
+	c.OnScraped(func(r *colly.Response) {
+		// attach the url to the game
+		game.Url = link
+
+		// make the game not favorited
+		game.Favorite = 0
+
+		fmt.Println("Data Obtained!", r.Request.URL)
+	})
+
+	c.Visit(link)
+
+	return
+}
+
 func cleanTime(time string) (cleanTime float32) {
 	// if no time recorded, then return -1
 	if time == "--" {
 		return -1
 	}
 
-	// immediately cut out all non-numeric values
+	// immediately cut out all trailing data from the space including the space
 	// eg. Hours
 	time, _, _ = strings.Cut(time, " ")
 

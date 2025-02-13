@@ -40,10 +40,10 @@ func SearchHLTB(query string) (gameLink string) {
 	}
 
 	// extract the link to the first game in the list
-	return ExtractLink(pageHTML)
+	return ExtractLinkHLTB(pageHTML)
 }
 
-func ExtractLink(pageHTML string) (gameLink string) {
+func extractLinkHLTB(pageHTML string) (gameLink string) {
 	// find the location where the first item from the search list is
 	firstindex := strings.Index(pageHTML, "GameCard_inside_blur__cP8_l")
 
@@ -56,6 +56,7 @@ func ExtractLink(pageHTML string) (gameLink string) {
 	ahrefindex := strings.Index(pageHTML[firstindex:], "a href=")
 
 	// cut off all trailing info
+	// TODO: clean up the number adding from this point on to make more simple to understand
 	// we add 7 to cut off the `a href=` from the search
 	suffindex := strings.Index(pageHTML[firstindex+ahrefindex+7:], ">")
 
@@ -64,4 +65,21 @@ func ExtractLink(pageHTML string) (gameLink string) {
 	// we also add 7 for the same reason as above, but also subtract 1
 	// so that it can remove the `"`
 	return pageHTML[firstindex+ahrefindex+8 : firstindex+ahrefindex+7+suffindex-1]
+}
+
+func SearchCompletionator(query string) (gameLink string) {
+	// given a name for a game, returns the link for the game
+	// eg. /Game/Details/3441
+
+	// makes the connection then proposes the query
+	// grabs the response from completionator website
+	// calls extractLinkCompletionator and sends the whole Page
+
+	return ""
+}
+
+func extractLinkCompletionator(pageHTML string) (gameLink string) {
+	// given the page html
+	// returns the link to teh first elt in the page
+	return ""
 }
