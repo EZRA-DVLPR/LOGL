@@ -74,4 +74,10 @@ func main() {
 
 	// game := scraper.FetchCompletionator("https://completionator.com/Game/Details/3441")
 	// fmt.Println(game.Name, game.Url, game.Main, game.MainPlus, game.Comp)
+	//
+	// game = scraper.FetchHLTB("https://howlongtobeat.com/game/155106")
+	// fmt.Println(game.Name, game.Url, game.Main, game.MainPlus, game.Comp)
+
+	// fmt.Println(scraper.SearchCompletionator("elden"))
+	// fmt.Println(scraper.SearchHLTB("elden"))
 }

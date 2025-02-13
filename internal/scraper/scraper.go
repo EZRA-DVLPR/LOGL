@@ -30,7 +30,7 @@ func SearchGameHLTB(gameName string) {
 // given a link to a particular game, fetch the data for it
 // eg. /game/42069
 func FetchHLTBRunner(gameLink string) {
-	games = append(games, FetchHLTB("https://howlongtobeat.com/"+gameLink))
+	games = append(games, FetchHLTB("https://howlongtobeat.com"+gameLink))
 }
 
 // given the entire proper link for HLTB, obtain information for the game
@@ -58,20 +58,6 @@ func FetchHLTB(link string) (game Game) {
 				// if the current label is "Co-Op" or "Single-Player"
 				// check if there is a value for "Main Story"
 				// 			if true: compare the values and take the higher
-		i/ var nameParts []string
-		//
-		// // iterate through all children of h2 tag w/ depth = 1
-		// e.DOM.Contents().Each(func(_ int, sel *goquery.Selection) {
-		// 	// only append text nodes
-		// 	if sel.Nodes[0].Type == html.TextNode {
-		// 		nameParts = append(nameParts, strings.TrimSpace(sel.Text()))
-		// 	}
-		// })
-		//
-		// // Join extracted text parts and assign to game.Name
-		// game.Name = strings.Join(nameParts, " ")
-
-				// grab the first child of h2 tag
 				// 			else: make "Main Story" data
 				// else write the the data as is
 
@@ -139,7 +125,7 @@ func SearchGameCompletionator(gameName string) {
 func FetchCompletionatorRunner(gameLink string) {
 	// given the partial link `Game/Details/3441` or something of the sort, performs the data scraping
 	// games = append(games, FetchCompletionator("https://completionator.com/"+gameLink))
-	newGame := FetchCompletionator("https://completionator.com/" + gameLink)
+	newGame := FetchCompletionator("https://completionator.com" + gameLink)
 	fmt.Println(newGame.Name)
 }
 
