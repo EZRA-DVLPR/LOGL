@@ -58,6 +58,20 @@ func FetchHLTB(link string) (game Game) {
 				// if the current label is "Co-Op" or "Single-Player"
 				// check if there is a value for "Main Story"
 				// 			if true: compare the values and take the higher
+		i/ var nameParts []string
+		//
+		// // iterate through all children of h2 tag w/ depth = 1
+		// e.DOM.Contents().Each(func(_ int, sel *goquery.Selection) {
+		// 	// only append text nodes
+		// 	if sel.Nodes[0].Type == html.TextNode {
+		// 		nameParts = append(nameParts, strings.TrimSpace(sel.Text()))
+		// 	}
+		// })
+		//
+		// // Join extracted text parts and assign to game.Name
+		// game.Name = strings.Join(nameParts, " ")
+
+				// grab the first child of h2 tag
 				// 			else: make "Main Story" data
 				// else write the the data as is
 
@@ -99,6 +113,7 @@ func FetchHLTB(link string) (game Game) {
 	// set the game name
 	c.OnHTML("div.GameHeader_profile_header__q_PID", func(e *colly.HTMLElement) {
 		game.Name = strings.TrimSpace(e.Text)
+		// remove the stuff after the <br>
 	})
 
 	// when the data is acquired, log it and attach URL
@@ -129,26 +144,12 @@ func FetchCompletionatorRunner(gameLink string) {
 }
 
 func FetchCompletionator(link string) (game Game) {
-	// div class = row
-	// 		div class = col-6 col-md-3
-	// 			div class = bg-info text-white
-	// 				h3 = TIME
-	// 				h5 = CATEGORY
-	// 		div class = col-6 col-md-3
-	// 			div class = bg-info text-white
-	// 				h3 = TIME
-	// 				h5 = CATEGORY
-
-	// if h5 == "core + few" => Main Story
-	// if h5 == "core + lots" ==> Main + Sides
-	// if h5 == "completionated" ==> Completionist
-
 	// declare the collector object so the scraping process can begin
 	c := colly.NewCollector()
 
 	// establish connection to Completionator
 	c.OnRequest(func(r *colly.Request) {
-		fmt.Println("Connection made to HLTB")
+		fmt.Println("Connection made to Completionator")
 	})
 
 	// log that there was a problem accessing the URL
@@ -158,7 +159,7 @@ func FetchCompletionator(link string) (game Game) {
 
 	// update the Main Story, Main + Sides, and Completionist fields of the game struct
 	c.OnHTML("div.row", func(e *colly.HTMLElement) {
-		e.ForEach("div.bg-info text-white", func(_ int, el *colly.HTMLElement) {
+		e.ForEach("div.col-6", func(_ int, el *colly.HTMLElement) {
 			// dont grab the data that is from the following categories:
 			// 		"speed run"
 			if el.ChildText("h5") != "speed run" {
@@ -207,7 +208,8 @@ func FetchCompletionator(link string) (game Game) {
 
 	// set the game name
 	c.OnHTML("h2.game-details-title", func(e *colly.HTMLElement) {
-		game.Name = strings.TrimSpace(e.Text)
+		// grab the first child of h2 tag
+		game.Name = strings.TrimSpace(e.DOM.Contents().First().Text())
 	})
 
 	// when the data is acquired, log it and attach URL

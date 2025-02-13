@@ -4,7 +4,7 @@ import (
 	"fmt"
 	// "github.com/EZRA-DVLPR/GameList/internal/dbhandler"
 	// "github.com/EZRA-DVLPR/GameList/internal/mkdown"
-	// "github.com/EZRA-DVLPR/GameList/internal/scraper"
+	"github.com/EZRA-DVLPR/GameList/internal/scraper"
 	// "github.com/EZRA-DVLPR/GameList/internal/ui"
 	// "github.com/EZRA-DVLPR/GameList/internal/integration"
 )
@@ -71,4 +71,7 @@ func main() {
 	// integration.GetAllEpicGamesFile()
 	// integration.GetAllGamesPS("")
 	// integration.GetAllGamesSteam("")
+
+	// game := scraper.FetchCompletionator("https://completionator.com/Game/Details/3441")
+	// fmt.Println(game.Name, game.Url, game.Main, game.MainPlus, game.Comp)
 }

@@ -40,7 +40,7 @@ func SearchHLTB(query string) (gameLink string) {
 	}
 
 	// extract the link to the first game in the list
-	return ExtractLinkHLTB(pageHTML)
+	return extractLinkHLTB(pageHTML)
 }
 
 func extractLinkHLTB(pageHTML string) (gameLink string) {
