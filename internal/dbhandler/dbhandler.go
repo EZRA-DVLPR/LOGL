@@ -12,33 +12,25 @@ import (
 )
 
 // INFO: STRUCTURE OF THE DB
-// games {
-// 		name		PRIMARY KEY
-// 		url
-//		favorite
-//		main
-//		mainPlus
-//		comp
+// games (table) {
+// 		name		string				PRIMARY KEY
+// 		url			string
+//		favorite	int
+//		main		real
+//		mainPlus	real
+//		comp		real
 //	}
 
-// TODO: refactor the code to make more simple
-// 1. make a function for checking affected rows
-// 2. validate that each function cannot use a helper function for simpler processing
-// 3. determine if this file should be broken into several other files for simplistic overhead
-
+// creates the DB with table
 func CreateDB() {
 	fmt.Println("Creating the DB")
 
-	// create/open the db file
 	db, err := sql.Open("sqlite3", "games.db")
 	if err != nil {
 		log.Fatal(err)
 	}
-
-	// close the connection when done
 	defer db.Close()
 
-	// create the tables if they don't exist
 	_, err = db.Exec(`
 	CREATE TABLE IF NOT EXISTS games (
 		name TEXT PRIMARY KEY,
@@ -63,25 +55,21 @@ func ImportCSV() {
 	}
 	defer db.Close()
 
-	// open csv
 	file, err := os.Open("export.csv")
 	if err != nil {
 		log.Fatal("error opening CSV:", err)
 	}
 	defer file.Close()
 
-	// read from csv
+	// read from csv and check formatting
 	reader := csv.NewReader(file)
 	rows, err := reader.ReadAll()
 	if err != nil {
 		log.Fatal("Error reading CSV:", err)
 	}
-
 	if len(rows) < 1 {
 		log.Fatal("CSV file is empty or improperly formatted")
 	}
-
-	cols := rows[0]
 
 	// create the table
 	var name string
@@ -98,21 +86,19 @@ func ImportCSV() {
 	}
 
 	// setup transaction with dummy values
+	cols := rows[0]
 	temp := make([]string, len(cols))
 	for i := range temp {
 		temp[i] = "?"
 	}
-
 	insertStmt := fmt.Sprintf("INSERT INTO games (%s) VALUES (%s);",
 		join(cols, ", "), join(temp, ", "))
 
-	// start transaction
+	// start transaction and insert data
 	tx, err := db.Begin()
 	if err != nil {
 		log.Fatal("Error starting transaction:", err)
 	}
-
-	// insert the data
 	for _, row := range rows[1:] {
 		_, err := tx.Exec(insertStmt, convertRowToInterface(row)...)
 		if err != nil {
@@ -136,13 +122,12 @@ func ImportSQL() {
 	}
 	defer db.Close()
 
-	// read the "export.sql" file
 	sqlDump, err := os.ReadFile("export.sql")
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	// perform the import
+	// perform the import (dump)
 	_, err = db.Exec(string(sqlDump))
 	if err != nil {
 		log.Fatal("Error importing sql database:", err)
@@ -151,34 +136,25 @@ func ImportSQL() {
 	fmt.Println("SQL database imported successfully")
 }
 
+// given a game struct, will search DB for the name of the game
 func DeleteFromDB(game scraper.Game) {
-	// find the game name
 	db, err := sql.Open("sqlite3", "games.db")
 	if err != nil {
 		log.Fatal("Failed to access db")
 	}
 
-	// delete from the games table
 	res, err := db.Exec("DELETE FROM games WHERE name = ?", game.Name)
 	if err != nil {
 		log.Fatal("Error deleting game from games table: ", err)
 	}
 
-	// check if there was a deletion
-	rowsAffected, err := res.RowsAffected()
-	if err != nil {
-		log.Fatal("Error checking affected rows: ", err)
+	if rowsAffected(res, game.Name) {
+		fmt.Println("Game deleted: ", game.Name)
 	}
-	if rowsAffected == 0 {
-		fmt.Printf("Game `%s` not found in local database\n", game.Name)
-		return
-	}
-
-	fmt.Println("Game deleted: ", game.Name)
 }
 
+// if the given game is not empty and not already existent in DB, then add to the DB
 func AddToDB(game scraper.Game) {
-	// if the given game is not empty, then add to the DB
 	if (game.Name == "") &&
 		(game.Url == "") &&
 		(game.Main == -1) &&
@@ -188,14 +164,12 @@ func AddToDB(game scraper.Game) {
 		return
 	}
 
-	// open the DB
 	db, err := sql.Open("sqlite3", "games.db")
 	if err != nil {
 		log.Fatal("Failed to access db")
 	}
 	defer db.Close()
 
-	// if the given game already exists in the db, then dont add it
 	var exists bool
 	err = db.QueryRow("SELECT EXISTS(SELECT 1 FROM games WHERE name = ?)", game.Name).Scan(&exists)
 	if err != nil {
@@ -216,8 +190,8 @@ func AddToDB(game scraper.Game) {
 	fmt.Println("Finished adding the game data to the local DB")
 }
 
+// if the given game is not empty, then add favorite
 func AddFavorite(game scraper.Game) {
-	// if the given game is not empty, then add favorite
 	if (game.Name == "") &&
 		(game.Url == "") &&
 		(game.Main == -1) &&
@@ -227,32 +201,25 @@ func AddFavorite(game scraper.Game) {
 		return
 	}
 
-	// open the DB
 	db, err := sql.Open("sqlite3", "games.db")
 	if err != nil {
 		log.Fatal("Failed to access db")
 	}
 	defer db.Close()
 
-	// update given game name to favorite = 1 (true)
+	// update given game.Favorite = 1 (true)
 	res, err := db.Exec("UPDATE games SET favorite = 1 WHERE name = ?", game.Name)
 	if err != nil {
 		log.Fatal("Error updating game to be favorite", err)
 	}
 
-	// check if there was a change
-	rowsAffected, err := res.RowsAffected()
-	if err != nil {
-		log.Fatal("Error checking affected rows: ", err)
-	}
-	if rowsAffected == 0 {
-		fmt.Printf("Game `%s` not found in local database\n", game.Name)
-		return
+	if rowsAffected(res, game.Name) {
+		fmt.Println("Favorited:", game.Name)
 	}
 }
 
+// if the given game is not empty, then remove favorite
 func RemoveFavorite(game scraper.Game) {
-	// if the given game is not empty, then add favorite
 	if (game.Name == "") &&
 		(game.Url == "") &&
 		(game.Main == -1) &&
@@ -262,27 +229,20 @@ func RemoveFavorite(game scraper.Game) {
 		return
 	}
 
-	// open the DB
 	db, err := sql.Open("sqlite3", "games.db")
 	if err != nil {
 		log.Fatal("Failed to access db")
 	}
 	defer db.Close()
 
-	// update given game name to favorite = 0 (false)
+	// update given game.Favorite = 0 (false)
 	res, err := db.Exec("UPDATE games SET favorite = 0 WHERE name = ?", game.Name)
 	if err != nil {
 		log.Fatal("Error updating game to be favorite")
 	}
 
-	// check if there was a change
-	rowsAffected, err := res.RowsAffected()
-	if err != nil {
-		log.Fatal("Error checking affected rows: ", err)
-	}
-	if rowsAffected == 0 {
-		fmt.Printf("Game `%s` not found in local database\n", game.Name)
-		return
+	if rowsAffected(res, game.Name) {
+		fmt.Println("Un-Favorited:", game.Name)
 	}
 }
 
@@ -302,9 +262,6 @@ func SortDB(sort string, sortOpt string) {
 	}
 	defer db.Close()
 
-	// sort by sortCat
-
-	// TODO: handle case where DB is empty
 	rows, err := db.Query(fmt.Sprintf("SELECT name, main, mainPlus, comp FROM games ORDER BY favorite DESC, %s %s;", sort, sortOpt))
 	if err != nil {
 		log.Fatal("Error sorting games from games table: ", err)
@@ -323,6 +280,7 @@ func SortDB(sort string, sortOpt string) {
 	fmt.Println()
 }
 
+// selector for exporting
 func Export(choice int) {
 	switch choice {
 	case 1:
@@ -363,7 +321,7 @@ func exportSQL() {
 	fmt.Println("Exporting database to", outputFile)
 	file.WriteString("PRAGMA foreign_keys=OFF;\nBEGIN TRANSACTION;\n")
 
-	//export scheme
+	//export schema
 	rows, err := db.Query("SELECT sql FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%';")
 	if err != nil {
 		log.Fatal("Error retrieving schema:", err)
@@ -393,33 +351,33 @@ func exportSQL() {
 			log.Fatal("Error scanning table name:", err)
 		}
 
-		// Fetch all rows from the table
+		// fetch all rows from the table
 		rows, err := db.Query(fmt.Sprintf("SELECT * FROM %s;", tableName))
 		if err != nil {
 			log.Fatalf("Error retrieving data from %s: %v", tableName, err)
 		}
 
-		// Get column names
+		// get column names
 		cols, err := rows.Columns()
 		if err != nil {
 			log.Fatal("Error getting columns:", err)
 		}
 		numCols := len(cols)
 
-		// Prepare for value scanning
+		// prepare for value scanning
 		values := make([]interface{}, numCols)
 		valuePtrs := make([]interface{}, numCols)
 		for i := range values {
 			valuePtrs[i] = &values[i]
 		}
 
-		// Iterate through rows and generate INSERT statements
+		// iterate through rows and generate INSERT statements for all values in each row
 		for rows.Next() {
 			if err := rows.Scan(valuePtrs...); err != nil {
 				log.Fatal("Error scanning row:", err)
 			}
 
-			// Convert values to SQL format
+			// convert values to SQL format
 			insertValues := make([]string, numCols)
 			for i, val := range values {
 				switch v := val.(type) {
@@ -434,7 +392,7 @@ func exportSQL() {
 				}
 			}
 
-			// Write the INSERT statement
+			// write the INSERT statement
 			insertStmt := fmt.Sprintf("INSERT INTO %s (%s) VALUES (%s);\n",
 				tableName,
 				joinColumns(cols),
@@ -473,7 +431,7 @@ func exportCSV() {
 		log.Fatal("Error getting column names:", err)
 	}
 
-	// open csv
+	// open csv to write to
 	file, err := os.Create("export.csv")
 	if err != nil {
 		log.Fatal("Error creating csv file", err)
@@ -516,14 +474,15 @@ func exportCSV() {
 			log.Fatal("Error writing row to CSV:", err)
 		}
 	}
-
 	fmt.Println("Export to CSV completed successfully")
 }
 
+// joins columns into a single string
 func joinColumns(cols []string) string {
 	return fmt.Sprintf("%s", join(cols, ", "))
 }
 
+// specific join function to join elts (cols, rows, etc.)
 func join(elements []string, sep string) string {
 	if len(elements) == 0 {
 		return ""
@@ -533,4 +492,17 @@ func join(elements []string, sep string) string {
 		result += sep + element
 	}
 	return result
+}
+
+// if given rows were affected then returns true. o/w false
+func rowsAffected(res sql.Result, name string) (wereAffected bool) {
+	rowsAffected, err := res.RowsAffected()
+	if err != nil {
+		log.Fatal("Error checking affected rows: ", err)
+	}
+	if rowsAffected == 0 {
+		fmt.Printf("Game `%s` not found in local database\n", name)
+		return false
+	}
+	return true
 }

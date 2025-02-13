@@ -2,9 +2,10 @@ package main
 
 import (
 	"fmt"
-	// "github.com/EZRA-DVLPR/GameList/internal/dbhandler"
+
+	"github.com/EZRA-DVLPR/GameList/internal/dbhandler"
 	// "github.com/EZRA-DVLPR/GameList/internal/mkdown"
-	"github.com/EZRA-DVLPR/GameList/internal/scraper"
+	// "github.com/EZRA-DVLPR/GameList/internal/scraper"
 	// "github.com/EZRA-DVLPR/GameList/internal/ui"
 	// "github.com/EZRA-DVLPR/GameList/internal/integration"
 )
@@ -47,7 +48,7 @@ func main() {
 	// dbhandler.Export(1)
 	// dbhandler.Export(2)
 
-	// dbhandler.ImportSQL()
+	dbhandler.ImportSQL()
 	// dbhandler.ImportCSV()
 	//
 	// dbhandler.AddFavorite(scraper.FetchHLTB("https://howlongtobeat.com/game/80199"))
@@ -80,4 +81,6 @@ func main() {
 
 	// fmt.Println(scraper.SearchCompletionator("elden"))
 	// fmt.Println(scraper.SearchHLTB("elden"))
+
+	// dbhandler.SortDB("name", "ASC")
 }
