@@ -28,12 +28,11 @@ func GetAllGamesSteam(profile string) {
 	cookieValue := os.Getenv("steamloginsecure")
 	cookieDomain := "steamcommunity.com"
 
-	// Create a new Chrome context
 	ctx, cancel := chromedp.NewContext(context.Background())
 	defer cancel()
 
-	// Set timeout
-	ctx, cancel = context.WithTimeout(ctx, 30*time.Second)
+	// timeout for 10 seconds
+	ctx, cancel = context.WithTimeout(ctx, 10*time.Second)
 	defer cancel()
 
 	// copying the js code basically
@@ -56,19 +55,18 @@ func GetAllGamesSteam(profile string) {
 
 		chromedp.Navigate(url),
 
-		// Wait for JavaScript to load the games list
+		// wait for js to load the games list (5 seconds)
 		chromedp.Sleep(5*time.Second),
 
-		// Ensure the game list is present
+		// ensure list is present
 		chromedp.WaitVisible(gamesRootSelector, chromedp.ByQuery),
 
-		// Extract games
+		// extract games
 		chromedp.Evaluate(`Array.from(document.querySelectorAll('`+gameLinksSelector+`')).map(el => el.textContent.trim())`, &gameNames))
 	if err != nil {
 		log.Fatal("Failed to fetch game names:", err)
 	}
 
-	// Print the extracted game names
 	fmt.Println("Owned Games:")
 	for _, name := range gameNames {
 		fmt.Println(name)
