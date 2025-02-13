@@ -26,6 +26,8 @@ type EPICGame struct {
 	Logo            any    `json:"-"`
 }
 
+// given the data (either in string or txt file format), formats (unmarshals) into JSON which is then parsed for the desired info
+
 func GetAllEpicGamesString(input string) {
 	fmt.Println("Getting products from Epic Games string...")
 
