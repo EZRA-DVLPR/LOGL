@@ -28,7 +28,7 @@ type EPICGame struct {
 
 // given the data (either in string or txt file format), formats (unmarshals) into JSON which is then parsed for the desired info
 
-func GetAllEpicGamesString(input string) {
+func GetAllGamesEpicString(input string) {
 	fmt.Println("Getting products from Epic Games string...")
 
 	var epicpage EPICPage
@@ -42,7 +42,7 @@ func GetAllEpicGamesString(input string) {
 	}
 }
 
-func GetAllEpicGamesFile() {
+func GetAllGamesEpicFile() {
 	fmt.Println("Getting products from Epic Games txt file...")
 
 	file, err := os.Open("epicgames.txt")

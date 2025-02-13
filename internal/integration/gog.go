@@ -52,7 +52,7 @@ type GOGProduct struct {
 	IsHidden             any    `json:"-"`
 }
 
-func GetAllGamesGOG(temp string) {
+func GetAllGamesGOG() {
 	fmt.Println("Getting products from GOG...")
 
 	url := "https://embed.gog.com/account/getFilteredProducts?mediaType=1&page=1"
@@ -65,7 +65,6 @@ func GetAllGamesGOG(temp string) {
 	}
 
 	// authentication cookie
-	// INFO: AUTH COOKIE MUST BE FOR CHROME BROWSER
 	err = godotenv.Load()
 	if err != nil {
 		log.Fatal("Error loading .env file")
@@ -99,12 +98,15 @@ func GetAllGamesGOG(temp string) {
 		log.Fatal("Error decoding JSON:", err)
 	}
 
-	// TODO: grab the first page games and append only games found on non-first pages to avoid redundancy of connection to 1st page
-
+	// from the 1st page, get the list of game titles
 	var gameList []string
-	// for each page in range [1:totalPages] inclusive, want to grab all games from each page
-	for i := 1; i <= gogpage.TotalPages; i++ {
-		gameList = append(gameList, getGOGGames(i)...) // unpack the elts from the search from each page
+	for _, gogproduct := range gogpage.Products {
+		gameList = append(gameList, gogproduct.Title)
+	}
+
+	// for each page in range [2:totalPages] inclusive, want to grab all games from each page
+	for i := 2; i <= gogpage.TotalPages; i++ {
+		gameList = append(gameList, getGOGGames(i)...) // unpack the elts from the search from each page and append to gameList
 	}
 
 	// we now have the entire list of games
@@ -124,7 +126,6 @@ func getGOGGames(pagenumber int) (gameList []string) {
 	}
 
 	// authentication cookie
-	// INFO: AUTH COOKIE MUST BE FOR CHROME BROWSER
 	err = godotenv.Load()
 	if err != nil {
 		log.Fatal("Error loading .env file")

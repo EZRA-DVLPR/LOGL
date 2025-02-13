@@ -3,11 +3,11 @@ package main
 import (
 	"fmt"
 
-	"github.com/EZRA-DVLPR/GameList/internal/dbhandler"
+	// "github.com/EZRA-DVLPR/GameList/internal/dbhandler"
 	// "github.com/EZRA-DVLPR/GameList/internal/mkdown"
 	// "github.com/EZRA-DVLPR/GameList/internal/scraper"
 	// "github.com/EZRA-DVLPR/GameList/internal/ui"
-	// "github.com/EZRA-DVLPR/GameList/internal/integration"
+	"github.com/EZRA-DVLPR/GameList/internal/integration"
 )
 
 func main() {
@@ -48,7 +48,7 @@ func main() {
 	// dbhandler.Export(1)
 	// dbhandler.Export(2)
 
-	dbhandler.ImportSQL()
+	// dbhandler.ImportSQL()
 	// dbhandler.ImportCSV()
 	//
 	// dbhandler.AddFavorite(scraper.FetchHLTB("https://howlongtobeat.com/game/80199"))
@@ -68,8 +68,9 @@ func main() {
 	// dbhandler.SortDB("main", "DESC")
 	// dbhandler.SortDB("comp", "ASC")
 	// dbhandler.SortDB("comp", "DESC")
-	// integration.GetAllGamesGOG("")
-	// integration.GetAllEpicGamesFile()
+	integration.GetAllGamesGOG()
+	// integration.GetAllGamesEpicFile()
+	// integration.GetAllGamesEpicString()
 	// integration.GetAllGamesPS("")
 	// integration.GetAllGamesSteam("")
 
