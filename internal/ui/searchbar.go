@@ -5,7 +5,7 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
-	"fyne.io/fyne/v2/layout"
+	// "fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 )
@@ -14,11 +14,7 @@ func createSearchBar(showLabel bool) (searchBar *fyne.Container) {
 	searchButton := createSearchButton(showLabel)
 	searchText := createSearchTextBox()
 
-	searchBar = container.New(
-		layout.NewHBoxLayout(),
-		searchButton,
-		searchText,
-	)
+	searchBar = container.NewBorder(nil, nil, searchButton, nil, searchText)
 	return searchBar
 }
 
@@ -35,6 +31,8 @@ func createSearchButton(showLabel bool) (searchButton *widget.Button) {
 	return searchButton
 }
 
-func createSearchTextBox() (searchTextBox *widget.Label) {
-	return widget.NewLabel("Begin Searching Here...")
+func createSearchTextBox() (searchTextBox *widget.Entry) {
+	searchTextBox = widget.NewEntry()
+	searchTextBox.SetPlaceHolder("Search Game Names Here!")
+	return
 }

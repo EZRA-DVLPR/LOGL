@@ -14,11 +14,11 @@ import (
 func createMainWindowToolbar(showLabels bool) (toolbar *fyne.Container) {
 	// create the buttons
 	sortButton := createSortButton(showLabels)
-	exportButton := createExportButton(showLabels)
-	settingsButton := createSettingsButton(showLabels)
+	exportButton := createExportButton()
+	settingsButton := createSettingsButton()
 	addButton := createAddButton(showLabels)
 	removeButton := createRemoveButton(showLabels)
-	helpButton := createHelpButton(showLabels)
+	helpButton := createHelpButton()
 	randButton := createRandomButton(showLabels)
 	textSizeUpButton := createTextSizeUpButton(showLabels)
 	textSizeDownButton := createTextSizeDownButton(showLabels)
@@ -31,10 +31,10 @@ func createMainWindowToolbar(showLabels bool) (toolbar *fyne.Container) {
 		addButton,
 		updateButton,
 		removeButton,
-		exportButton,
 		randButton,
 		textSizeUpButton,
 		textSizeDownButton,
+		exportButton,
 		settingsButton,
 		helpButton,
 	)
@@ -68,26 +68,16 @@ func createSortButton(showLabel bool) (sortButton *widget.Button) {
 	return sortButton
 }
 
-func createExportButton(showLabel bool) (exportButton *widget.Button) {
-	startText := ""
-	if showLabel {
-		startText = "Export"
-	}
-
-	exportButton = widget.NewButtonWithIcon(startText, theme.MailSendIcon(), func() {
+func createExportButton() (exportButton *widget.Button) {
+	exportButton = widget.NewButtonWithIcon("", theme.MailSendIcon(), func() {
 		log.Println("Open the dropdown menu and show options for exporting")
 	})
 
 	return exportButton
 }
 
-func createSettingsButton(showLabel bool) (settingsButton *widget.Button) {
-	startText := ""
-	if showLabel {
-		startText = "Settings"
-	}
-
-	settingsButton = widget.NewButtonWithIcon(startText, theme.SettingsIcon(), func() {
+func createSettingsButton() (settingsButton *widget.Button) {
+	settingsButton = widget.NewButtonWithIcon("", theme.SettingsIcon(), func() {
 		log.Println("Open the dropdown menu and show options for user config")
 	})
 
@@ -120,13 +110,8 @@ func createRemoveButton(showLabel bool) (removeButton *widget.Button) {
 	return removeButton
 }
 
-func createHelpButton(showLabel bool) (removeButton *widget.Button) {
-	startText := ""
-	if showLabel {
-		startText = "Help Menu"
-	}
-
-	removeButton = widget.NewButtonWithIcon(startText, theme.QuestionIcon(), func() {
+func createHelpButton() (removeButton *widget.Button) {
+	removeButton = widget.NewButtonWithIcon("", theme.QuestionIcon(), func() {
 		log.Println("opens dropdown of diff options for help menu")
 	})
 
