@@ -5,6 +5,8 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
+	"fyne.io/fyne/v2/container"
+	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/widget"
 )
 
@@ -16,23 +18,12 @@ func StartGUI() {
 	//			think of it as an output terminal
 	// im not sure if ill keep it in the final build
 	a := app.New()
-	w := a.NewWindow("Clock")
-	w2 := a.NewWindow("Debug Window")
+	w := a.NewWindow("Main window - GameList")
+	w2 := a.NewWindow("Debug Window - GameList")
 
 	// defaults for windows to be set
 	w.Resize(fyne.NewSize(200, 200)) // set the default size of the window upon start
 	w.SetMaster()                    // the app will close when the main window is closed
-
-	// actually modify the content of the main window
-	clock := widget.NewLabel("")
-	updateTime(clock)
-
-	w.SetContent(clock)
-	go func() {
-		for range time.Tick(time.Second) {
-			updateTime(clock)
-		}
-	}()
 
 	// handle diagnostics...
 	// w2.SetContent(widget.NewLabel("Debugging stuff..."))
@@ -42,6 +33,14 @@ func StartGUI() {
 		w3.Show()
 	}))
 
+	content := container.New(
+		layout.NewVBoxLayout(),
+		createMainWindowToolbar(true),
+		createSearchBar(true),
+		createDBRender(),
+	)
+
+	w.SetContent(content)
 	// show all windows
 	w.Show()
 	w2.Show()
@@ -53,4 +52,18 @@ func StartGUI() {
 func updateTime(clock *widget.Label) {
 	formatted := time.Now().Format("Time: 03:04:05")
 	clock.SetText(formatted)
+}
+
+// creates the DBRender that will be display the DB
+func createDBRender() (DBRender *widget.Label) {
+	DBRender = widget.NewLabel("")
+	updateTime(DBRender)
+
+	go func() {
+		for range time.Tick(time.Second) {
+			updateTime(DBRender)
+		}
+	}()
+
+	return
 }

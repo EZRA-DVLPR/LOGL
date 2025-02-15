@@ -6,8 +6,8 @@ import (
 	// "github.com/EZRA-DVLPR/GameList/internal/dbhandler"
 	// "github.com/EZRA-DVLPR/GameList/internal/mkdown"
 	// "github.com/EZRA-DVLPR/GameList/internal/scraper"
-	// "github.com/EZRA-DVLPR/GameList/internal/ui"
-	"github.com/EZRA-DVLPR/GameList/internal/integration"
+	"github.com/EZRA-DVLPR/GameList/internal/ui"
+	// "github.com/EZRA-DVLPR/GameList/internal/integration"
 )
 
 func main() {
@@ -42,8 +42,6 @@ func main() {
 	//
 
 	// mkdown.WriteToMarkdown()
-
-	// ui.StartGUI()
 
 	// dbhandler.Export(1)
 	// dbhandler.Export(2)
@@ -85,4 +83,6 @@ func main() {
 	// fmt.Println(scraper.SearchHLTB("elden"))
 
 	// dbhandler.SortDB("name", "ASC")
+
+	ui.StartGUI()
 }
