@@ -5,6 +5,7 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/widget"
+	"github.com/EZRA-DVLPR/GameList/internal/dbhandler"
 )
 
 type Temp struct {
@@ -12,35 +13,63 @@ type Temp struct {
 	col int
 }
 
-// creates the DBRender that will be display the DB
+// makes the table and performs changes on it to send to main window
 func createDBRender() (dbRender *widget.Table) {
-	// create Lists
-	// nameList, mainList, mainPlusList, compList := makeLists()
-	dbTable := makeLists()
+	dbTable := makeTable()
+	dbTable = headerSetup(dbTable)
 
 	return dbTable
 }
 
-func makeLists() (dbTable *widget.Table) {
+// PERF: make my own widget (EZRATableWidget) that has the following features:
+//  1. clicking cell highlights row of cells
+//  2. get column widths for each column
+//  3. set size of column based on size of window
+func makeTable() (dbTable *widget.Table) {
 	// obtain data to insert into table
-	rows, cols := 20000, 4
+	dbData := dbhandler.SortDB("name", "ASC")
+
+	numRows := 1
+	if len(dbData) != 0 {
+		numRows = len(dbData)
+	}
 
 	// populate table with info
 	dbTable = widget.NewTableWithHeaders(
-		// dims
-		func() (int, int) { return rows, cols },
+		// table dims
+		func() (int, int) { return numRows, 4 },
 		// create an empty cell
 		func() fyne.CanvasObject { return widget.NewLabel("") },
 		// populate table with content
 		func(id widget.TableCellID, obj fyne.CanvasObject) {
-			obj.(*widget.Label).SetText(fmt.Sprintf("%d", id.Row+1))
+			// if there is data in DB then display it
+			// o/w display "No Data"
+			if numRows > 1 {
+				if id.Col == 0 {
+					// TODO: Have to change what the text displays based on the size of the available column size
+					// if the game name is too long, display the name and "..." wherever the cutoff is
+					obj.(*widget.Label).SetText(dbData[id.Row][0])
+				} else if id.Col == 1 {
+					obj.(*widget.Label).SetText(fmt.Sprintf("%v", dbData[id.Row][1]))
+				} else if id.Col == 2 {
+					obj.(*widget.Label).SetText(fmt.Sprintf("%v", dbData[id.Row][2]))
+				} else {
+					obj.(*widget.Label).SetText(fmt.Sprintf("%v", dbData[id.Row][3]))
+				}
+			} else {
+				obj.(*widget.Label).SetText("No Data")
+			}
 		},
 	)
 
+	return
+}
+
+func headerSetup(dbTable *widget.Table) *widget.Table {
 	// name of each header
 	headers := []string{"Game Name", "Main Story", "Main + Sides", "Completionist"}
 
-	// make the headers bold
+	// setup for creating the headers
 	dbTable.CreateHeader = func() fyne.CanvasObject {
 		return widget.NewLabelWithStyle(
 			// add placeholder for at least 6 characters, making 6 digit numbers display nicely
@@ -55,6 +84,7 @@ func makeLists() (dbTable *widget.Table) {
 	// make headers display content
 	dbTable.UpdateHeader = func(id widget.TableCellID, obj fyne.CanvasObject) {
 		if id.Col >= 0 && id.Col < len(headers) {
+			// display headers defined prev
 			obj.(*widget.Label).SetText(headers[id.Col])
 		} else {
 			// for row index, start at 1:rows
@@ -62,12 +92,10 @@ func makeLists() (dbTable *widget.Table) {
 		}
 	}
 
-	// expand column widths
-	// TODO: Save these settings before close
-	// Adjust size of columns to be spread evenly when the horizontal spacing is larger than the min
-	dbTable.SetColumnWidth(0, 150)
+	// set column widths
+	dbTable.SetColumnWidth(0, 400)
 	dbTable.SetColumnWidth(1, 200)
-	dbTable.SetColumnWidth(2, 300)
-	dbTable.SetColumnWidth(3, 400)
-	return
+	dbTable.SetColumnWidth(2, 200)
+	dbTable.SetColumnWidth(3, 200)
+	return dbTable
 }

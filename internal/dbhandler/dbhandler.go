@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strconv"
 
 	"github.com/EZRA-DVLPR/GameList/internal/scraper"
 	_ "github.com/mattn/go-sqlite3"
@@ -255,7 +256,7 @@ func RemoveFavorite(game scraper.Game) {
 //	sort == comp
 //
 // in all cases, it will sort the list based on favorites first, then non-favorited entries
-func SortDB(sort string, sortOpt string) {
+func SortDB(sort string, sortOpt string) (dbOutput [][]string) {
 	db, err := sql.Open("sqlite3", "games.db")
 	if err != nil {
 		log.Fatal("Error accessing local dB: ", err)
@@ -267,17 +268,24 @@ func SortDB(sort string, sortOpt string) {
 		log.Fatal("Error sorting games from games table: ", err)
 	}
 
-	fmt.Println("Games in DB sorted by ", sort, sortOpt)
+	// fmt.Println("Games in DB sorted by ", sort, sortOpt)
 
 	for rows.Next() {
 		var name string
-		var main, mainPlus, comp float32
+		var main, mainPlus, comp float64
 		if err := rows.Scan(&name, &main, &mainPlus, &comp); err != nil {
 			log.Fatal("Error scanning row: ", err)
 		}
-		fmt.Printf("Name: %s\nMain:\t%v\nMain+:\t%v\nComp:\t%v\n", name, main, mainPlus, comp)
+		// fmt.Printf("Name: %s\nMain:\t%v\nMain+:\t%v\nComp:\t%v\n", name, main, mainPlus, comp)
+		dbOutput = append(dbOutput, []string{
+			name,
+			strconv.FormatFloat(main, 'f', -1, 64),
+			strconv.FormatFloat(mainPlus, 'f', -1, 64),
+			strconv.FormatFloat(comp, 'f', -1, 64),
+		})
 	}
-	fmt.Println()
+	// fmt.Println()
+	return dbOutput
 }
 
 // selector for exporting

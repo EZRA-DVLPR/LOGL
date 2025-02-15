@@ -6,8 +6,8 @@ import (
 	// "github.com/EZRA-DVLPR/GameList/internal/dbhandler"
 	// "github.com/EZRA-DVLPR/GameList/internal/mkdown"
 	// "github.com/EZRA-DVLPR/GameList/internal/scraper"
-	"github.com/EZRA-DVLPR/GameList/internal/ui"
 	// "github.com/EZRA-DVLPR/GameList/internal/integration"
+	"github.com/EZRA-DVLPR/GameList/internal/ui"
 )
 
 func main() {
@@ -26,10 +26,9 @@ func main() {
 	//
 	// data = scraper.FetchHLTB("https://howlongtobeat.com/game/2127")
 	// dbhandler.AddToDB(data)
-
+	//
 	// data = scraper.FetchHLTB("https://howlongtobeat.com/game/68151")
 	// dbhandler.AddToDB(data)
-	//
 
 	// data = scraper.FetchHLTB("https://howlongtobeat.com/game/116471")
 	// dbhandler.AddToDB(data)
