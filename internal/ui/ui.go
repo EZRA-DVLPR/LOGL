@@ -1,13 +1,10 @@
 package ui
 
 import (
-	"time"
-
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/layout"
-	"fyne.io/fyne/v2/widget"
 )
 
 func StartGUI() {
@@ -19,7 +16,7 @@ func StartGUI() {
 	// im not sure if ill keep it in the final build
 	a := app.New()
 	w := a.NewWindow("Main window - GameList")
-	w2 := a.NewWindow("Debug Window - GameList")
+	// w2 := a.NewWindow("Debug Window - GameList")
 
 	// default window size accommodates changing of ASC-DESC without changing size of window
 	w.Resize(fyne.NewSize(1140, 400))
@@ -28,43 +25,32 @@ func StartGUI() {
 
 	// handle diagnostics...
 	// w2.SetContent(widget.NewLabel("Debugging stuff..."))
-	w2.SetContent(widget.NewButton("Open new window", func() {
-		w3 := a.NewWindow("Third")
-		w3.SetContent(widget.NewLabel("Third"))
-		w3.Show()
-	}))
+	// w2.SetContent(widget.NewButton("Open new window", func() {
+	// 	w3 := a.NewWindow("Third")
+	// 	w3.SetContent(widget.NewLabel("Third"))
+	// 	w3.Show()
+	// }))
+
+	//See diagram in documentation for clearer illustration
+	//
+	//--------toolbar--------
+	//Search--TypingBoxSearch
+	//id|GameName|M|M+S|C
+	//~~~~~~~~~~~~~~~~~~~~~~~~
+	//~~~~~~~~~~~~~~~~~~~~~~~~
 
 	content := container.New(
 		layout.NewVBoxLayout(),
 		createMainWindowToolbar(w.Canvas()),
-		createSearchBar(true),
+		createSearchBar(),
 		createDBRender(),
 	)
 
 	w.SetContent(content)
 	// show all windows
 	w.Show()
-	w2.Show()
+	// w2.Show()
 
 	// runloop for the app
 	a.Run()
-}
-
-func updateTime(clock *widget.Label) {
-	formatted := time.Now().Format("Time: 03:04:05")
-	clock.SetText(formatted)
-}
-
-// creates the DBRender that will be display the DB
-func createDBRender() (DBRender *widget.Label) {
-	DBRender = widget.NewLabel("")
-	updateTime(DBRender)
-
-	go func() {
-		for range time.Tick(time.Second) {
-			updateTime(DBRender)
-		}
-	}()
-
-	return
 }
