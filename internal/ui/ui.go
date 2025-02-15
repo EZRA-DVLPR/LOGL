@@ -4,7 +4,6 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
 	"fyne.io/fyne/v2/container"
-	"fyne.io/fyne/v2/layout"
 )
 
 func StartGUI() {
@@ -39,10 +38,14 @@ func StartGUI() {
 	//~~~~~~~~~~~~~~~~~~~~~~~~
 	//~~~~~~~~~~~~~~~~~~~~~~~~
 
-	content := container.New(
-		layout.NewVBoxLayout(),
-		createMainWindowToolbar(w.Canvas()),
-		createSearchBar(),
+	content := container.NewBorder(
+		// top is toolbar + searchbar
+		container.NewVBox(
+			createMainWindowToolbar(w.Canvas()),
+			createSearchBar(),
+		),
+		// fill remaining space left with dbRender (center). all else nil
+		nil, nil, nil,
 		createDBRender(),
 	)
 
