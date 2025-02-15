@@ -5,7 +5,6 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
-	// "fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 )
@@ -18,6 +17,8 @@ func createSearchBar(showLabel bool) (searchBar *fyne.Container) {
 	return searchBar
 }
 
+// INFO: search is only for game names
+// TODO: Decide if it will search whenever there is a change in the textbox or when the user hits enter
 func createSearchButton(showLabel bool) (searchButton *widget.Button) {
 	startText := ""
 	if showLabel {

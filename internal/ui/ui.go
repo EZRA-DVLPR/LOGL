@@ -21,9 +21,10 @@ func StartGUI() {
 	w := a.NewWindow("Main window - GameList")
 	w2 := a.NewWindow("Debug Window - GameList")
 
-	// defaults for windows to be set
-	w.Resize(fyne.NewSize(200, 200)) // set the default size of the window upon start
-	w.SetMaster()                    // the app will close when the main window is closed
+	// default window size accommodates changing of ASC-DESC without changing size of window
+	w.Resize(fyne.NewSize(1140, 400))
+	// the app will close when the main window (w) is closed
+	w.SetMaster()
 
 	// handle diagnostics...
 	// w2.SetContent(widget.NewLabel("Debugging stuff..."))
@@ -35,7 +36,7 @@ func StartGUI() {
 
 	content := container.New(
 		layout.NewVBoxLayout(),
-		createMainWindowToolbar(true),
+		createMainWindowToolbar(w.Canvas()),
 		createSearchBar(true),
 		createDBRender(),
 	)
