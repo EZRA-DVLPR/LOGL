@@ -5,15 +5,16 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
+	"fyne.io/fyne/v2/data/binding"
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 )
 
 // creates the toolbar with the options that will be displayed to manage the rendered DB
-func createMainWindowToolbar(toolbarCanvas fyne.Canvas) (toolbar *fyne.Container) {
+func createMainWindowToolbar(toolbarCanvas fyne.Canvas, sortOrder binding.String) (toolbar *fyne.Container) {
 	// create the buttons
-	sortButton := createSortButton()
+	sortButton := createSortButton(sortOrder)
 	exportButton := createExportButton(toolbarCanvas)
 	settingsButton := createSettingsButton()
 	addButton := createAddButton(toolbarCanvas)
@@ -51,21 +52,29 @@ func createMainWindowToolbar(toolbarCanvas fyne.Canvas) (toolbar *fyne.Container
 	return toolbar
 }
 
-func createSortButton() (sortButton *widget.Button) {
-	isAsc := true
-
-	// TODO: When selected, each option calls the sorting of the db and renders it in the other pane
-	sortButton = widget.NewButtonWithIcon("Sort ASC", theme.MenuDropUpIcon(), func() {
-		if isAsc {
-			sortButton.SetText("Sort DESC")
-			sortButton.SetIcon(theme.MenuDropDownIcon())
-			isAsc = false
+func createSortButton(sortOrder binding.String) (sortButton *widget.Button) {
+	// create the button with empty label
+	sortButton = widget.NewButtonWithIcon("", theme.MenuDropUpIcon(), func() {
+		// whatver curr value of sortOrder is, we want opposite when clicked
+		val, _ := sortOrder.Get()
+		if val == "ASC" {
+			sortOrder.Set("DESC")
 		} else {
-			sortButton.SetText("Sort ASC")
-			sortButton.SetIcon(theme.MenuDropUpIcon())
-			isAsc = true
+			sortOrder.Set("ASC")
 		}
 	})
+
+	// listen for changes, and update text+icon
+	sortOrder.AddListener(binding.NewDataListener(func() {
+		val, _ := sortOrder.Get()
+		if val == "ASC" {
+			sortButton.SetText("Sort ASC")
+			sortButton.SetIcon(theme.MenuDropUpIcon())
+		} else {
+			sortButton.SetText("Sort DESC")
+			sortButton.SetIcon(theme.MenuDropDownIcon())
+		}
+	}))
 	return sortButton
 }
 
