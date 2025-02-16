@@ -8,14 +8,9 @@ import (
 	"github.com/EZRA-DVLPR/GameList/internal/dbhandler"
 )
 
-type Temp struct {
-	row int
-	col int
-}
-
 // makes the table and performs changes on it to send to main window
-func createDBRender() (dbRender *widget.Table) {
-	dbTable := makeTable()
+func createDBRender(sortBy string, opt string) (dbRender *widget.Table) {
+	dbTable := makeTable(sortBy, opt)
 	dbTable = headerSetup(dbTable)
 
 	return dbTable
@@ -25,9 +20,9 @@ func createDBRender() (dbRender *widget.Table) {
 //  1. clicking cell highlights row of cells
 //  2. get column widths for each column
 //  3. set size of column based on size of window
-func makeTable() (dbTable *widget.Table) {
+func makeTable(sortBy string, opt string) (dbTable *widget.Table) {
 	// obtain data to insert into table
-	dbData := dbhandler.SortDB("name", "ASC")
+	dbData := dbhandler.SortDB(sortBy, opt)
 
 	numRows := 1
 	if len(dbData) != 0 {
@@ -46,9 +41,12 @@ func makeTable() (dbTable *widget.Table) {
 			// o/w display "No Data"
 			if numRows > 1 {
 				if id.Col == 0 {
-					// TODO: Have to change what the text displays based on the size of the available column size
-					// if the game name is too long, display the name and "..." wherever the cutoff is
-					obj.(*widget.Label).SetText(dbData[id.Row][0])
+					// if game name is too long, then truncate and append "...". o/w display entire game name
+					if len(dbData[id.Row][0]) < 48 {
+						obj.(*widget.Label).SetText(dbData[id.Row][0])
+					} else {
+						obj.(*widget.Label).SetText(dbData[id.Row][0][:45] + "...")
+					}
 				} else if id.Col == 1 {
 					obj.(*widget.Label).SetText(fmt.Sprintf("%v", dbData[id.Row][1]))
 				} else if id.Col == 2 {

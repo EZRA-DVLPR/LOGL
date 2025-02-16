@@ -33,10 +33,10 @@ func StartGUI() {
 	//See diagram in documentation for clearer illustration
 	//
 	//--------toolbar--------
-	//Search--TypingBoxSearch
+	//Search-TypingBoxSearch-
 	//id|GameName|M|M+S|C
-	//~~~~~~~~~~~~~~~~~~~~~~~~
-	//~~~~~~~~~~~~~~~~~~~~~~~~
+	//~~~~~~~~~~~~~~~~~~~~~~~
+	//~~~~~~~~~~~~~~~~~~~~~~~
 
 	content := container.NewBorder(
 		// top is toolbar + searchbar
@@ -44,9 +44,10 @@ func StartGUI() {
 			createMainWindowToolbar(w.Canvas()),
 			createSearchBar(),
 		),
-		// fill remaining space left with dbRender (center). all else nil
+		// dont render anything else in space besides DB
 		nil, nil, nil,
-		createDBRender(),
+		// default to display names ASC
+		createDBRender("name", "ASC"),
 	)
 
 	w.SetContent(content)
