@@ -9,6 +9,8 @@ import (
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
+	"github.com/EZRA-DVLPR/GameList/internal/dbhandler"
+	"github.com/EZRA-DVLPR/GameList/internal/mkdown"
 )
 
 // creates the toolbar with the options that will be displayed to manage the rendered DB
@@ -82,11 +84,21 @@ func createExportButton(toolbarCanvas fyne.Canvas) (exportButton *widget.Button)
 	// create a button without a function
 	exportButton = widget.NewButtonWithIcon("", theme.MailSendIcon(), nil)
 
-	// create the dropdown menu items
+	// create the dropdown menu items for exporting
+	// TODO: Export the current view, not the default one in the database
 	menu := fyne.NewMenu("",
-		fyne.NewMenuItem("Export to CSV", func() { println("Export to CSV") }),
-		fyne.NewMenuItem("Export to SQL", func() { println("Export to SQL") }),
-		fyne.NewMenuItem("Export to Markdown", func() { println("Export to Markdown") }),
+		fyne.NewMenuItem("Export to SQL", func() {
+			println("Export to SQL")
+			dbhandler.Export(1)
+		}),
+		fyne.NewMenuItem("Export to CSV", func() {
+			println("Export to CSV")
+			dbhandler.Export(2)
+		}),
+		fyne.NewMenuItem("Export to Markdown", func() {
+			println("Export to Markdown")
+			mkdown.WriteToMarkdown()
+		}),
 	)
 
 	// define the popup

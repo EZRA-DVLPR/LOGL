@@ -9,6 +9,7 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
+// TODO: bring this code into the dbhandler pkg, and make a new file just for exporting
 func WriteToMarkdown() {
 	db, err := sql.Open("sqlite3", "games.db")
 	if err != nil {
@@ -50,4 +51,6 @@ func WriteToMarkdown() {
 		_, err = mdfile.WriteString(fmt.Sprintf("| %d. | %s | %v | %v | %v | %d |\n", id, name, main, mainPlus, comp, favorite))
 		id += 1
 	}
+
+	fmt.Println("Export to Markdown completed successfully")
 }
