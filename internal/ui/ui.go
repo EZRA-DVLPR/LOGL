@@ -25,18 +25,13 @@ func StartGUI() {
 	// set up prefs for app
 	prefs := a.Preferences()
 
-	// get list of bindings for things that can change
-	// bindingsList = createBindings() // TODO: all the code between here and resizing window goes into this func
+	// create all bindings here
+	sortOrder := binding.NewBool()
 
-	// create binding string for sort order
-	// PERF: change string to boolean
-	sortOrder := binding.NewString()
-
-	// load stored value from preferences storage
-	// default to ASC if not found
-	storedSortOrder := prefs.String("sort_order")
-	if storedSortOrder == "" {
-		storedSortOrder = "ASC"
+	// load stored value from preferences storage. default to ASC if not found
+	storedSortOrder := prefs.Bool("sort_order")
+	if storedSortOrder {
+		storedSortOrder = true
 	}
 	sortOrder.Set(storedSortOrder)
 
@@ -85,7 +80,7 @@ func StartGUI() {
 		// the preferences list so the user can see them when they reopen app
 		// i.e. persistent options saved b/n sessions
 		val, _ := sortOrder.Get()
-		prefs.SetString("sort_order", val)
+		prefs.SetBool("sort_order", val)
 		fmt.Println("Saved last value for sort_order", val)
 	})
 

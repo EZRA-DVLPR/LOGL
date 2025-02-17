@@ -12,7 +12,7 @@ import (
 )
 
 // creates the toolbar with the options that will be displayed to manage the rendered DB
-func createMainWindowToolbar(toolbarCanvas fyne.Canvas, sortOrder binding.String) (toolbar *fyne.Container) {
+func createMainWindowToolbar(toolbarCanvas fyne.Canvas, sortOrder binding.Bool) (toolbar *fyne.Container) {
 	// create the buttons
 	sortButton := createSortButton(sortOrder)
 	exportButton := createExportButton(toolbarCanvas)
@@ -52,22 +52,22 @@ func createMainWindowToolbar(toolbarCanvas fyne.Canvas, sortOrder binding.String
 	return toolbar
 }
 
-func createSortButton(sortOrder binding.String) (sortButton *widget.Button) {
+func createSortButton(sortOrder binding.Bool) (sortButton *widget.Button) {
 	// create the button with empty label
 	sortButton = widget.NewButtonWithIcon("", theme.MenuDropUpIcon(), func() {
 		// whatver curr value of sortOrder is, we want opposite when clicked
 		val, _ := sortOrder.Get()
-		if val == "ASC" {
-			sortOrder.Set("DESC")
+		if val {
+			sortOrder.Set(false)
 		} else {
-			sortOrder.Set("ASC")
+			sortOrder.Set(true)
 		}
 	})
 
 	// listen for changes, and update text+icon
 	sortOrder.AddListener(binding.NewDataListener(func() {
 		val, _ := sortOrder.Get()
-		if val == "ASC" {
+		if val {
 			sortButton.SetText("Sort ASC")
 			sortButton.SetIcon(theme.MenuDropUpIcon())
 		} else {
