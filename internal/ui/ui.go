@@ -56,8 +56,6 @@ func StartGUI() {
 	//~~~~~~~~~~~~~~~~~~~~~~~
 	//~~~~~~~~~~~~~~~~~~~~~~~
 
-	// TODO: remove the need to pass the bindings
-	// Instead make a function that will return all/some bindings to use inside and prevent passing unnecessary opts
 	content := container.NewBorder(
 		// top is toolbar + searchbar
 		container.NewVBox(
@@ -76,9 +74,6 @@ func StartGUI() {
 	// w2.Show()
 
 	w.SetOnClosed(func() {
-		// TODO: Make a function that will save all the values from the bindings to
-		// the preferences list so the user can see them when they reopen app
-		// i.e. persistent options saved b/n sessions
 		val, _ := sortOrder.Get()
 		prefs.SetBool("sort_order", val)
 		fmt.Println("Saved last value for sort_order", val)
