@@ -10,7 +10,6 @@ import (
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 	"github.com/EZRA-DVLPR/GameList/internal/dbhandler"
-	"github.com/EZRA-DVLPR/GameList/internal/mkdown"
 )
 
 // creates the toolbar with the options that will be displayed to manage the rendered DB
@@ -97,7 +96,7 @@ func createExportButton(toolbarCanvas fyne.Canvas) (exportButton *widget.Button)
 		}),
 		fyne.NewMenuItem("Export to Markdown", func() {
 			println("Export to Markdown")
-			mkdown.WriteToMarkdown()
+			dbhandler.Export(3)
 		}),
 	)
 
