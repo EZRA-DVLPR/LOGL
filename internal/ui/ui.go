@@ -2,11 +2,13 @@ package ui
 
 import (
 	"fmt"
+	"time"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/data/binding"
+	// "fyne.io/fyne/v2/widget"
 )
 
 // setup for the entire gui portion of app
@@ -27,26 +29,51 @@ func StartGUI() {
 
 	// create all bindings here
 	sortOrder := binding.NewBool()
+	wWidth := binding.NewFloat()
+	wHeight := binding.NewFloat()
 
-	// load stored value from preferences storage. default to ASC if not found
+	// load sort order from preferences storage. default to ASC
 	storedSortOrder := prefs.Bool("sort_order")
 	if storedSortOrder {
 		storedSortOrder = true
 	}
 	sortOrder.Set(storedSortOrder)
 
-	// default window size accommodates changing of ASC-DESC without changing size of window
-	w.Resize(fyne.NewSize(1140, 400))
+	// default window size accommodates changing of ASC-DESC without changing size of window (1140, 400)
+	// load screen width from pref storage. default to 1140
+	storedWWidth := prefs.Float("w_width")
+	if storedWWidth == 0 {
+		storedWWidth = 1140
+	}
+	wWidth.Set(storedWWidth)
+
+	// load screen height from pref storage. default to 400
+	storedWHeight := prefs.Float("w_height")
+	if storedWHeight == 0 {
+		storedWHeight = 400
+	}
+	wHeight.Set(storedWHeight)
+
+	wW, _ := wWidth.Get()
+	wH, _ := wHeight.Get()
+
+	w.Resize(fyne.NewSize(float32(wW), float32(wH)))
+
 	// the app will close when the main window (w) is closed
 	w.SetMaster()
 
 	// handle diagnostics...
-	// w2.SetContent(widget.NewLabel("Debugging stuff..."))
-	// w2.SetContent(widget.NewButton("Open new window", func() {
-	// 	w3 := a.NewWindow("Third")
-	// 	w3.SetContent(widget.NewLabel("Third"))
-	// 	w3.Show()
-	// }))
+	// hello := widget.NewLabel("Debugging stuff...")
+	// w2.SetContent(
+	// 	container.NewVBox(
+	// 		hello,
+	// 		widget.NewButton("Hi!", func() {
+	// 			hello.SetText("Welcome")
+	// 		}),
+	// 		// w3 := a.NewWindow("Third")
+	// 		// w3.SetContent(widget.NewLabel("Third"))
+	// 		// w3.Show()
+	// 	))
 
 	//See diagram in documentation for clearer illustration
 	//
@@ -74,9 +101,21 @@ func StartGUI() {
 	// w2.Show()
 
 	w.SetOnClosed(func() {
-		val, _ := sortOrder.Get()
-		prefs.SetBool("sort_order", val)
-		fmt.Println("Saved last value for sort_order", val)
+		// save sort order
+		so, _ := sortOrder.Get()
+		prefs.SetBool("sort_order", so)
+
+		// save screen size
+		width := w.Content().Size().Width
+		height := w.Content().Size().Height
+
+		wWidth.Set(float64(width))
+		wW, _ = wWidth.Get()
+		prefs.SetFloat("w_width", wW)
+
+		wHeight.Set(float64(height))
+		wH, _ = wHeight.Get()
+		prefs.SetFloat("w_height", wH)
 	})
 
 	// runloop for the app
