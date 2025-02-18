@@ -14,15 +14,16 @@ import (
 //  1. clicking cell highlights row of cells
 //  2. get column widths for each column
 //  3. set size of column based on size of window
-func createDBRender(sortBy string, opt binding.Bool) (dbRender *widget.Table) {
+func createDBRender(sortType binding.String, opt binding.Bool) (dbRender *widget.Table) {
 	var data [][]string
 
-	// given the bool, will create the table with the new set of data
+	// given the bindings create the table with the new set of data
+	sortingType, _ := sortType.Get()
 	sortingOpt, _ := opt.Get()
 	if sortingOpt {
-		data = dbhandler.SortDB(sortBy, "ASC")
+		data = dbhandler.SortDB(sortingType, "ASC")
 	} else {
-		data = dbhandler.SortDB(sortBy, "DESC")
+		data = dbhandler.SortDB(sortingType, "DESC")
 	}
 
 	// make the table with size of data. default 1
@@ -62,20 +63,26 @@ func createDBRender(sortBy string, opt binding.Bool) (dbRender *widget.Table) {
 
 	// listener to update the contents of the table when value of sorting opt changes
 	opt.AddListener(binding.NewDataListener(func() {
-		dbRender = updateTable(opt, sortBy, data, dbRender)
+		dbRender = updateTable(opt, sortType, data, dbRender)
 		dbRender.Refresh()
 	}))
 
+	// listener to update the contents of the table when value of sorting sortType changes
+	sortType.AddListener(binding.NewDataListener(func() {
+		dbRender = updateTable(opt, sortType, data, dbRender)
+		dbRender.Refresh()
+	}))
 	return
 }
 
 // given bindings, data, and table will update the contents of the given table
-func updateTable(opt binding.Bool, sortBy string, data [][]string, dbRender *widget.Table) *widget.Table {
+func updateTable(opt binding.Bool, sortBy binding.String, data [][]string, dbRender *widget.Table) *widget.Table {
+	sortingType, _ := sortBy.Get()
 	sortingOpt, _ := opt.Get()
 	if sortingOpt {
-		data = dbhandler.SortDB(sortBy, "ASC")
+		data = dbhandler.SortDB(sortingType, "ASC")
 	} else {
-		data = dbhandler.SortDB(sortBy, "DESC")
+		data = dbhandler.SortDB(sortingType, "DESC")
 	}
 	numRows := 1
 	if len(data) != 0 {
@@ -101,6 +108,7 @@ func updateTable(opt binding.Bool, sortBy string, data [][]string, dbRender *wid
 			obj.(*widget.Label).SetText("No Data")
 		}
 	}
+	dbRender = headerSetup(dbRender)
 	return dbRender
 }
 

@@ -8,7 +8,7 @@ import (
 	"fyne.io/fyne/v2/app"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/data/binding"
-	// "fyne.io/fyne/v2/widget"
+	"fyne.io/fyne/v2/widget"
 )
 
 // setup for the entire gui portion of app
@@ -28,9 +28,17 @@ func StartGUI() {
 	prefs := a.Preferences()
 
 	// create all bindings here
+	sortType := binding.NewString()
 	sortOrder := binding.NewBool()
 	wWidth := binding.NewFloat()
 	wHeight := binding.NewFloat()
+
+	// load sort type from pref storage. default to "name"  i.e. Game Name
+	storedSortType := prefs.String("sort_type")
+	if storedSortType == "" {
+		storedSortType = "name"
+	}
+	sortType.Set(storedSortType)
 
 	// load sort order from preferences storage. default to ASC
 	storedSortOrder := prefs.Bool("sort_order")
@@ -89,10 +97,21 @@ func StartGUI() {
 			createMainWindowToolbar(w.Canvas(), sortOrder),
 			createSearchBar(),
 		),
+		// TEST:: Widgets are in place for testing changes to table
+		// remove once implementation for sorting is done in another manner
+		widget.NewButton("main", func() {
+			sortType.Set("main")
+		}),
+		widget.NewButton("main+", func() {
+			sortType.Set("mainPlus")
+		}),
+		widget.NewButton("comp", func() {
+			sortType.Set("comp")
+		}),
 		// dont render anything else in space besides DB
-		nil, nil, nil,
+		// nil, nil, nil,
 		// default to display names ASC
-		createDBRender("name", sortOrder),
+		createDBRender(sortType, sortOrder),
 	)
 
 	// show all windows with their content
@@ -101,6 +120,10 @@ func StartGUI() {
 	// w2.Show()
 
 	w.SetOnClosed(func() {
+		// save sort type
+		st, _ := sortType.Get()
+		prefs.SetString("sort_type", st)
+
 		// save sort order
 		so, _ := sortOrder.Get()
 		prefs.SetBool("sort_order", so)
