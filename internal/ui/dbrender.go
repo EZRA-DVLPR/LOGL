@@ -2,8 +2,11 @@ package ui
 
 import (
 	"fmt"
+	"image/color"
 
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/canvas"
+	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/data/binding"
 	"fyne.io/fyne/v2/widget"
 	"github.com/EZRA-DVLPR/GameList/internal/dbhandler"
@@ -15,7 +18,14 @@ import (
 //  2. get column widths for each column
 //  3. set size of column based on size of window
 func createDBRender(sortType binding.String, opt binding.Bool) (dbRender *widget.Table) {
+	// placeholder for data from SQLite requests
 	var data [][]string
+
+	// create a new binding that will keep track of the currently selected row
+	// INFO: does not persist throughout sessions
+	selectedRow := binding.NewInt()
+	selectedRow.Set(-1)
+	selRow, _ := selectedRow.Get()
 
 	// given the bindings create the table with the new set of data
 	sortingType, _ := sortType.Get()
@@ -36,49 +46,81 @@ func createDBRender(sortType binding.String, opt binding.Bool) (dbRender *widget
 	dbRender = widget.NewTableWithHeaders(
 		// table dims
 		func() (int, int) { return numRows, 4 },
-		// create an empty cell
-		func() fyne.CanvasObject { return widget.NewLabel("") },
+		// create an empty cell with def bg color and empty text
+		func() fyne.CanvasObject {
+			bg := canvas.NewRectangle(color.Black)
+			label := widget.NewLabel("")
+			return container.NewStack(bg, label)
+		},
 		// populate table with content
 		func(id widget.TableCellID, obj fyne.CanvasObject) {
+			// get the label from the stack
+			stack := obj.(*fyne.Container)
+			bg := stack.Objects[0].(*canvas.Rectangle)
+			label := stack.Objects[1].(*widget.Label)
+
 			// if there is data in DB then display it
 			// o/w display "No Data"
 			if numRows > 1 {
 				if id.Col == 0 {
 					// if game name is too long, then truncate and append "...". o/w display entire game name
 					if len(data[id.Row][0]) < 48 {
-						obj.(*widget.Label).SetText(data[id.Row][0])
+						label.SetText(data[id.Row][0])
 					} else {
-						obj.(*widget.Label).SetText(data[id.Row][0][:45] + "...")
+						label.SetText(data[id.Row][0][:45] + "...")
 					}
 				} else {
 					// display the time data
-					obj.(*widget.Label).SetText(fmt.Sprintf("%v", data[id.Row][id.Col]))
+					label.SetText(fmt.Sprintf("%v", data[id.Row][id.Col]))
 				}
 			} else {
-				obj.(*widget.Label).SetText("No Data")
+				label.SetText("No Data")
+			}
+
+			// highlighting when the row is selected
+			if id.Row == selRow {
+				bg.FillColor = color.RGBA{200, 200, 255, 255}
+			} else {
+				bg.FillColor = color.Black
 			}
 		},
 	)
+
+	// highlight the row if its not a divider -> dividers have negative position values
+	dbRender.OnSelected = func(id widget.TableCellID) {
+		if id.Row >= 0 && id.Col >= 0 {
+			selectedRow.Set(id.Row)
+		}
+	}
+
+	// set up the header
 	dbRender = headerSetup(dbRender)
 
-	// listener to update the contents of the table when value of sorting opt changes
+	// listener to update cell row selection
+	selectedRow.AddListener(binding.NewDataListener(func() {
+		dbRender = updateTable(selectedRow, opt, sortType, data, dbRender)
+		dbRender.Refresh()
+	}))
+
+	// listener to update the contents of the table when value of sorting op changes
 	opt.AddListener(binding.NewDataListener(func() {
-		dbRender = updateTable(opt, sortType, data, dbRender)
+		dbRender = updateTable(selectedRow, opt, sortType, data, dbRender)
 		dbRender.Refresh()
 	}))
 
 	// listener to update the contents of the table when value of sorting sortType changes
 	sortType.AddListener(binding.NewDataListener(func() {
-		dbRender = updateTable(opt, sortType, data, dbRender)
+		dbRender = updateTable(selectedRow, opt, sortType, data, dbRender)
 		dbRender.Refresh()
 	}))
 	return
 }
 
 // given bindings, data, and table will update the contents of the given table
-func updateTable(opt binding.Bool, sortBy binding.String, data [][]string, dbRender *widget.Table) *widget.Table {
+func updateTable(selectedRow binding.Int, opt binding.Bool, sortBy binding.String, data [][]string, dbRender *widget.Table) *widget.Table {
 	sortingType, _ := sortBy.Get()
 	sortingOpt, _ := opt.Get()
+	selRow, _ := selectedRow.Get()
 	if sortingOpt {
 		data = dbhandler.SortDB(sortingType, "ASC")
 	} else {
@@ -91,21 +133,34 @@ func updateTable(opt binding.Bool, sortBy binding.String, data [][]string, dbRen
 
 	dbRender.Length = func() (int, int) { return numRows, 4 }
 	dbRender.UpdateCell = func(id widget.TableCellID, obj fyne.CanvasObject) {
+		// get the label from the stack
+		stack := obj.(*fyne.Container)
+		bg := stack.Objects[0].(*canvas.Rectangle)
+		label := stack.Objects[1].(*widget.Label)
+
 		// if there is data in DB then display it
 		// o/w display "No Data"
 		if numRows > 1 {
 			if id.Col == 0 {
 				// if game name is too long, then truncate and append "...". o/w display entire game name
 				if len(data[id.Row][0]) < 48 {
-					obj.(*widget.Label).SetText(data[id.Row][0])
+					label.SetText(data[id.Row][0])
 				} else {
-					obj.(*widget.Label).SetText(data[id.Row][0][:45] + "...")
+					label.SetText(data[id.Row][0][:45] + "...")
 				}
 			} else {
-				obj.(*widget.Label).SetText(fmt.Sprintf("%v", data[id.Row][id.Col]))
+				// display the time data
+				label.SetText(fmt.Sprintf("%v", data[id.Row][id.Col]))
 			}
 		} else {
-			obj.(*widget.Label).SetText("No Data")
+			label.SetText("No Data")
+		}
+
+		// highlighting
+		if id.Row == selRow {
+			bg.FillColor = color.RGBA{200, 200, 255, 255}
+		} else {
+			bg.FillColor = color.Black
 		}
 	}
 	dbRender = headerSetup(dbRender)
