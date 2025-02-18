@@ -1,6 +1,7 @@
 package ui
 
 import (
+	_ "embed"
 	"log"
 
 	"fyne.io/fyne/v2"
@@ -11,6 +12,9 @@ import (
 	"fyne.io/fyne/v2/widget"
 	"github.com/EZRA-DVLPR/GameList/internal/dbhandler"
 )
+
+//go:embed assets/heart.svg
+var heartSVG []byte
 
 // creates the toolbar with the options that will be displayed to manage the rendered DB
 func createMainWindowToolbar(toolbarCanvas fyne.Canvas, sortOrder binding.Bool) (toolbar *fyne.Container) {
@@ -23,7 +27,6 @@ func createMainWindowToolbar(toolbarCanvas fyne.Canvas, sortOrder binding.Bool) 
 	helpButton := createHelpButton(toolbarCanvas)
 	randButton := createRandomButton()
 	faveButton := createFaveButton()
-	unFaveButton := createUnFaveButton()
 	updateButton := createUpdateButton()
 
 	// add them to the toolbar in horizontal row
@@ -40,8 +43,6 @@ func createMainWindowToolbar(toolbarCanvas fyne.Canvas, sortOrder binding.Bool) 
 		randButton,
 		layout.NewSpacer(),
 		faveButton,
-		layout.NewSpacer(),
-		unFaveButton,
 		layout.NewSpacer(),
 		exportButton,
 		layout.NewSpacer(),
@@ -189,22 +190,14 @@ func createRandomButton() (removeButton *widget.Button) {
 	return removeButton
 }
 
-// TODO: Find heart svg icon to use instead of this checkmark
 // PERF: change to toggle and swap between fave/unfave of the selected row
 func createFaveButton() (faveButton *widget.Button) {
-	faveButton = widget.NewButtonWithIcon("Favorite", theme.ConfirmIcon(), func() {
-		log.Println("Favorite the selected row")
+	heartIcon := fyne.NewStaticResource("heart.svg", heartSVG)
+	faveButton = widget.NewButtonWithIcon("(Un)Favorite", theme.NewThemedResource(heartIcon), func() {
+		log.Println("(Un)Favorite the selected row")
 	})
 
 	return faveButton
-}
-
-func createUnFaveButton() (unFaveButton *widget.Button) {
-	unFaveButton = widget.NewButtonWithIcon("Unfavorite", theme.CancelIcon(), func() {
-		log.Println("unfavorite the selected row")
-	})
-
-	return unFaveButton
 }
 
 func createUpdateButton() (updateButton *widget.Button) {
