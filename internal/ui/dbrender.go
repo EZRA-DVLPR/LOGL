@@ -26,7 +26,7 @@ func createDBRender(sortType binding.String, opt binding.Bool) (dbRender *widget
 		data = dbhandler.SortDB(sortingType, "DESC")
 	}
 
-	// make the table with size of data. default 1
+	// make the table with size of data. default 1 -- Display "No data"
 	numRows := 1
 	if len(data) != 0 {
 		numRows = len(data)
@@ -109,6 +109,8 @@ func updateTable(opt binding.Bool, sortBy binding.String, data [][]string, dbRen
 		}
 	}
 	dbRender = headerSetup(dbRender)
+	dbRender.ScrollToLeading()
+	dbRender.ScrollToTop()
 	return dbRender
 }
 
