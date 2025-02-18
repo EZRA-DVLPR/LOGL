@@ -4,33 +4,35 @@ import (
 	"fmt"
 
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/data/binding"
 	"fyne.io/fyne/v2/widget"
 	"github.com/EZRA-DVLPR/GameList/internal/dbhandler"
 )
 
-// makes the table and performs changes on it to send to main window
-func createDBRender(sortBy string, opt string) (dbRender *widget.Table) {
-	dbTable := makeTable(sortBy, opt)
-	dbTable = headerSetup(dbTable)
-
-	return dbTable
-}
-
+// makes the table and reflects changes based on bindings
 // PERF: make my own widget (EZRATableWidget) that has the following features:
 //  1. clicking cell highlights row of cells
 //  2. get column widths for each column
 //  3. set size of column based on size of window
-func makeTable(sortBy string, opt string) (dbTable *widget.Table) {
-	// obtain data to insert into table
-	dbData := dbhandler.SortDB(sortBy, opt)
+func createDBRender(sortBy string, opt binding.Bool) (dbRender *widget.Table) {
+	var data [][]string
 
+	// given the bool, will create the table with the new set of data
+	sortingOpt, _ := opt.Get()
+	if sortingOpt {
+		data = dbhandler.SortDB(sortBy, "ASC")
+	} else {
+		data = dbhandler.SortDB(sortBy, "DESC")
+	}
+
+	// make the table with size of data. default 1
 	numRows := 1
-	if len(dbData) != 0 {
-		numRows = len(dbData)
+	if len(data) != 0 {
+		numRows = len(data)
 	}
 
 	// populate table with info
-	dbTable = widget.NewTableWithHeaders(
+	dbRender = widget.NewTableWithHeaders(
 		// table dims
 		func() (int, int) { return numRows, 4 },
 		// create an empty cell
@@ -42,29 +44,68 @@ func makeTable(sortBy string, opt string) (dbTable *widget.Table) {
 			if numRows > 1 {
 				if id.Col == 0 {
 					// if game name is too long, then truncate and append "...". o/w display entire game name
-					if len(dbData[id.Row][0]) < 48 {
-						obj.(*widget.Label).SetText(dbData[id.Row][0])
+					if len(data[id.Row][0]) < 48 {
+						obj.(*widget.Label).SetText(data[id.Row][0])
 					} else {
-						obj.(*widget.Label).SetText(dbData[id.Row][0][:45] + "...")
+						obj.(*widget.Label).SetText(data[id.Row][0][:45] + "...")
 					}
-				} else if id.Col == 1 {
-					obj.(*widget.Label).SetText(fmt.Sprintf("%v", dbData[id.Row][1]))
-				} else if id.Col == 2 {
-					obj.(*widget.Label).SetText(fmt.Sprintf("%v", dbData[id.Row][2]))
 				} else {
-					obj.(*widget.Label).SetText(fmt.Sprintf("%v", dbData[id.Row][3]))
+					// display the time data
+					obj.(*widget.Label).SetText(fmt.Sprintf("%v", data[id.Row][id.Col]))
 				}
 			} else {
 				obj.(*widget.Label).SetText("No Data")
 			}
 		},
 	)
+	dbRender = headerSetup(dbRender)
+
+	// listener to update the contents of the table when value of sorting opt changes
+	opt.AddListener(binding.NewDataListener(func() {
+		dbRender = updateTable(opt, sortBy, data, dbRender)
+		dbRender.Refresh()
+	}))
 
 	return
 }
 
+// given bindings, data, and table will update the contents of the given table
+func updateTable(opt binding.Bool, sortBy string, data [][]string, dbRender *widget.Table) *widget.Table {
+	sortingOpt, _ := opt.Get()
+	if sortingOpt {
+		data = dbhandler.SortDB(sortBy, "ASC")
+	} else {
+		data = dbhandler.SortDB(sortBy, "DESC")
+	}
+	numRows := 1
+	if len(data) != 0 {
+		numRows = len(data)
+	}
+
+	dbRender.Length = func() (int, int) { return numRows, 4 }
+	dbRender.UpdateCell = func(id widget.TableCellID, obj fyne.CanvasObject) {
+		// if there is data in DB then display it
+		// o/w display "No Data"
+		if numRows > 1 {
+			if id.Col == 0 {
+				// if game name is too long, then truncate and append "...". o/w display entire game name
+				if len(data[id.Row][0]) < 48 {
+					obj.(*widget.Label).SetText(data[id.Row][0])
+				} else {
+					obj.(*widget.Label).SetText(data[id.Row][0][:45] + "...")
+				}
+			} else {
+				obj.(*widget.Label).SetText(fmt.Sprintf("%v", data[id.Row][id.Col]))
+			}
+		} else {
+			obj.(*widget.Label).SetText("No Data")
+		}
+	}
+	return dbRender
+}
+
 func headerSetup(dbTable *widget.Table) *widget.Table {
-	// name of each header
+	// name of each column header
 	headers := []string{"Game Name", "Main Story", "Main + Sides", "Completionist"}
 
 	// setup for creating the headers

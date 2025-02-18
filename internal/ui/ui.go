@@ -92,7 +92,7 @@ func StartGUI() {
 		// dont render anything else in space besides DB
 		nil, nil, nil,
 		// default to display names ASC
-		createDBRender("name", "ASC"),
+		createDBRender("name", sortOrder),
 	)
 
 	// show all windows with their content
