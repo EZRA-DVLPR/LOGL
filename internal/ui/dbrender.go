@@ -14,9 +14,8 @@ import (
 
 // makes the table and reflects changes based on bindings
 // PERF: make my own widget (EZRATableWidget) that has the following features:
-//  1. clicking cell highlights row of cells
-//  2. get column widths for each column
-//  3. set size of column based on size of window
+//  1. get column widths for each column
+//  2. set size of column based on size of window
 func createDBRender(sortType binding.String, opt binding.Bool) (dbRender *widget.Table) {
 	// placeholder for data from SQLite requests
 	var data [][]string

@@ -47,6 +47,7 @@ func StartGUI() {
 	}
 	sortOrder.Set(storedSortOrder)
 
+	// TODO: Handle default sizes of window when i finalize the length/size of the toolbar with icons
 	// default window size accommodates changing of ASC-DESC without changing size of window (1140, 400)
 	// load screen width from pref storage. default to 1140
 	storedWWidth := prefs.Float("w_width")

@@ -22,8 +22,8 @@ func createMainWindowToolbar(toolbarCanvas fyne.Canvas, sortOrder binding.Bool) 
 	removeButton := createRemoveButton()
 	helpButton := createHelpButton(toolbarCanvas)
 	randButton := createRandomButton()
-	textSizeUpButton := createTextSizeUpButton()
-	textSizeDownButton := createTextSizeDownButton()
+	faveButton := createFaveButton()
+	unFaveButton := createUnFaveButton()
 	updateButton := createUpdateButton()
 
 	// add them to the toolbar in horizontal row
@@ -39,9 +39,9 @@ func createMainWindowToolbar(toolbarCanvas fyne.Canvas, sortOrder binding.Bool) 
 		layout.NewSpacer(),
 		randButton,
 		layout.NewSpacer(),
-		textSizeUpButton,
+		faveButton,
 		layout.NewSpacer(),
-		textSizeDownButton,
+		unFaveButton,
 		layout.NewSpacer(),
 		exportButton,
 		layout.NewSpacer(),
@@ -189,20 +189,22 @@ func createRandomButton() (removeButton *widget.Button) {
 	return removeButton
 }
 
-func createTextSizeUpButton() (textSizeUpButton *widget.Button) {
-	textSizeUpButton = widget.NewButtonWithIcon("Increase Text Size", theme.Icon("viewZoomIn"), func() {
-		log.Println("adjust text size of everything in app")
+// TODO: Find heart svg icon to use instead of this checkmark
+// PERF: change to toggle and swap between fave/unfave of the selected row
+func createFaveButton() (faveButton *widget.Button) {
+	faveButton = widget.NewButtonWithIcon("Favorite", theme.ConfirmIcon(), func() {
+		log.Println("Favorite the selected row")
 	})
 
-	return textSizeUpButton
+	return faveButton
 }
 
-func createTextSizeDownButton() (textSizeDownButton *widget.Button) {
-	textSizeDownButton = widget.NewButtonWithIcon("Decrease Text Size", theme.Icon("viewZoomOut"), func() {
-		log.Println("adjust text size of everything in app")
+func createUnFaveButton() (unFaveButton *widget.Button) {
+	unFaveButton = widget.NewButtonWithIcon("Unfavorite", theme.CancelIcon(), func() {
+		log.Println("unfavorite the selected row")
 	})
 
-	return textSizeDownButton
+	return unFaveButton
 }
 
 func createUpdateButton() (updateButton *widget.Button) {
