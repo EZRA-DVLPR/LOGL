@@ -13,6 +13,8 @@ import (
 	"github.com/EZRA-DVLPR/GameList/internal/dbhandler"
 )
 
+// used to grab the custom SVG for the heart
+//
 //go:embed assets/heart.svg
 var heartSVG []byte
 

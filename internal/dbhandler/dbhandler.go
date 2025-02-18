@@ -208,42 +208,21 @@ func AddFavorite(game scraper.Game) {
 	}
 	defer db.Close()
 
-	// update given game.Favorite = 1 (true)
-	res, err := db.Exec("UPDATE games SET favorite = 1 WHERE name = ?", game.Name)
+	// get data for game
+	var favorite bool
+	err = db.QueryRow("SELECT favorite FROM games WHERE name = ?", game.Name).Scan(&favorite)
+	if err != nil {
+		log.Fatal("Error obtaining favorite value from game", err)
+	}
+
+	// update game favorite value to the opposite value
+	res, err := db.Exec("UPDATE games SET favorite = ? WHERE name = ?", !favorite, game.Name)
 	if err != nil {
 		log.Fatal("Error updating game to be favorite", err)
 	}
 
 	if rowsAffected(res, game.Name) {
 		fmt.Println("Favorited:", game.Name)
-	}
-}
-
-// if the given game is not empty, then remove favorite
-func RemoveFavorite(game scraper.Game) {
-	if (game.Name == "") &&
-		(game.Url == "") &&
-		(game.Main == -1) &&
-		(game.MainPlus == -1) &&
-		(game.Comp == -1) {
-		fmt.Println("No game data received for associate game.")
-		return
-	}
-
-	db, err := sql.Open("sqlite3", "games.db")
-	if err != nil {
-		log.Fatal("Failed to access db")
-	}
-	defer db.Close()
-
-	// update given game.Favorite = 0 (false)
-	res, err := db.Exec("UPDATE games SET favorite = 0 WHERE name = ?", game.Name)
-	if err != nil {
-		log.Fatal("Error updating game to be favorite")
-	}
-
-	if rowsAffected(res, game.Name) {
-		fmt.Println("Un-Favorited:", game.Name)
 	}
 }
 
@@ -268,15 +247,12 @@ func SortDB(sort string, sortOpt string) (dbOutput [][]string) {
 		log.Fatal("Error sorting games from games table: ", err)
 	}
 
-	// fmt.Println("Games in DB sorted by ", sort, sortOpt)
-
 	for rows.Next() {
 		var name string
 		var main, mainPlus, comp float64
 		if err := rows.Scan(&name, &main, &mainPlus, &comp); err != nil {
 			log.Fatal("Error scanning row: ", err)
 		}
-		// fmt.Printf("Name: %s\nMain:\t%v\nMain+:\t%v\nComp:\t%v\n", name, main, mainPlus, comp)
 		dbOutput = append(dbOutput, []string{
 			name,
 			strconv.FormatFloat(main, 'f', -1, 64),
@@ -284,7 +260,6 @@ func SortDB(sort string, sortOpt string) (dbOutput [][]string) {
 			strconv.FormatFloat(comp, 'f', -1, 64),
 		})
 	}
-	// fmt.Println()
 	return dbOutput
 }
 
