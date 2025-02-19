@@ -226,7 +226,6 @@ func AddFavorite(game scraper.Game) {
 	}
 }
 
-// defaults to sort by name
 // o/w sorts based on these criteria:
 //
 //	sort == name
@@ -245,6 +244,40 @@ func SortDB(sort string, sortOpt string) (dbOutput [][]string) {
 	rows, err := db.Query(fmt.Sprintf("SELECT name, main, mainPlus, comp FROM games ORDER BY favorite DESC, %s %s;", sort, sortOpt))
 	if err != nil {
 		log.Fatal("Error sorting games from games table: ", err)
+	}
+
+	for rows.Next() {
+		var name string
+		var main, mainPlus, comp float64
+		if err := rows.Scan(&name, &main, &mainPlus, &comp); err != nil {
+			log.Fatal("Error scanning row: ", err)
+		}
+		dbOutput = append(dbOutput, []string{
+			name,
+			strconv.FormatFloat(main, 'f', -1, 64),
+			strconv.FormatFloat(mainPlus, 'f', -1, 64),
+			strconv.FormatFloat(comp, 'f', -1, 64),
+		})
+	}
+	return dbOutput
+}
+
+// takes in Search string and searches DB for matches
+func SearchSortDB(sort string, sortOpt string, partialName string) (dbOutput [][]string) {
+	db, err := sql.Open("sqlite3", "games.db")
+	if err != nil {
+		log.Fatal("Error accessing local dB: ", err)
+	}
+	defer db.Close()
+
+	// find partial matches given string
+	rows, err := db.Query(fmt.Sprintf(
+		"SELECT name, main, mainPlus, comp FROM games WHERE name LIKE ? ORDER BY favorite DESC, %s %s;",
+		sort,
+		sortOpt,
+	), "%"+partialName+"%")
+	if err != nil {
+		log.Fatal("Error retrieving partial matches given sorting opts", err)
 	}
 
 	for rows.Next() {

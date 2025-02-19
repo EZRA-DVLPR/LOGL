@@ -99,52 +99,62 @@ func createDBRender(sortType binding.String, opt binding.Bool, userText binding.
 
 	// listener to update cell row selection
 	selectedRow.AddListener(binding.NewDataListener(func() {
-		dbRender = updateTable(selectedRow, opt, sortType, data, dbRender)
+		dbRender = updateTable(selectedRow, opt, sortType, userText, data, dbRender)
 		dbRender.Refresh()
 	}))
 
 	// listener to update the contents of the table when value of sorting op changes
 	opt.AddListener(binding.NewDataListener(func() {
-		dbRender = updateTable(selectedRow, opt, sortType, data, dbRender)
+		dbRender = updateTable(selectedRow, opt, sortType, userText, data, dbRender)
 		dbRender.Refresh()
 	}))
 
 	// listener to update the contents of the table when value of sorting sortType changes
 	sortType.AddListener(binding.NewDataListener(func() {
-		dbRender = updateTable(selectedRow, opt, sortType, data, dbRender)
+		dbRender = updateTable(selectedRow, opt, sortType, userText, data, dbRender)
 		dbRender.Refresh()
 	}))
 
 	// listener to update the contents of the table when value of sorting sortType changes
 	userText.AddListener(binding.NewDataListener(func() {
-		st, _ := userText.Get()
-		st = strings.TrimSpace(st)
-
-		if st == "" {
-			// return entire DB
-		} else {
-			// return DB based on game name search with given text
-		}
-		log.Println("st", st)
+		dbRender = updateTable(selectedRow, opt, sortType, userText, data, dbRender)
+		dbRender.Refresh()
 	}))
 	return
 }
 
 // given bindings, data, and table will update the contents of the given table
-func updateTable(selectedRow binding.Int, opt binding.Bool, sortBy binding.String, data [][]string, dbRender *widget.Table) *widget.Table {
+func updateTable(
+	selectedRow binding.Int,
+	opt binding.Bool,
+	sortBy binding.String,
+	searchText binding.String,
+	data [][]string,
+	dbRender *widget.Table,
+) *widget.Table {
 	sortingType, _ := sortBy.Get()
 	sortingOpt, _ := opt.Get()
 	selRow, _ := selectedRow.Get()
-	if sortingOpt {
-		data = dbhandler.SortDB(sortingType, "ASC")
+	userSearchText, _ := searchText.Get()
+
+	// check the user search text and if empty, then search entire DB. O/w search db w/ opts
+	if strings.TrimSpace(userSearchText) == "" {
+		if sortingOpt {
+			data = dbhandler.SortDB(sortingType, "ASC")
+		} else {
+			data = dbhandler.SortDB(sortingType, "DESC")
+		}
 	} else {
-		data = dbhandler.SortDB(sortingType, "DESC")
+		data = dbhandler.SearchSortDB(sortingType, "DESC", userSearchText)
 	}
+
+	// check rows for finding dims
 	numRows := 1
 	if len(data) != 0 {
 		numRows = len(data)
 	}
 
+	// set dims
 	dbRender.Length = func() (int, int) { return numRows, 4 }
 	dbRender.UpdateCell = func(id widget.TableCellID, obj fyne.CanvasObject) {
 		// get the label from the stack
@@ -177,6 +187,8 @@ func updateTable(selectedRow binding.Int, opt binding.Bool, sortBy binding.Strin
 			bg.FillColor = color.Black
 		}
 	}
+
+	// setup headers and reset positioning for scrolls
 	dbRender = headerSetup(dbRender)
 	dbRender.ScrollToLeading()
 	dbRender.ScrollToTop()
