@@ -192,7 +192,6 @@ func createRandomButton() (removeButton *widget.Button) {
 	return removeButton
 }
 
-// PERF: change to toggle and swap between fave/unfave of the selected row
 func createFaveButton() (faveButton *widget.Button) {
 	heartIcon := fyne.NewStaticResource("heart.svg", heartSVG)
 	faveButton = widget.NewButtonWithIcon("(Un)Favorite", theme.NewThemedResource(heartIcon), func() {
