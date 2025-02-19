@@ -3,6 +3,7 @@ package ui
 import (
 	"fmt"
 	"image/color"
+	"log"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
@@ -16,7 +17,7 @@ import (
 // PERF: make my own widget (EZRATableWidget) that has the following features:
 //  1. get column widths for each column
 //  2. set size of column based on size of window
-func createDBRender(sortType binding.String, opt binding.Bool) (dbRender *widget.Table) {
+func createDBRender(sortType binding.String, opt binding.Bool, userText binding.String) (dbRender *widget.Table) {
 	// placeholder for data from SQLite requests
 	var data [][]string
 
@@ -111,6 +112,12 @@ func createDBRender(sortType binding.String, opt binding.Bool) (dbRender *widget
 	sortType.AddListener(binding.NewDataListener(func() {
 		dbRender = updateTable(selectedRow, opt, sortType, data, dbRender)
 		dbRender.Refresh()
+	}))
+
+	// listener to update the contents of the table when value of sorting sortType changes
+	userText.AddListener(binding.NewDataListener(func() {
+		st, _ := userText.Get()
+		log.Println("st", st)
 	}))
 	return
 }

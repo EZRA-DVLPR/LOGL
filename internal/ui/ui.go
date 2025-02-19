@@ -32,6 +32,7 @@ func StartGUI() {
 	sortOrder := binding.NewBool()
 	wWidth := binding.NewFloat()
 	wHeight := binding.NewFloat()
+	userText := binding.NewString()
 
 	// load sort type from pref storage. default to "name"  i.e. Game Name
 	storedSortType := prefs.String("sort_type")
@@ -96,7 +97,7 @@ func StartGUI() {
 		// top is toolbar + searchbar
 		container.NewVBox(
 			createMainWindowToolbar(w.Canvas(), sortOrder),
-			createSearchBar(),
+			createSearchBar(userText),
 		),
 		// TEST:: Widgets are in place for testing changes to table
 		// remove once implementation for sorting is done in another manner
@@ -113,7 +114,7 @@ func StartGUI() {
 		// dont render anything else in space besides DB
 		// nil, nil, nil,
 		// default to display names ASC
-		createDBRender(sortType, sortOrder),
+		createDBRender(sortType, sortOrder, userText),
 	)
 
 	// show all windows with their content
