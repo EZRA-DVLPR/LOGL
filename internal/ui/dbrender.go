@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"image/color"
 	"log"
+	"strings"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
@@ -117,6 +118,13 @@ func createDBRender(sortType binding.String, opt binding.Bool, userText binding.
 	// listener to update the contents of the table when value of sorting sortType changes
 	userText.AddListener(binding.NewDataListener(func() {
 		st, _ := userText.Get()
+		st = strings.TrimSpace(st)
+
+		if st == "" {
+			// return entire DB
+		} else {
+			// return DB based on game name search with given text
+		}
 		log.Println("st", st)
 	}))
 	return

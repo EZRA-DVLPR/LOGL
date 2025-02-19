@@ -263,20 +263,6 @@ func SortDB(sort string, sortOpt string) (dbOutput [][]string) {
 	return dbOutput
 }
 
-// selector for exporting
-func Export(choice int) {
-	switch choice {
-	case 1:
-		exportSQL()
-	case 2:
-		exportCSV()
-	case 3:
-		exportMarkdown()
-	default:
-		log.Fatal("No such export exists!")
-	}
-}
-
 func convertRowToInterface(row []string) []interface{} {
 	result := make([]interface{}, len(row))
 	for i, v := range row {

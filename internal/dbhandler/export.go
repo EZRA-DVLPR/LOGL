@@ -10,6 +10,20 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
+// selector for exporting
+func Export(choice int) {
+	switch choice {
+	case 1:
+		exportSQL()
+	case 2:
+		exportCSV()
+	case 3:
+		exportMarkdown()
+	default:
+		log.Fatal("No such export exists!")
+	}
+}
+
 func exportSQL() {
 	fmt.Println("Exporting to SQL file")
 
