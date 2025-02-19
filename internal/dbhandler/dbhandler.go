@@ -20,7 +20,7 @@ import (
 //		main		real
 //		mainPlus	real
 //		comp		real
-//	}
+//		}
 
 // creates the DB with table
 func CreateDB() {
@@ -43,10 +43,10 @@ func CreateDB() {
 	);
 	`)
 	if err != nil {
-		log.Fatal("Error creating table: ", err)
+		log.Fatal("Error creating games table:", err)
 	}
 
-	fmt.Println("Created the local DB successfully")
+	fmt.Println("Created the local DBs successfully")
 }
 
 func ImportCSV() {
@@ -191,8 +191,8 @@ func AddToDB(game scraper.Game) {
 	fmt.Println("Finished adding the game data to the local DB")
 }
 
-// if the given game is not empty, then add favorite
-func AddFavorite(game scraper.Game) {
+// if the given game is not empty, then toggle favorite
+func ToggleFavorite(game scraper.Game) {
 	if (game.Name == "") &&
 		(game.Url == "") &&
 		(game.Main == -1) &&
@@ -263,6 +263,7 @@ func SortDB(sort string, sortOpt string) (dbOutput [][]string) {
 }
 
 // takes in Search string and searches DB for matches
+// PERF: Might want to combine with the above function and just have no search query if the given partialName is empty
 func SearchSortDB(sort string, sortOpt string, partialName string) (dbOutput [][]string) {
 	db, err := sql.Open("sqlite3", "games.db")
 	if err != nil {
@@ -272,25 +273,25 @@ func SearchSortDB(sort string, sortOpt string, partialName string) (dbOutput [][
 
 	// find partial matches given string
 	rows, err := db.Query(fmt.Sprintf(
-		"SELECT name, main, mainPlus, comp FROM games WHERE name LIKE ? ORDER BY favorite DESC, %s %s;",
+		"SELECT name, main, mainPlus, comp FROM games WHERE name LIKE ? ORDER BY favorite DESC, %s %s",
 		sort,
 		sortOpt,
 	), "%"+partialName+"%")
 	if err != nil {
-		log.Fatal("Error retrieving partial matches given sorting opts", err)
+		log.Fatal("Error retrieving partial matches given sorting opts:", err)
 	}
+	defer rows.Close()
 
 	for rows.Next() {
-		var name string
-		var main, mainPlus, comp float64
+		var name, main, mainPlus, comp string
 		if err := rows.Scan(&name, &main, &mainPlus, &comp); err != nil {
 			log.Fatal("Error scanning row: ", err)
 		}
 		dbOutput = append(dbOutput, []string{
 			name,
-			strconv.FormatFloat(main, 'f', -1, 64),
-			strconv.FormatFloat(mainPlus, 'f', -1, 64),
-			strconv.FormatFloat(comp, 'f', -1, 64),
+			main,
+			mainPlus,
+			comp,
 		})
 	}
 	return dbOutput

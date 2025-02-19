@@ -3,7 +3,7 @@ package ui
 import (
 	"fmt"
 	"image/color"
-	"log"
+	// "log"
 	"strings"
 
 	"fyne.io/fyne/v2"
@@ -145,7 +145,11 @@ func updateTable(
 			data = dbhandler.SortDB(sortingType, "DESC")
 		}
 	} else {
-		data = dbhandler.SearchSortDB(sortingType, "DESC", userSearchText)
+		if sortingOpt {
+			data = dbhandler.SearchSortDB(sortingType, "ASC", userSearchText)
+		} else {
+			data = dbhandler.SearchSortDB(sortingType, "DESC", userSearchText)
+		}
 	}
 
 	// check rows for finding dims
@@ -164,7 +168,7 @@ func updateTable(
 
 		// if there is data in DB then display it
 		// o/w display "No Data"
-		if numRows > 1 {
+		if len(data) != 0 {
 			if id.Col == 0 {
 				// if game name is too long, then truncate and append "...". o/w display entire game name
 				if len(data[id.Row][0]) < 48 {
