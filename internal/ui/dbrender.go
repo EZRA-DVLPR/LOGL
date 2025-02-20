@@ -31,10 +31,15 @@ func createDBRender(sortType binding.String, opt binding.Bool, userText binding.
 	// given the bindings create the table with the new set of data
 	sortingType, _ := sortType.Get()
 	sortingOpt, _ := opt.Get()
-	if sortingOpt {
-		data = dbhandler.SortDB(sortingType, "ASC")
-	} else {
-		data = dbhandler.SortDB(sortingType, "DESC")
+
+	// if db exists with table games, then get data stored. O/w display nothing
+	isDB := dbhandler.CheckDBExists()
+	if isDB {
+		if sortingOpt {
+			data = dbhandler.SortDB(sortingType, "ASC")
+		} else {
+			data = dbhandler.SortDB(sortingType, "DESC")
+		}
 	}
 
 	// make the table with size of data. default 1 -- Display "No data"
@@ -62,7 +67,7 @@ func createDBRender(sortType binding.String, opt binding.Bool, userText binding.
 
 			// if there is data in DB then display it
 			// o/w display "No Data"
-			if numRows > 1 {
+			if len(data) > 1 {
 				if id.Col == 0 {
 					// if game name is too long, then truncate and append "...". o/w display entire game name
 					if len(data[id.Row][0]) < 48 {
@@ -137,18 +142,22 @@ func updateTable(
 	selRow, _ := selectedRow.Get()
 	userSearchText, _ := searchText.Get()
 
-	// check the user search text and if empty, then search entire DB. O/w search db w/ opts
-	if strings.TrimSpace(userSearchText) == "" {
-		if sortingOpt {
-			data = dbhandler.SortDB(sortingType, "ASC")
+	// if the DB exists then get the data from it
+	isDB := dbhandler.CheckDBExists()
+	if isDB {
+		// check the user search text and if empty, then search entire DB. O/w search db w/ opts
+		if strings.TrimSpace(userSearchText) == "" {
+			if sortingOpt {
+				data = dbhandler.SortDB(sortingType, "ASC")
+			} else {
+				data = dbhandler.SortDB(sortingType, "DESC")
+			}
 		} else {
-			data = dbhandler.SortDB(sortingType, "DESC")
-		}
-	} else {
-		if sortingOpt {
-			data = dbhandler.SearchSortDB(sortingType, "ASC", userSearchText)
-		} else {
-			data = dbhandler.SearchSortDB(sortingType, "DESC", userSearchText)
+			if sortingOpt {
+				data = dbhandler.SearchSortDB(sortingType, "ASC", userSearchText)
+			} else {
+				data = dbhandler.SearchSortDB(sortingType, "DESC", userSearchText)
+			}
 		}
 	}
 

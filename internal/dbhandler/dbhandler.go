@@ -50,6 +50,23 @@ func CreateDB() {
 	fmt.Println("Created the local DBs successfully")
 }
 
+func CheckDBExists() bool {
+	db, err := sql.Open("sqlite3", "games.db")
+	if err != nil {
+		log.Fatal("Error opening db:", err)
+	}
+	defer db.Close()
+
+	var name string
+	err = db.QueryRow("SELECT name FROM sqlite_master WHERE type='table' AND name = ?", "games").Scan(&name)
+	if err == sql.ErrNoRows {
+		return false
+	} else if err != nil {
+		log.Fatal("Error checking table with no data:", err)
+	}
+	return true
+}
+
 func ImportCSV() {
 	db, err := sql.Open("sqlite3", "games.db")
 	if err != nil {

@@ -24,7 +24,7 @@ func createMainWindowToolbar(toolbarCanvas fyne.Canvas, sortOrder binding.Bool) 
 	sortButton := createSortButton(sortOrder)
 	exportButton := createExportButton(toolbarCanvas)
 	settingsButton := createSettingsButton()
-	addButton := createAddButton(toolbarCanvas)
+	addButton := createAddButton(sortOrder, toolbarCanvas)
 	removeButton := createRemoveButton()
 	helpButton := createHelpButton(toolbarCanvas)
 	randButton := createRandomButton()
@@ -131,20 +131,35 @@ func createSettingsButton() (settingsButton *widget.Button) {
 	return settingsButton
 }
 
-func createAddButton(toolbarCanvas fyne.Canvas) (addButton *widget.Button) {
+func createAddButton(sortOrder binding.Bool, toolbarCanvas fyne.Canvas) (addButton *widget.Button) {
 	addButton = widget.NewButtonWithIcon("Add Game Data", theme.ContentAddIcon(), func() {
 		log.Println("dropdown menu of diff ways to add data")
 	})
 
 	// TODO: Open window for Manual Entry and Single Game Search
 	menu := fyne.NewMenu("",
-		fyne.NewMenuItem("Single Game Search", func() { println("Open New window for single game name entry") }),
-		fyne.NewMenuItem("Manual Entry", func() { println("Open New Window with form for game data entry") }),
-		// WARN: For TXT File, they must be game names separated by new lines with 1 game per line
-		// Cannot guarantee that the program will accept files not created by this program (i.e. by hand)
-		fyne.NewMenuItem("From TXT", func() { println("Import from txt file") }),
-		fyne.NewMenuItem("From SQL", func() { println("Import from SQL file") }),
-		fyne.NewMenuItem("From CSV", func() { println("Import from CSV file") }),
+		// TODO: re render the dbrender widget whenever one of these is called
+		fyne.NewMenuItem("Single Game Search", func() {
+			println("Open New window for single game name entry")
+		}),
+		// TODO: re render the dbrender widget whenever one of these is called
+		fyne.NewMenuItem("Manual Entry", func() {
+			println("Open New Window with form for game data entry")
+		}),
+		// INFO: For TXT File, they must be game names separated by new lines with 1 game per line
+		fyne.NewMenuItem("From TXT", func() {
+			dbhandler.ImportTXT()
+			doBadPracticeHackLOL(sortOrder)
+		}),
+		// INFO: Cannot guarantee that the program will accept SQL/CSV files not created by this program (i.e. by hand)
+		fyne.NewMenuItem("From SQL", func() {
+			dbhandler.ImportSQL()
+			doBadPracticeHackLOL(sortOrder)
+		}),
+		fyne.NewMenuItem("From CSV", func() {
+			dbhandler.ImportCSV()
+			doBadPracticeHackLOL(sortOrder)
+		}),
 	)
 
 	menuPopup := widget.NewPopUpMenu(menu, toolbarCanvas)
@@ -153,6 +168,15 @@ func createAddButton(toolbarCanvas fyne.Canvas) (addButton *widget.Button) {
 		menuPopup.ShowAtPosition(addButton.Position().Add(fyne.NewPos(0, addButton.Size().Height)))
 	}
 	return addButton
+}
+
+// TODO: Probably just make the whole data from the DB a binding and use that instead of having this lol
+func doBadPracticeHackLOL(sortOrder binding.Bool) {
+	// PERF: BAD CODING PRACTICE
+	// need to re-render the dbrender widget, so i just set the value of sortorder to the same value it already has...
+	val, _ := sortOrder.Get()
+	sortOrder.Set(!val)
+	sortOrder.Set(val)
 }
 
 func createRemoveButton() (removeButton *widget.Button) {
