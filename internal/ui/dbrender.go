@@ -111,18 +111,21 @@ func createDBRender(sortType binding.String, opt binding.Bool, userText binding.
 	// listener to update the contents of the table when value of sorting op changes
 	opt.AddListener(binding.NewDataListener(func() {
 		dbRender = updateTable(selectedRow, opt, sortType, userText, data, dbRender)
+		selectedRow.Set(0)
 		dbRender.Refresh()
 	}))
 
 	// listener to update the contents of the table when value of sorting sortType changes
 	sortType.AddListener(binding.NewDataListener(func() {
 		dbRender = updateTable(selectedRow, opt, sortType, userText, data, dbRender)
+		selectedRow.Set(0)
 		dbRender.Refresh()
 	}))
 
 	// listener to update the contents of the table when value of sorting sortType changes
 	userText.AddListener(binding.NewDataListener(func() {
 		dbRender = updateTable(selectedRow, opt, sortType, userText, data, dbRender)
+		selectedRow.Set(0)
 		dbRender.Refresh()
 	}))
 	return
