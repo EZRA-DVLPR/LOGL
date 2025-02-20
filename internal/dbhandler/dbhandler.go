@@ -1,6 +1,7 @@
 package dbhandler
 
 import (
+	"bufio"
 	"database/sql"
 	"encoding/csv"
 	"fmt"
@@ -135,6 +136,26 @@ func ImportSQL() {
 	}
 
 	fmt.Println("SQL database imported successfully")
+}
+
+func ImportTXT() {
+	db, err := sql.Open("sqlite3", "games.db")
+	if err != nil {
+		log.Fatal("Error opening db:", err)
+	}
+	defer db.Close()
+
+	file, err := os.Open("gamenames.txt")
+	if err != nil {
+		log.Fatal("error opening txt file:", err)
+	}
+	defer file.Close()
+
+	// scan file and print line by line
+	scanner := bufio.NewScanner(file)
+	for scanner.Scan() {
+		fmt.Println(scanner.Text())
+	}
 }
 
 // given a game struct, will search DB for the name of the game

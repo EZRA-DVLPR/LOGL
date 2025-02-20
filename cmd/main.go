@@ -82,6 +82,7 @@ func main() {
 	// fmt.Println(scraper.SearchHLTB("elden"))
 
 	// dbhandler.SortDB("name", "ASC")
+	// dbhandler.ImportTXT()
 
 	ui.StartGUI()
 }
