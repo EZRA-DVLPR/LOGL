@@ -19,6 +19,8 @@ import (
 //	think of it as an output terminal
 //
 // im not sure if ill keep it in the final build
+
+// TODO: Restructure and redesign the whole app properly
 func StartGUI() {
 	a := app.NewWithID("GameListID") // FIX: IDK what the id does or how to use it properly
 	w := a.NewWindow("Main window - GameList")
