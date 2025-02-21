@@ -21,9 +21,9 @@ func StartGUI() {
 	// create all bindings here
 	sortCategory := binding.NewString()
 	sortOrder := binding.NewBool()
+	dbData := NewMyDataBindingEmpty()
 	wWidth := binding.NewFloat()
 	wHeight := binding.NewFloat()
-	dbData := NewMyDataBindingEmpty()
 
 	// INFO: The following bindings do not persist through sessions
 	userText := binding.NewString()
