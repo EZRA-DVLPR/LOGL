@@ -15,7 +15,6 @@ import (
 )
 
 // makes the table and reflects changes based on values of bindings
-// TODO: Order the parameters in a way that makes more sense
 // PERF: make my own widget (EZRATableWidget) that has the following features:
 //  1. get column widths for each column
 //  2. set size of column based on size of window
@@ -93,7 +92,7 @@ func createDBRender(
 
 	// change contents of dbData binding when sort order changes
 	sortOrder.AddListener(binding.NewDataListener(func() {
-		updateDBData(sortOrder, sortCategory, searchText, dbData)
+		updateDBData(sortCategory, sortOrder, searchText, dbData)
 		dbRender = updateTable(selectedRow, dbData, dbRender)
 		selectedRow.Set(-1)
 		dbRender.Refresh()
@@ -101,7 +100,7 @@ func createDBRender(
 
 	// change contents of dbData binding when sort category changes
 	sortCategory.AddListener(binding.NewDataListener(func() {
-		updateDBData(sortOrder, sortCategory, searchText, dbData)
+		updateDBData(sortCategory, sortOrder, searchText, dbData)
 		dbRender = updateTable(selectedRow, dbData, dbRender)
 		selectedRow.Set(-1)
 		dbRender.Refresh()
@@ -109,7 +108,7 @@ func createDBRender(
 
 	// change contents of dbData binding when search text changes
 	searchText.AddListener(binding.NewDataListener(func() {
-		updateDBData(sortOrder, sortCategory, searchText, dbData)
+		updateDBData(sortCategory, sortOrder, searchText, dbData)
 		dbRender = updateTable(selectedRow, dbData, dbRender)
 		selectedRow.Set(-1)
 		dbRender.Refresh()
@@ -149,8 +148,8 @@ func createDBRender(
 
 // sets dbData with given opts
 func updateDBData(
-	sortOrder binding.Bool,
 	sortCategory binding.String,
+	sortOrder binding.Bool,
 	searchText binding.String,
 	dbData *MyDataBinding,
 ) {
@@ -167,7 +166,6 @@ func updateDBData(
 }
 
 // update the contents of the given table
-// TODO: Reorder parameters to make more sense
 func updateTable(
 	selectedRow binding.Int,
 	dbData *MyDataBinding,
