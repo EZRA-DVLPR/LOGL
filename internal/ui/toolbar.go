@@ -2,6 +2,7 @@ package ui
 
 import (
 	_ "embed"
+	// "fmt"
 	"log"
 
 	"fyne.io/fyne/v2"
@@ -59,13 +60,9 @@ func createMainWindowToolbar(toolbarCanvas fyne.Canvas, sortOrder binding.Bool) 
 func createSortButton(sortOrder binding.Bool) (sortButton *widget.Button) {
 	// create the button with empty label
 	sortButton = widget.NewButtonWithIcon("", theme.MenuDropUpIcon(), func() {
-		// whatver curr value of sortOrder is, we want opposite when clicked
+		// whatever curr value of sortOrder is, we want opposite when clicked
 		val, _ := sortOrder.Get()
-		if val {
-			sortOrder.Set(false)
-		} else {
-			sortOrder.Set(true)
-		}
+		sortOrder.Set(!val)
 	})
 
 	// listen for changes, and update text+icon
@@ -114,15 +111,24 @@ func createExportButton(toolbarCanvas fyne.Canvas) (exportButton *widget.Button)
 	return exportButton
 }
 
-// TODO: Might want to open a new window for this one in particular...
 func createSettingsButton() (settingsButton *widget.Button) {
 	// TODO: special case of adding a stylized menu with diff types of menu options
 	// eg. checkbox, slider, filepath, etc.
 
 	// TODO: options:
 	//		Light/Dark mode
+	//		increase/decrease text size
+	//		update all game data
+	//		delete entire db
+	//		default location to store db
+	//		default location to export to
+	//		default website to search first: HTLB vs Completionator
+	//		dont ask for confirmation for:
+	//			deleting games
+	//			updating all entries without URL
+	//		find way to implement menu without opening new window for window tiling managers
 
-	// PERF: maybe future updates?
+	// PERF: possible future updates?
 	//		Theme Selector
 	settingsButton = widget.NewButtonWithIcon("", theme.SettingsIcon(), func() {
 		log.Println("Open the dropdown menu and show options for user config")
@@ -131,6 +137,8 @@ func createSettingsButton() (settingsButton *widget.Button) {
 	return settingsButton
 }
 
+// TODO: connect to dbData
+// get data and append the new value
 func createAddButton(sortOrder binding.Bool, toolbarCanvas fyne.Canvas) (addButton *widget.Button) {
 	addButton = widget.NewButtonWithIcon("Add Game Data", theme.ContentAddIcon(), func() {
 		log.Println("dropdown menu of diff ways to add data")
@@ -146,19 +154,18 @@ func createAddButton(sortOrder binding.Bool, toolbarCanvas fyne.Canvas) (addButt
 		fyne.NewMenuItem("Manual Entry", func() {
 			println("Open New Window with form for game data entry")
 		}),
+		// TODO: Fix the below functions so they re render the DB properly
+		// Should be connected to dbData
 		// INFO: For TXT File, they must be game names separated by new lines with 1 game per line
 		fyne.NewMenuItem("From TXT", func() {
 			dbhandler.ImportTXT()
-			doBadPracticeHackLOL(sortOrder)
 		}),
 		// INFO: Cannot guarantee that the program will accept SQL/CSV files not created by this program (i.e. by hand)
 		fyne.NewMenuItem("From SQL", func() {
 			dbhandler.ImportSQL()
-			doBadPracticeHackLOL(sortOrder)
 		}),
 		fyne.NewMenuItem("From CSV", func() {
 			dbhandler.ImportCSV()
-			doBadPracticeHackLOL(sortOrder)
 		}),
 	)
 
@@ -170,18 +177,12 @@ func createAddButton(sortOrder binding.Bool, toolbarCanvas fyne.Canvas) (addButt
 	return addButton
 }
 
-// TODO: Probably just make the whole data from the DB a binding and use that instead of having this lol
-func doBadPracticeHackLOL(sortOrder binding.Bool) {
-	// PERF: BAD CODING PRACTICE
-	// need to re-render the dbrender widget, so i just set the value of sortorder to the same value it already has...
-	val, _ := sortOrder.Get()
-	sortOrder.Set(!val)
-	sortOrder.Set(val)
-}
-
+// TODO:connect to selectedRow and dbData
+// get row value and select row from dbData
 func createRemoveButton() (removeButton *widget.Button) {
+	// TODO: Ask for confirmation in new window
 	removeButton = widget.NewButtonWithIcon("Remove Game Data", theme.ContentRemoveIcon(), func() {
-		log.Println("remove the highlighted rows")
+		log.Println("remove the highlighted row")
 	})
 
 	return removeButton
@@ -208,6 +209,8 @@ func createHelpButton(toolbarCanvas fyne.Canvas) (helpButton *widget.Button) {
 	return helpButton
 }
 
+// TODO: Connect this to selectedRow and dbData
+// change to random value from 1:rows
 func createRandomButton() (removeButton *widget.Button) {
 	removeButton = widget.NewButtonWithIcon("Random Row", theme.SearchReplaceIcon(), func() {
 		log.Println("highlight a random row in the other pane")
@@ -216,6 +219,9 @@ func createRandomButton() (removeButton *widget.Button) {
 	return removeButton
 }
 
+// TODO: connect to selectedRow and dbData
+// get row value from selectedRow and select row from dbData
+// toggle favorite for that game in particular
 func createFaveButton() (faveButton *widget.Button) {
 	heartIcon := fyne.NewStaticResource("heart.svg", heartSVG)
 	faveButton = widget.NewButtonWithIcon("(Un)Favorite", theme.NewThemedResource(heartIcon), func() {
@@ -225,9 +231,11 @@ func createFaveButton() (faveButton *widget.Button) {
 	return faveButton
 }
 
+// TODO:connect to selectedRow and dbData
+// get row value and select row from dbData
 func createUpdateButton() (updateButton *widget.Button) {
 	updateButton = widget.NewButtonWithIcon("Update", theme.MediaReplayIcon(), func() {
-		log.Println("updated highlighted entries")
+		log.Println("updated highlighted entry")
 	})
 
 	return updateButton

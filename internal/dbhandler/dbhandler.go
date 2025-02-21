@@ -67,6 +67,9 @@ func CheckDBExists() bool {
 	return true
 }
 
+// TODO: Make new file for imports
+// TODO: make a new function to drive which import to run
+// import (opt) -> 1 = CSV, 2 = SQL, etc.
 func ImportCSV() {
 	db, err := sql.Open("sqlite3", "games.db")
 	if err != nil {
@@ -175,7 +178,7 @@ func ImportTXT() {
 	}
 }
 
-// given a game struct, will search DB for the name of the game
+// given a game struct, will search DB for the name of the game to delete it
 func DeleteFromDB(game scraper.Game) {
 	db, err := sql.Open("sqlite3", "games.db")
 	if err != nil {
@@ -246,7 +249,7 @@ func ToggleFavorite(game scraper.Game) {
 	}
 	defer db.Close()
 
-	// get data for game
+	// get value of favorite for given game
 	var favorite bool
 	err = db.QueryRow("SELECT favorite FROM games WHERE name = ?", game.Name).Scan(&favorite)
 	if err != nil {
@@ -260,26 +263,34 @@ func ToggleFavorite(game scraper.Game) {
 	}
 
 	if rowsAffected(res, game.Name) {
-		fmt.Println("Favorited:", game.Name)
+		fmt.Println("Toggled Favorite for given game:", game.Name)
 	}
 }
 
 // o/w sorts based on these criteria:
 //
-//	sort == name
-//	sort == main
-//	sort == mainPlus
-//	sort == comp
+//	sortCategory == name
+//	sortCategory == main
+//	sortCategory == mainPlus
+//	sortCategory == comp
 //
 // in all cases, it will sort the list based on favorites first, then non-favorited entries
-func SortDB(sort string, sortOpt string) (dbOutput [][]string) {
+func SortDB(sortCategory string, sortOrder bool) (dbOutput [][]string) {
 	db, err := sql.Open("sqlite3", "games.db")
 	if err != nil {
 		log.Fatal("Error accessing local dB: ", err)
 	}
 	defer db.Close()
 
-	rows, err := db.Query(fmt.Sprintf("SELECT name, main, mainPlus, comp FROM games ORDER BY favorite DESC, %s %s;", sort, sortOpt))
+	// if sortOrder is true => ASC. False => DESC
+	so := ""
+	if sortOrder {
+		so = "ASC"
+	} else {
+		so = "DESC"
+	}
+
+	rows, err := db.Query(fmt.Sprintf("SELECT name, main, mainPlus, comp FROM games ORDER BY favorite DESC, %s %s;", sortCategory, so))
 	if err != nil {
 		log.Fatal("Error sorting games from games table: ", err)
 	}
@@ -302,19 +313,27 @@ func SortDB(sort string, sortOpt string) (dbOutput [][]string) {
 
 // takes in Search string and searches DB for matches
 // PERF: Might want to combine with the above function and just have no search query if the given partialName is empty
-func SearchSortDB(sort string, sortOpt string, partialName string) (dbOutput [][]string) {
+func SearchSortDB(sortCategory string, sortOrder bool, queryname string) (dbOutput [][]string) {
 	db, err := sql.Open("sqlite3", "games.db")
 	if err != nil {
 		log.Fatal("Error accessing local dB: ", err)
 	}
 	defer db.Close()
 
+	// if sortOrder is true => ASC. False => DESC
+	so := ""
+	if sortOrder {
+		so = "ASC"
+	} else {
+		so = "DESC"
+	}
+
 	// find partial matches given string
 	rows, err := db.Query(fmt.Sprintf(
 		"SELECT name, main, mainPlus, comp FROM games WHERE name LIKE ? ORDER BY favorite DESC, %s %s",
-		sort,
-		sortOpt,
-	), "%"+partialName+"%")
+		sortCategory,
+		so,
+	), "%"+queryname+"%")
 	if err != nil {
 		log.Fatal("Error retrieving partial matches given sorting opts:", err)
 	}

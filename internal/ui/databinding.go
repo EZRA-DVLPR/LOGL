@@ -15,17 +15,22 @@ type MyDataBinding struct {
 	lock sync.Mutex
 }
 
+// create a new data binding obj with no initial data
+func NewMyDataBindingEmpty() *MyDataBinding {
+	return &MyDataBinding{data: [][]string{}}
+}
+
 // create a new data binding obj with the initial data given
 func NewMyDataBinding(initialData [][]string) *MyDataBinding {
 	return &MyDataBinding{data: initialData}
 }
 
 // return the data from the binding, and error
-func (b *MyDataBinding) Get() (interface{}, error) {
+func (b *MyDataBinding) Get() ([][]string, error) {
 	// prevent other goroutines from writing to this binding while we read it
 	b.lock.Lock()
 
-	// release the lock so other goroutines can write again
+	// release the lock so other goroutines can write again when we return
 	defer b.lock.Unlock()
 	return b.data, nil
 }

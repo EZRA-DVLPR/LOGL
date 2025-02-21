@@ -9,13 +9,14 @@ import (
 )
 
 func createSearchBar(userText binding.String) (searchBar *fyne.Container) {
+	// widget with icon and text for clarity to user
 	searchSymbolText := container.NewHBox(widget.NewIcon(theme.SearchIcon()), widget.NewLabel("Search"))
 
 	// create the textbox for user input and attach the binding to it
 	searchText := createSearchTextBox()
 	searchText.Bind(userText)
 
-	// allows the searchText (where user types) fit into the entire rest of the Hspace
+	// allows searchText (where user types) to fit into the entire rest of the Hspace
 	searchBar = container.NewBorder(
 		nil,
 		nil,
@@ -26,6 +27,8 @@ func createSearchBar(userText binding.String) (searchBar *fyne.Container) {
 	return searchBar
 }
 
+// makes the search text box widget
+// PERF: remove this function and put it inside the searchBar function
 func createSearchTextBox() (searchTextBox *widget.Entry) {
 	searchTextBox = widget.NewEntry()
 	searchTextBox.SetPlaceHolder("Search Game Names Here!")

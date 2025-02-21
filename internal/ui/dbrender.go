@@ -14,35 +14,30 @@ import (
 	"github.com/EZRA-DVLPR/GameList/internal/dbhandler"
 )
 
-// makes the table and reflects changes based on bindings
+// makes the table and reflects changes based on values of bindings
+// TODO: Order the parameters in a way that makes more sense
 // PERF: make my own widget (EZRATableWidget) that has the following features:
 //  1. get column widths for each column
 //  2. set size of column based on size of window
-func createDBRender(sortType binding.String, opt binding.Bool, userText binding.String) (dbRender *widget.Table) {
-	// placeholder for data from SQLite requests
-	var data [][]string
-
-	// create a new binding that will keep track of the currently selected row
-	// INFO: does not persist throughout sessions
-	selectedRow := binding.NewInt()
-	selectedRow.Set(-1)
-	selRow, _ := selectedRow.Get()
-
+func createDBRender(
+	selectedRow binding.Int,
+	sortCategory binding.String,
+	sortOrder binding.Bool,
+	searchText binding.String,
+	dbData *MyDataBinding,
+) (dbRender *widget.Table) {
 	// given the bindings create the table with the new set of data
-	sortingType, _ := sortType.Get()
-	sortingOpt, _ := opt.Get()
+	sortcat, _ := sortCategory.Get()
+	sortord, _ := sortOrder.Get()
 
-	// if db exists with table games, then get data stored. O/w display nothing
-	isDB := dbhandler.CheckDBExists()
-	if isDB {
-		if sortingOpt {
-			data = dbhandler.SortDB(sortingType, "ASC")
-		} else {
-			data = dbhandler.SortDB(sortingType, "DESC")
-		}
+	// if db exists then get the data
+	// NOTE: notice there is no search text, because we initialize without any search text from the user
+	if dbhandler.CheckDBExists() {
+		dbData.Set(dbhandler.SortDB(sortcat, sortord))
 	}
+	data, _ := dbData.Get()
 
-	// make the table with size of data. default 1 -- Display "No data"
+	// make the table with size of data. default 1
 	numRows := 1
 	if len(data) != 0 {
 		numRows = len(data)
@@ -52,7 +47,7 @@ func createDBRender(sortType binding.String, opt binding.Bool, userText binding.
 	dbRender = widget.NewTableWithHeaders(
 		// table dims
 		func() (int, int) { return numRows, 4 },
-		// create an empty cell with def bg color and empty text
+		// create empty cells with dflt bg color and empty text
 		func() fyne.CanvasObject {
 			bg := canvas.NewRectangle(color.Black)
 			label := widget.NewLabel("")
@@ -60,13 +55,11 @@ func createDBRender(sortType binding.String, opt binding.Bool, userText binding.
 		},
 		// populate table with content
 		func(id widget.TableCellID, obj fyne.CanvasObject) {
-			// get the label from the stack
 			stack := obj.(*fyne.Container)
 			bg := stack.Objects[0].(*canvas.Rectangle)
 			label := stack.Objects[1].(*widget.Label)
 
-			// if there is data in DB then display it
-			// o/w display "No Data"
+			// if there is data in DB then display it o/w display "No Data"
 			if len(data) > 1 {
 				if id.Col == 0 {
 					// if game name is too long, then truncate and append "...". o/w display entire game name
@@ -83,88 +76,107 @@ func createDBRender(sortType binding.String, opt binding.Bool, userText binding.
 				label.SetText("No Data")
 			}
 
-			// highlighting when the row is selected
-			if id.Row == selRow {
-				bg.FillColor = color.RGBA{200, 200, 255, 255}
-			} else {
-				bg.FillColor = color.Black
-			}
+			// no selected row, so make all cells have bg color
+			bg.FillColor = color.Black
 		},
 	)
 
-	// highlight the row if its not a divider -> dividers have negative position values
+	// highlight the row of the cell clicked if its not a divider -> dividers have negative position values
 	dbRender.OnSelected = func(id widget.TableCellID) {
 		if id.Row >= 0 && id.Col >= 0 {
 			selectedRow.Set(id.Row)
 		}
 	}
 
-	// set up the header
+	// set up the headers
 	dbRender = headerSetup(dbRender)
 
-	// listener to update cell row selection
+	// change contents of dbData binding when sort order changes
+	sortOrder.AddListener(binding.NewDataListener(func() {
+		updateDBData(sortOrder, sortCategory, searchText, dbData)
+		dbRender = updateTable(selectedRow, dbData, dbRender)
+		selectedRow.Set(-1)
+		dbRender.Refresh()
+	}))
+
+	// change contents of dbData binding when sort category changes
+	sortCategory.AddListener(binding.NewDataListener(func() {
+		updateDBData(sortOrder, sortCategory, searchText, dbData)
+		dbRender = updateTable(selectedRow, dbData, dbRender)
+		selectedRow.Set(-1)
+		dbRender.Refresh()
+	}))
+
+	// change contents of dbData binding when search text changes
+	searchText.AddListener(binding.NewDataListener(func() {
+		updateDBData(sortOrder, sortCategory, searchText, dbData)
+		dbRender = updateTable(selectedRow, dbData, dbRender)
+		selectedRow.Set(-1)
+		dbRender.Refresh()
+	}))
+
+	// selectedRow changes
 	selectedRow.AddListener(binding.NewDataListener(func() {
-		dbRender = updateTable(selectedRow, opt, sortType, userText, data, dbRender)
+		selRow, _ := selectedRow.Get()
+		dbRender.UpdateCell = func(id widget.TableCellID, obj fyne.CanvasObject) {
+			// get the label from the stack
+			stack := obj.(*fyne.Container)
+			bg := stack.Objects[0].(*canvas.Rectangle)
+			label := stack.Objects[1].(*widget.Label)
+			label.SetText("No Data")
+
+			// highlighting
+			if id.Row == selRow {
+				bg.FillColor = color.RGBA{0, 0, 180, 255}
+			} else {
+				bg.FillColor = color.Black
+			}
+		}
+		dbRender = updateTable(selectedRow, dbData, dbRender)
+
+		// scroll to the new location selected
+		var selCell widget.TableCellID
+		selCell.Row = selRow
+		selCell.Col = 0
+		dbRender.ScrollTo(selCell)
+		dbRender.ScrollToLeading()
+
 		dbRender.Refresh()
 	}))
 
-	// listener to update the contents of the table when value of sorting op changes
-	opt.AddListener(binding.NewDataListener(func() {
-		dbRender = updateTable(selectedRow, opt, sortType, userText, data, dbRender)
-		selectedRow.Set(-1)
-		dbRender.Refresh()
-	}))
-
-	// listener to update the contents of the table when value of sorting sortType changes
-	sortType.AddListener(binding.NewDataListener(func() {
-		dbRender = updateTable(selectedRow, opt, sortType, userText, data, dbRender)
-		selectedRow.Set(-1)
-		dbRender.Refresh()
-	}))
-
-	// listener to update the contents of the table when value of sorting sortType changes
-	userText.AddListener(binding.NewDataListener(func() {
-		dbRender = updateTable(selectedRow, opt, sortType, userText, data, dbRender)
-		selectedRow.Set(-1)
-		dbRender.Refresh()
-	}))
 	return
 }
 
-// given bindings, data, and table will update the contents of the given table
+// sets dbData with given opts
+func updateDBData(
+	sortOrder binding.Bool,
+	sortCategory binding.String,
+	searchText binding.String,
+	dbData *MyDataBinding,
+) {
+	sortcat, _ := sortCategory.Get()
+	sortord, _ := sortOrder.Get()
+	searchtxt, _ := searchText.Get()
+
+	// if nonempty, search with given searchtxt
+	if strings.TrimSpace(searchtxt) == "" {
+		dbData.Set(dbhandler.SortDB(sortcat, sortord))
+	} else {
+		dbData.Set(dbhandler.SearchSortDB(sortcat, sortord, searchtxt))
+	}
+}
+
+// update the contents of the given table
+// TODO: Reorder parameters to make more sense
 func updateTable(
 	selectedRow binding.Int,
-	opt binding.Bool,
-	sortBy binding.String,
-	searchText binding.String,
-	data [][]string,
+	dbData *MyDataBinding,
 	dbRender *widget.Table,
 ) *widget.Table {
-	sortingType, _ := sortBy.Get()
-	sortingOpt, _ := opt.Get()
 	selRow, _ := selectedRow.Get()
-	userSearchText, _ := searchText.Get()
-
-	// if the DB exists then get the data from it
-	isDB := dbhandler.CheckDBExists()
-	if isDB {
-		// check the user search text and if empty, then search entire DB. O/w search db w/ opts
-		if strings.TrimSpace(userSearchText) == "" {
-			if sortingOpt {
-				data = dbhandler.SortDB(sortingType, "ASC")
-			} else {
-				data = dbhandler.SortDB(sortingType, "DESC")
-			}
-		} else {
-			if sortingOpt {
-				data = dbhandler.SearchSortDB(sortingType, "ASC", userSearchText)
-			} else {
-				data = dbhandler.SearchSortDB(sortingType, "DESC", userSearchText)
-			}
-		}
-	}
 
 	// check rows for finding dims
+	data, _ := dbData.Get()
 	numRows := 1
 	if len(data) != 0 {
 		numRows = len(data)
@@ -204,10 +216,8 @@ func updateTable(
 		}
 	}
 
-	// setup headers and reset positioning for scrolls
+	// setup headers
 	dbRender = headerSetup(dbRender)
-	dbRender.ScrollToLeading()
-	dbRender.ScrollToTop()
 	return dbRender
 }
 
@@ -220,9 +230,8 @@ func headerSetup(dbTable *widget.Table) *widget.Table {
 		return widget.NewLabelWithStyle(
 			// add placeholder for at least 6 characters, making 6 digit numbers display nicely
 			"______",
-			// set text to be centered
+			// set text to be centered and bold
 			fyne.TextAlignCenter,
-			// set text to be bold
 			fyne.TextStyle{Bold: true},
 		)
 	}
@@ -230,10 +239,10 @@ func headerSetup(dbTable *widget.Table) *widget.Table {
 	// make headers display content
 	dbTable.UpdateHeader = func(id widget.TableCellID, obj fyne.CanvasObject) {
 		if id.Col >= 0 && id.Col < len(headers) {
-			// display headers defined prev
+			// display column header text
 			obj.(*widget.Label).SetText(headers[id.Col])
 		} else {
-			// for row index, start at 1:rows
+			// display row index, from 1:rows
 			obj.(*widget.Label).SetText(fmt.Sprintf("%d", id.Row+1))
 		}
 	}

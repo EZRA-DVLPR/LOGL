@@ -1,7 +1,7 @@
 package ui
 
 import (
-	// "fmt"
+	"fmt"
 	// "time"
 
 	"fyne.io/fyne/v2"
@@ -11,55 +11,45 @@ import (
 	"fyne.io/fyne/v2/widget"
 )
 
-// setup for the entire gui portion of app
-// a is the whole app
-// w is the main window for interaction
-// w2 another window for other info that wont be interacted with
-//
-//	think of it as an output terminal
-//
-// im not sure if ill keep it in the final build
-
-// TODO: Restructure and redesign the whole app properly
 func StartGUI() {
 	a := app.NewWithID("GameListID") // FIX: IDK what the id does or how to use it properly
 	w := a.NewWindow("Main window - GameList")
-	// w2 := a.NewWindow("Debug Window - GameList")
 
 	// set up prefs for app
 	prefs := a.Preferences()
 
 	// create all bindings here
-	sortType := binding.NewString()
+	sortCategory := binding.NewString()
 	sortOrder := binding.NewBool()
 	wWidth := binding.NewFloat()
 	wHeight := binding.NewFloat()
+	dbData := NewMyDataBindingEmpty()
+
+	// INFO: The following bindings do not persist through sessions
 	userText := binding.NewString()
+	selectedRow := binding.NewInt()
+	// dont highlight any row
+	selectedRow.Set(-1)
 
-	// load sort type from pref storage. default to "name"  i.e. Game Name
-	storedSortType := prefs.String("sort_type")
-	if storedSortType == "" {
-		storedSortType = "name"
+	// load sort category from pref storage. default to "name"  i.e. Game Name
+	storedSortCategory := prefs.String("sort_category")
+	if storedSortCategory == "" {
+		storedSortCategory = "name"
 	}
-	sortType.Set(storedSortType)
+	sortCategory.Set(storedSortCategory)
 
-	// load sort order from preferences storage. default to ASC
-	storedSortOrder := prefs.Bool("sort_order")
-	if storedSortOrder {
-		storedSortOrder = true
-	}
+	// load sort order from preferences storage. default to true (ASC)
+	storedSortOrder := prefs.BoolWithFallback("sort_order", true)
 	sortOrder.Set(storedSortOrder)
 
 	// TODO: Handle default sizes of window when i finalize the length/size of the toolbar with icons
-	// default window size accommodates changing of ASC-DESC without changing size of window (1140, 400)
-	// load screen width from pref storage. default to 1140
+	// default window size accommodates changing of "ASC"/"DESC" without changing size of window (1140, 400) (W,H)
 	storedWWidth := prefs.Float("w_width")
 	if storedWWidth == 0 {
 		storedWWidth = 1140
 	}
 	wWidth.Set(storedWWidth)
 
-	// load screen height from pref storage. default to 400
 	storedWHeight := prefs.Float("w_height")
 	if storedWHeight == 0 {
 		storedWHeight = 400
@@ -74,60 +64,60 @@ func StartGUI() {
 	// the app will close when the main window (w) is closed
 	w.SetMaster()
 
-	// handle diagnostics...
-	// hello := widget.NewLabel("Debugging stuff...")
-	// w2.SetContent(
-	// 	container.NewVBox(
-	// 		hello,
-	// 		widget.NewButton("Hi!", func() {
-	// 			hello.SetText("Welcome")
-	// 		}),
-	// 		// w3 := a.NewWindow("Third")
-	// 		// w3.SetContent(widget.NewLabel("Third"))
-	// 		// w3.Show()
-	// 	))
-
 	//See diagram in documentation for clearer illustration
 	//
 	//--------toolbar--------
 	//Search-TypingBoxSearch-
-	//id|GameName|M|M+S|C
+	//id|GameName|M|M+S|C----
 	//~~~~~~~~~~~~~~~~~~~~~~~
 	//~~~~~~~~~~~~~~~~~~~~~~~
-
 	content := container.NewBorder(
 		// top is toolbar + searchbar
 		container.NewVBox(
 			createMainWindowToolbar(w.Canvas(), sortOrder),
 			createSearchBar(userText),
 		),
-		// TEST:: Widgets are in place for testing changes to table
+		// TEST:: Button Widgets are in place for testing changes to table
 		// remove once implementation for sorting is done in another manner
 		widget.NewButton("main", func() {
-			sortType.Set("main")
+			fmt.Println("change to main")
+			sc, _ := sortCategory.Get()
+			fmt.Println("b4", sc)
+			sortCategory.Set("main")
+			sc, _ = sortCategory.Get()
+			fmt.Println("after", sc)
 		}),
 		widget.NewButton("main+", func() {
-			sortType.Set("mainPlus")
+			fmt.Println("change to main+")
+			sc, _ := sortCategory.Get()
+			fmt.Println("b4", sc)
+			sortCategory.Set("mainPlus")
+			sc, _ = sortCategory.Get()
+			fmt.Println("after", sc)
 		}),
 		widget.NewButton("comp", func() {
-			sortType.Set("comp")
+			fmt.Println("change to comp")
+			sc, _ := sortCategory.Get()
+			fmt.Println("b4", sc)
+			sortCategory.Set("comp")
+			sc, _ = sortCategory.Get()
+			fmt.Println("after", sc)
 		}),
 
 		// dont render anything else in space besides DB
 		// nil, nil, nil,
 		// default to display names ASC
-		createDBRender(sortType, sortOrder, userText),
+		createDBRender(selectedRow, sortCategory, sortOrder, userText, dbData),
 	)
 
-	// show all windows with their content
 	w.SetContent(content)
 	w.Show()
-	// w2.Show()
 
+	// when main window closes, save preferences for future session
 	w.SetOnClosed(func() {
 		// save sort type
-		st, _ := sortType.Get()
-		prefs.SetString("sort_type", st)
+		st, _ := sortCategory.Get()
+		prefs.SetString("sort_category", st)
 
 		// save sort order
 		so, _ := sortOrder.Get()
