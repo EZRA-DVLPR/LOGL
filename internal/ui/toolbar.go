@@ -62,6 +62,20 @@ func createMainWindowToolbar(
 		helpButton,
 	)
 
+	// TODO: change size of each button depending on the size of the given window
+	// toolbar = container.New(
+	// 	layout.NewGridWrapLayout(fyne.NewSize(200, 50)),
+	// 	sortButton,
+	// 	addButton,
+	// 	updateButton,
+	// 	removeButton,
+	// 	randButton,
+	// 	faveButton,
+	// 	exportButton,
+	// 	settingsButton,
+	// 	helpButton,
+	// )
+
 	return toolbar
 }
 

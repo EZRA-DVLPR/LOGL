@@ -43,6 +43,7 @@ func StartGUI() {
 
 	// TODO: Handle default sizes of window when i finalize the length/size of the toolbar with icons
 	// default window size accommodates changing of "ASC"/"DESC" without changing size of window (1140, 400) (W,H)
+	// It seems that the first row doesnt render properly initially if the width is too great...
 	storedWWidth := prefs.Float("w_width")
 	if storedWWidth == 0 {
 		storedWWidth = 1140
