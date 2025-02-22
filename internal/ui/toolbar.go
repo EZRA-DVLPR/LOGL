@@ -65,6 +65,7 @@ func createMainWindowToolbar(
 	return toolbar
 }
 
+// flips sort Order (ASC->DESC->ASC)
 func createSortButton(sortOrder binding.Bool) (sortButton *widget.Button) {
 	// create the button with empty label
 	sortButton = widget.NewButtonWithIcon("", theme.MenuDropUpIcon(), func() {
@@ -87,6 +88,7 @@ func createSortButton(sortOrder binding.Bool) (sortButton *widget.Button) {
 	return sortButton
 }
 
+// opens mini-menu to select export option
 func createExportButton(toolbarCanvas fyne.Canvas) (exportButton *widget.Button) {
 	// create a button without a function
 	exportButton = widget.NewButtonWithIcon("", theme.MailSendIcon(), nil)
