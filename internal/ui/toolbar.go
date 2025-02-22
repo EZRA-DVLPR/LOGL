@@ -108,7 +108,7 @@ func createExportButton(toolbarCanvas fyne.Canvas) (exportButton *widget.Button)
 	exportButton = widget.NewButtonWithIcon("", theme.MailSendIcon(), nil)
 
 	// create the dropdown menu items for exporting
-	// TODO: Export the current view, not the default one in the database
+	// PERF: Export the current view, not the default one in the database
 	menu := fyne.NewMenu("",
 		fyne.NewMenuItem("Export to SQL", func() {
 			println("Export to SQL")
@@ -176,16 +176,15 @@ func createAddButton(sortOrder binding.Bool, toolbarCanvas fyne.Canvas) (addButt
 		}),
 		// TODO: Fix the below functions so they re render the DB properly
 		// Should be connected to dbData
+		fyne.NewMenuItem("From CSV", func() {
+			dbhandler.Import(1)
+		}),
+		fyne.NewMenuItem("From SQL", func() {
+			dbhandler.Import(2)
+		}),
 		// INFO: For TXT File, they must be game names separated by new lines with 1 game per line
 		fyne.NewMenuItem("From TXT", func() {
-			dbhandler.ImportTXT()
-		}),
-		// INFO: Cannot guarantee that the program will accept SQL/CSV files not created by this program (i.e. by hand)
-		fyne.NewMenuItem("From SQL", func() {
-			dbhandler.ImportSQL()
-		}),
-		fyne.NewMenuItem("From CSV", func() {
-			dbhandler.ImportCSV()
+			dbhandler.Import(3)
 		}),
 	)
 
