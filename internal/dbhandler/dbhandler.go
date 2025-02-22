@@ -286,6 +286,9 @@ func SortDB(sortCategory string, sortOrder bool) (dbOutput [][]string) {
 		log.Fatal("Error sorting games from games table: ", err)
 	}
 
+	// TODO: MAKE SORT COMPARE NOT DIGIT-WISE BUT WHOLE VALUE WISE
+	// eg. 1234 < 2000
+
 	for rows.Next() {
 		var name string
 		var main, mainPlus, comp float64

@@ -89,12 +89,12 @@ func createDBRender(
 	}
 
 	// set up the headers
-	dbRender = headerSetup(dbRender)
+	dbRender = headerSetup(sortCategory, dbRender)
 
 	// change contents of dbData binding when sort order changes
 	sortOrder.AddListener(binding.NewDataListener(func() {
 		updateDBData(sortCategory, sortOrder, searchText, dbData)
-		dbRender = updateTable(selectedRow, dbData, dbRender)
+		dbRender = updateTable(sortCategory, selectedRow, dbData, dbRender)
 		selectedRow.Set(-1)
 		dbRender.Refresh()
 	}))
@@ -102,15 +102,17 @@ func createDBRender(
 	// change contents of dbData binding when sort category changes
 	sortCategory.AddListener(binding.NewDataListener(func() {
 		updateDBData(sortCategory, sortOrder, searchText, dbData)
-		dbRender = updateTable(selectedRow, dbData, dbRender)
+		dbRender = updateTable(sortCategory, selectedRow, dbData, dbRender)
 		selectedRow.Set(-1)
+		d, _ := dbData.Get()
+		fmt.Println(d)
 		dbRender.Refresh()
 	}))
 
 	// change contents of dbData binding when search text changes
 	searchText.AddListener(binding.NewDataListener(func() {
 		updateDBData(sortCategory, sortOrder, searchText, dbData)
-		dbRender = updateTable(selectedRow, dbData, dbRender)
+		dbRender = updateTable(sortCategory, selectedRow, dbData, dbRender)
 		selectedRow.Set(-1)
 		dbRender.Refresh()
 	}))
@@ -132,7 +134,7 @@ func createDBRender(
 				bg.FillColor = color.Black
 			}
 		}
-		dbRender = updateTable(selectedRow, dbData, dbRender)
+		dbRender = updateTable(sortCategory, selectedRow, dbData, dbRender)
 
 		// scroll to the new location selected
 		var selCell widget.TableCellID
@@ -168,6 +170,7 @@ func updateDBData(
 
 // update the contents of the given table
 func updateTable(
+	sortCategory binding.String,
 	selectedRow binding.Int,
 	dbData *MyDataBinding,
 	dbRender *widget.Table,
@@ -216,11 +219,11 @@ func updateTable(
 	}
 
 	// setup headers
-	dbRender = headerSetup(dbRender)
+	dbRender = headerSetup(sortCategory, dbRender)
 	return dbRender
 }
 
-func headerSetup(dbTable *widget.Table) *widget.Table {
+func headerSetup(sortCategory binding.String, dbTable *widget.Table) *widget.Table {
 	// name of each column header
 	headers := []string{"Game Name", "Main Story", "Main + Sides", "Completionist"}
 
@@ -248,7 +251,16 @@ func headerSetup(dbTable *widget.Table) *widget.Table {
 			label.Hide()
 			button.SetText(headers[id.Col])
 			button.OnTapped = func() {
-				fmt.Println(fmt.Sprintf("Header %d clicked", id.Col))
+				// sortCategory gets set to whichever header was clicked
+				if id.Col == 0 {
+					sortCategory.Set("name")
+				} else if id.Col == 1 {
+					sortCategory.Set("main")
+				} else if id.Col == 2 {
+					sortCategory.Set("mainPlus")
+				} else {
+					sortCategory.Set("comp")
+				}
 			}
 		} else {
 			// display row label index, from 1:rows
@@ -257,7 +269,6 @@ func headerSetup(dbTable *widget.Table) *widget.Table {
 			label.SetText(fmt.Sprintf("%d", id.Row+1))
 		}
 	}
-	canvas.Refresh(dbTable)
 
 	// set column widths
 	dbTable.SetColumnWidth(0, 400)

@@ -1,14 +1,13 @@
 package ui
 
 import (
-	"fmt"
+	// "fmt"
 	// "time"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/data/binding"
-	"fyne.io/fyne/v2/widget"
 )
 
 func StartGUI() {
@@ -77,35 +76,8 @@ func StartGUI() {
 			createMainWindowToolbar(w.Canvas(), sortCategory, sortOrder, searchText, selectedRow, dbData),
 			createSearchBar(searchText),
 		),
-		// TEST:: Button Widgets are in place for testing changes to table
-		// remove once implementation for sorting is done in another manner
-		widget.NewButton("main", func() {
-			fmt.Println("change to main")
-			sc, _ := sortCategory.Get()
-			fmt.Println("b4", sc)
-			sortCategory.Set("main")
-			sc, _ = sortCategory.Get()
-			fmt.Println("after", sc)
-		}),
-		widget.NewButton("main+", func() {
-			fmt.Println("change to main+")
-			sc, _ := sortCategory.Get()
-			fmt.Println("b4", sc)
-			sortCategory.Set("mainPlus")
-			sc, _ = sortCategory.Get()
-			fmt.Println("after", sc)
-		}),
-		widget.NewButton("comp", func() {
-			fmt.Println("change to comp")
-			sc, _ := sortCategory.Get()
-			fmt.Println("b4", sc)
-			sortCategory.Set("comp")
-			sc, _ = sortCategory.Get()
-			fmt.Println("after", sc)
-		}),
-
 		// dont render anything else in space besides DB
-		// nil, nil, nil,
+		nil, nil, nil,
 		// default to display names ASC
 		createDBRender(selectedRow, sortCategory, sortOrder, searchText, dbData),
 	)
