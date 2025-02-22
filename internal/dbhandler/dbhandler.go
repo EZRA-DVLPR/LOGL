@@ -179,19 +179,19 @@ func ImportTXT() {
 }
 
 // given a game struct, will search DB for the name of the game to delete it
-func DeleteFromDB(game scraper.Game) {
+func DeleteFromDB(gamename string) {
 	db, err := sql.Open("sqlite3", "games.db")
 	if err != nil {
 		log.Fatal("Failed to access db")
 	}
 
-	res, err := db.Exec("DELETE FROM games WHERE name = ?", game.Name)
+	res, err := db.Exec("DELETE FROM games WHERE name = ?", gamename)
 	if err != nil {
 		log.Fatal("Error deleting game from games table: ", err)
 	}
 
-	if rowsAffected(res, game.Name) {
-		fmt.Println("Game deleted: ", game.Name)
+	if rowsAffected(res, gamename) {
+		fmt.Println("Game deleted: ", gamename)
 	}
 }
 
