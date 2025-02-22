@@ -233,16 +233,7 @@ func AddToDB(game scraper.Game) {
 }
 
 // if the given game is not empty, then toggle favorite
-func ToggleFavorite(game scraper.Game) {
-	if (game.Name == "") &&
-		(game.Url == "") &&
-		(game.Main == -1) &&
-		(game.MainPlus == -1) &&
-		(game.Comp == -1) {
-		fmt.Println("No game data received for associate game.")
-		return
-	}
-
+func ToggleFavorite(gamename string) {
 	db, err := sql.Open("sqlite3", "games.db")
 	if err != nil {
 		log.Fatal("Failed to access db")
@@ -251,19 +242,19 @@ func ToggleFavorite(game scraper.Game) {
 
 	// get value of favorite for given game
 	var favorite bool
-	err = db.QueryRow("SELECT favorite FROM games WHERE name = ?", game.Name).Scan(&favorite)
+	err = db.QueryRow("SELECT favorite FROM games WHERE name = ?", gamename).Scan(&favorite)
 	if err != nil {
 		log.Fatal("Error obtaining favorite value from game", err)
 	}
 
 	// update game favorite value to the opposite value
-	res, err := db.Exec("UPDATE games SET favorite = ? WHERE name = ?", !favorite, game.Name)
+	res, err := db.Exec("UPDATE games SET favorite = ? WHERE name = ?", !favorite, gamename)
 	if err != nil {
 		log.Fatal("Error updating game to be favorite", err)
 	}
 
-	if rowsAffected(res, game.Name) {
-		fmt.Println("Toggled Favorite for given game:", game.Name)
+	if rowsAffected(res, gamename) {
+		fmt.Println("Toggled Favorite for given game:", gamename)
 	}
 }
 

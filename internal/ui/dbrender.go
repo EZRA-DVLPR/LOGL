@@ -15,6 +15,7 @@ import (
 )
 
 // makes the table and reflects changes based on values of bindings
+// TODO: make the favorited rows be a diff color than the others
 // PERF: make my own widget (EZRATableWidget) that has the following features:
 //  1. get column widths for each column
 //  2. set size of column based on size of window

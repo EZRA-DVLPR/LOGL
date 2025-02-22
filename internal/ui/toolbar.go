@@ -37,7 +37,7 @@ func createMainWindowToolbar(
 	removeButton := createRemoveButton(selectedRow, sortCategory, sortOrder, searchText, dbData)
 	helpButton := createHelpButton(toolbarCanvas)
 	randButton := createRandomButton(selectedRow, dbData)
-	faveButton := createFaveButton()
+	faveButton := createFaveButton(selectedRow, sortCategory, sortOrder, searchText, dbData)
 	updateButton := createUpdateButton()
 
 	// add them to the toolbar in horizontal row
@@ -128,9 +128,6 @@ func createExportButton(toolbarCanvas fyne.Canvas) (exportButton *widget.Button)
 //	default location to store db
 //	default location to export to
 //	default website to search first: HTLB vs Completionator
-//	dont ask for confirmation for:
-//		deleting games
-//		updating all entries without URL
 //	find way to implement menu without opening new window for window tiling managers
 //
 // PERF: possible future updates?
@@ -192,7 +189,6 @@ func createRemoveButton(
 	searchText binding.String,
 	dbData *MyDataBinding,
 ) (removeButton *widget.Button) {
-	// TODO: Ask for confirmation in new window
 	removeButton = widget.NewButtonWithIcon("Remove Game Data", theme.ContentRemoveIcon(), func() {
 		selrow, _ := selectedRow.Get()
 		if selrow >= 0 {
@@ -241,13 +237,26 @@ func createRandomButton(selectedRow binding.Int, dbData *MyDataBinding) (removeB
 	return removeButton
 }
 
-// TODO: connect to selectedRow and dbData
-// get row value from selectedRow and select row from dbData
-// toggle favorite for that game in particular
-func createFaveButton() (faveButton *widget.Button) {
+// toggle favorite for game defined by selectedRow
+func createFaveButton(
+	selectedRow binding.Int,
+	sortCategory binding.String,
+	sortOrder binding.Bool,
+	searchText binding.String,
+	dbData *MyDataBinding,
+) (faveButton *widget.Button) {
 	heartIcon := fyne.NewStaticResource("heart.svg", heartSVG)
 	faveButton = widget.NewButtonWithIcon("(Un)Favorite", theme.NewThemedResource(heartIcon), func() {
-		log.Println("(Un)Favorite the selected row")
+		selrow, _ := selectedRow.Get()
+		if selrow >= 0 {
+			// get the game name and send query for toggling favorite
+			dbdata, _ := dbData.Get()
+			dbhandler.ToggleFavorite(dbdata[selrow][0])
+
+			// update dbData and selectedRow to render changes
+			updateDBData(sortCategory, sortOrder, searchText, dbData)
+			selectedRow.Set(-1)
+		}
 	})
 
 	return faveButton
