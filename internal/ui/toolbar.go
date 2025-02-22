@@ -4,6 +4,7 @@ import (
 	_ "embed"
 	// "fmt"
 	"log"
+	"math/rand"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
@@ -35,7 +36,7 @@ func createMainWindowToolbar(
 	addButton := createAddButton(sortOrder, toolbarCanvas)
 	removeButton := createRemoveButton(selectedRow, sortCategory, sortOrder, searchText, dbData)
 	helpButton := createHelpButton(toolbarCanvas)
-	randButton := createRandomButton()
+	randButton := createRandomButton(selectedRow, dbData)
 	faveButton := createFaveButton()
 	updateButton := createUpdateButton()
 
@@ -193,7 +194,6 @@ func createRemoveButton(
 ) (removeButton *widget.Button) {
 	// TODO: Ask for confirmation in new window
 	removeButton = widget.NewButtonWithIcon("Remove Game Data", theme.ContentRemoveIcon(), func() {
-		log.Println("remove the highlighted row")
 		selrow, _ := selectedRow.Get()
 		if selrow >= 0 {
 			// get the game name and send query for deletion
@@ -217,6 +217,7 @@ func createHelpButton(toolbarCanvas fyne.Canvas) (helpButton *widget.Button) {
 			println("Opens a new window with booklet/document. Explicit with page numbers and how to do stuff")
 		}),
 		// TODO: maybe want to have version number here?
+		// Update button?
 		// Figure out what would go into Program Info and see if i can expand this menu to accommodate that data
 		fyne.NewMenuItem("Program Info", func() { println("Opens a new window with information about the Program") }),
 		fyne.NewMenuItem("Support Me <3", func() { println("Is a link such that, when clicked will take you to Ko-Fi, Paypal, etc.") }),
@@ -230,11 +231,11 @@ func createHelpButton(toolbarCanvas fyne.Canvas) (helpButton *widget.Button) {
 	return helpButton
 }
 
-// TODO: Connect this to selectedRow and dbData
 // change to random value from 1:rows
-func createRandomButton() (removeButton *widget.Button) {
+func createRandomButton(selectedRow binding.Int, dbData *MyDataBinding) (removeButton *widget.Button) {
 	removeButton = widget.NewButtonWithIcon("Random Row", theme.SearchReplaceIcon(), func() {
-		log.Println("highlight a random row in the other pane")
+		dbdata, _ := dbData.Get()
+		selectedRow.Set(rand.Intn(len(dbdata)))
 	})
 
 	return removeButton
