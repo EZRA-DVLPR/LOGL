@@ -105,8 +105,6 @@ func createDBRender(
 		updateDBData(sortCategory, sortOrder, searchText, dbData)
 		dbRender = updateTable(sortCategory, selectedRow, dbData, dbRender)
 		selectedRow.Set(-1)
-		d, _ := dbData.Get()
-		fmt.Println(d)
 		dbRender.Refresh()
 	}))
 
