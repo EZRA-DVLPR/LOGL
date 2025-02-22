@@ -226,25 +226,38 @@ func headerSetup(dbTable *widget.Table) *widget.Table {
 
 	// setup for creating the headers
 	dbTable.CreateHeader = func() fyne.CanvasObject {
-		return widget.NewLabelWithStyle(
-			// add placeholder for at least 6 characters, making 6 digit numbers display nicely
-			"______",
-			// set text to be centered and bold
-			fyne.TextAlignCenter,
-			fyne.TextStyle{Bold: true},
+		return container.NewStack(
+			widget.NewLabelWithStyle(
+				"------",
+				fyne.TextAlignCenter,
+				fyne.TextStyle{Bold: true},
+			),
+			widget.NewButton("------", nil),
 		)
 	}
 
 	// make headers display content
 	dbTable.UpdateHeader = func(id widget.TableCellID, obj fyne.CanvasObject) {
-		if id.Col >= 0 && id.Col < len(headers) {
-			// display column header text
-			obj.(*widget.Label).SetText(headers[id.Col])
+		containerObj := obj.(*fyne.Container)
+		label := containerObj.Objects[0].(*widget.Label)
+		button := containerObj.Objects[1].(*widget.Button)
+
+		if id.Row == -1 {
+			// display column header buttons
+			button.Show()
+			label.Hide()
+			button.SetText(headers[id.Col])
+			button.OnTapped = func() {
+				fmt.Println(fmt.Sprintf("Header %d clicked", id.Col))
+			}
 		} else {
-			// display row index, from 1:rows
-			obj.(*widget.Label).SetText(fmt.Sprintf("%d", id.Row+1))
+			// display row label index, from 1:rows
+			button.Hide()
+			label.Show()
+			label.SetText(fmt.Sprintf("%d", id.Row+1))
 		}
 	}
+	canvas.Refresh(dbTable)
 
 	// set column widths
 	dbTable.SetColumnWidth(0, 400)
