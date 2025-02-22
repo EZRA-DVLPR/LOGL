@@ -258,15 +258,8 @@ func ToggleFavorite(gamename string) {
 	}
 }
 
-// o/w sorts based on these criteria:
-//
-//	sortCategory == name
-//	sortCategory == main
-//	sortCategory == mainPlus
-//	sortCategory == comp
-//
-// in all cases, it will sort the list based on favorites first, then non-favorited entries
-func SortDB(sortCategory string, sortOrder bool) (dbOutput [][]string) {
+// returns query from db as [][]string given cat, ord, and query
+func SortDB(sortCategory string, sortOrder bool, queryname string) (dbOutput [][]string) {
 	db, err := sql.Open("sqlite3", "games.db")
 	if err != nil {
 		log.Fatal("Error accessing local dB: ", err)
@@ -281,14 +274,42 @@ func SortDB(sortCategory string, sortOrder bool) (dbOutput [][]string) {
 		so = "DESC"
 	}
 
-	rows, err := db.Query(fmt.Sprintf("SELECT name, main, mainPlus, comp FROM games ORDER BY favorite DESC, %s %s;", sortCategory, so))
+	// if queryname is empty, sort DB without game name similarity search
+	var rows *sql.Rows
+	if queryname == "" {
+		rows, err = db.Query(
+			fmt.Sprintf(`
+				SELECT name, main, mainPlus, comp 
+				FROM games 
+				ORDER BY favorite DESC, 
+				CASE 
+					WHEN typeof(%[1]s) = 'integer' OR %[1]s GLOB '[0-9]*' THEN CAST(%[1]s AS INTEGER) 
+					ELSE %[1]s 
+				END %[2]s;`,
+				sortCategory,
+				so,
+			),
+		)
+	} else {
+		rows, err = db.Query(
+			fmt.Sprintf(`
+				SELECT name, main, mainPlus, comp 
+				FROM games 
+				WHERE name LIKE ?
+				ORDER BY favorite DESC, 
+				CASE 
+					WHEN typeof(%[1]s) = 'integer' OR %[1]s GLOB '[0-9]*' THEN CAST(%[1]s AS INTEGER) 
+					ELSE %[1]s 
+				END %[2]s;`,
+				sortCategory,
+				so,
+			), "%"+queryname+"%")
+	}
 	if err != nil {
 		log.Fatal("Error sorting games from games table: ", err)
 	}
 
-	// TODO: MAKE SORT COMPARE NOT DIGIT-WISE BUT WHOLE VALUE WISE
-	// eg. 1234 < 2000
-
+	// format data for return
 	for rows.Next() {
 		var name string
 		var main, mainPlus, comp float64
@@ -300,49 +321,6 @@ func SortDB(sortCategory string, sortOrder bool) (dbOutput [][]string) {
 			strconv.FormatFloat(main, 'f', -1, 64),
 			strconv.FormatFloat(mainPlus, 'f', -1, 64),
 			strconv.FormatFloat(comp, 'f', -1, 64),
-		})
-	}
-	return dbOutput
-}
-
-// takes in Search string and searches DB for matches
-// PERF: Might want to combine with the above function and just have no search query if the given partialName is empty
-func SearchSortDB(sortCategory string, sortOrder bool, queryname string) (dbOutput [][]string) {
-	db, err := sql.Open("sqlite3", "games.db")
-	if err != nil {
-		log.Fatal("Error accessing local dB: ", err)
-	}
-	defer db.Close()
-
-	// if sortOrder is true => ASC. False => DESC
-	so := ""
-	if sortOrder {
-		so = "ASC"
-	} else {
-		so = "DESC"
-	}
-
-	// find partial matches given string
-	rows, err := db.Query(fmt.Sprintf(
-		"SELECT name, main, mainPlus, comp FROM games WHERE name LIKE ? ORDER BY favorite DESC, %s %s",
-		sortCategory,
-		so,
-	), "%"+queryname+"%")
-	if err != nil {
-		log.Fatal("Error retrieving partial matches given sorting opts:", err)
-	}
-	defer rows.Close()
-
-	for rows.Next() {
-		var name, main, mainPlus, comp string
-		if err := rows.Scan(&name, &main, &mainPlus, &comp); err != nil {
-			log.Fatal("Error scanning row: ", err)
-		}
-		dbOutput = append(dbOutput, []string{
-			name,
-			main,
-			mainPlus,
-			comp,
 		})
 	}
 	return dbOutput

@@ -33,7 +33,8 @@ func createDBRender(
 	// if db exists then get the data
 	// NOTE: notice there is no search text, because we initialize without any search text from the user
 	if dbhandler.CheckDBExists() {
-		dbData.Set(dbhandler.SortDB(sortcat, sortord))
+		// no initial search query so use ""
+		dbData.Set(dbhandler.SortDB(sortcat, sortord, ""))
 	}
 	data, _ := dbData.Get()
 
@@ -160,12 +161,7 @@ func updateDBData(
 	sortord, _ := sortOrder.Get()
 	searchtxt, _ := searchText.Get()
 
-	// if nonempty, search with given searchtxt
-	if strings.TrimSpace(searchtxt) == "" {
-		dbData.Set(dbhandler.SortDB(sortcat, sortord))
-	} else {
-		dbData.Set(dbhandler.SearchSortDB(sortcat, sortord, searchtxt))
-	}
+	dbData.Set(dbhandler.SortDB(sortcat, sortord, strings.TrimSpace(searchtxt)))
 }
 
 // update the contents of the given table
