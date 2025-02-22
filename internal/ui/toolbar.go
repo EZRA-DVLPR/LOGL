@@ -20,13 +20,20 @@ import (
 var heartSVG []byte
 
 // creates the toolbar with the options that will be displayed to manage the rendered DB
-func createMainWindowToolbar(toolbarCanvas fyne.Canvas, sortOrder binding.Bool) (toolbar *fyne.Container) {
+func createMainWindowToolbar(
+	toolbarCanvas fyne.Canvas,
+	sortCategory binding.String,
+	sortOrder binding.Bool,
+	searchText binding.String,
+	selectedRow binding.Int,
+	dbData *MyDataBinding,
+) (toolbar *fyne.Container) {
 	// create the buttons
 	sortButton := createSortButton(sortOrder)
 	exportButton := createExportButton(toolbarCanvas)
 	settingsButton := createSettingsButton()
 	addButton := createAddButton(sortOrder, toolbarCanvas)
-	removeButton := createRemoveButton()
+	removeButton := createRemoveButton(selectedRow, sortCategory, sortOrder, searchText, dbData)
 	helpButton := createHelpButton(toolbarCanvas)
 	randButton := createRandomButton()
 	faveButton := createFaveButton()
@@ -111,25 +118,24 @@ func createExportButton(toolbarCanvas fyne.Canvas) (exportButton *widget.Button)
 	return exportButton
 }
 
+// TODO: options:
+//
+//	Light/Dark mode
+//	increase/decrease text size
+//	update all game data
+//	delete entire db
+//	default location to store db
+//	default location to export to
+//	default website to search first: HTLB vs Completionator
+//	dont ask for confirmation for:
+//		deleting games
+//		updating all entries without URL
+//	find way to implement menu without opening new window for window tiling managers
+//
+// PERF: possible future updates?
+//
+//	Theme Selector
 func createSettingsButton() (settingsButton *widget.Button) {
-	// TODO: special case of adding a stylized menu with diff types of menu options
-	// eg. checkbox, slider, filepath, etc.
-
-	// TODO: options:
-	//		Light/Dark mode
-	//		increase/decrease text size
-	//		update all game data
-	//		delete entire db
-	//		default location to store db
-	//		default location to export to
-	//		default website to search first: HTLB vs Completionator
-	//		dont ask for confirmation for:
-	//			deleting games
-	//			updating all entries without URL
-	//		find way to implement menu without opening new window for window tiling managers
-
-	// PERF: possible future updates?
-	//		Theme Selector
 	settingsButton = widget.NewButtonWithIcon("", theme.SettingsIcon(), func() {
 		log.Println("Open the dropdown menu and show options for user config")
 	})
@@ -177,12 +183,27 @@ func createAddButton(sortOrder binding.Bool, toolbarCanvas fyne.Canvas) (addButt
 	return addButton
 }
 
-// TODO:connect to selectedRow and dbData
-// get row value and select row from dbData
-func createRemoveButton() (removeButton *widget.Button) {
+// finds selected row game name, and issues query to db
+func createRemoveButton(
+	selectedRow binding.Int,
+	sortCategory binding.String,
+	sortOrder binding.Bool,
+	searchText binding.String,
+	dbData *MyDataBinding,
+) (removeButton *widget.Button) {
 	// TODO: Ask for confirmation in new window
 	removeButton = widget.NewButtonWithIcon("Remove Game Data", theme.ContentRemoveIcon(), func() {
 		log.Println("remove the highlighted row")
+		selrow, _ := selectedRow.Get()
+		if selrow >= 0 {
+			// get the game name and send query for deletion
+			dbdata, _ := dbData.Get()
+			dbhandler.DeleteFromDB(dbdata[selrow][0])
+
+			// update dbData and selectedRow to render changes
+			updateDBData(sortCategory, sortOrder, searchText, dbData)
+			selectedRow.Set(-1)
+		}
 	})
 
 	return removeButton

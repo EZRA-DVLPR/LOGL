@@ -26,7 +26,7 @@ func StartGUI() {
 	wHeight := binding.NewFloat()
 
 	// INFO: The following bindings do not persist through sessions
-	userText := binding.NewString()
+	searchText := binding.NewString()
 	selectedRow := binding.NewInt()
 	// dont highlight any row
 	selectedRow.Set(-1)
@@ -74,8 +74,8 @@ func StartGUI() {
 	content := container.NewBorder(
 		// top is toolbar + searchbar
 		container.NewVBox(
-			createMainWindowToolbar(w.Canvas(), sortOrder),
-			createSearchBar(userText),
+			createMainWindowToolbar(w.Canvas(), sortCategory, sortOrder, searchText, selectedRow, dbData),
+			createSearchBar(searchText),
 		),
 		// TEST:: Button Widgets are in place for testing changes to table
 		// remove once implementation for sorting is done in another manner
@@ -107,7 +107,7 @@ func StartGUI() {
 		// dont render anything else in space besides DB
 		// nil, nil, nil,
 		// default to display names ASC
-		createDBRender(selectedRow, sortCategory, sortOrder, userText, dbData),
+		createDBRender(selectedRow, sortCategory, sortOrder, searchText, dbData),
 	)
 
 	w.SetContent(content)
