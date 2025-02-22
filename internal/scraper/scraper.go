@@ -10,18 +10,18 @@ import (
 )
 
 type Game struct {
-	Name, Url            string
-	Favorite             int
-	Main, MainPlus, Comp float32
+	Name, HLTBUrl, CompletionatorUrl string
+	Favorite                         int
+	Main, MainPlus, Comp             float32
 }
 
 var games []Game
 
+// TODO: make sure it only updates the url field when the game is searched.
+// otherwise update all fields excepts the urls
+
 // given the name of a game as a string, search HLTB, then get its data
 func SearchGameHLTB(gameName string) {
-	// TODO: Check if the game exists in the current database
-	// if not then add a new entry to the database
-
 	FetchHLTBRunner(SearchHLTB(gameName))
 
 	fmt.Println("Game data acquired for ", gameName)
@@ -105,7 +105,7 @@ func FetchHLTB(link string) (game Game) {
 	// when the data is acquired, log it and attach URL
 	c.OnScraped(func(r *colly.Response) {
 		// attach the url to the game
-		game.Url = link
+		game.HLTBUrl = link
 
 		// make the game not favorited
 		game.Favorite = 0
@@ -124,9 +124,7 @@ func SearchGameCompletionator(gameName string) {
 
 func FetchCompletionatorRunner(gameLink string) {
 	// given the partial link `Game/Details/3441` or something of the sort, performs the data scraping
-	// games = append(games, FetchCompletionator("https://completionator.com/"+gameLink))
-	newGame := FetchCompletionator("https://completionator.com" + gameLink)
-	fmt.Println(newGame.Name)
+	games = append(games, FetchCompletionator("https://completionator.com"+gameLink))
 }
 
 func FetchCompletionator(link string) (game Game) {
@@ -201,7 +199,7 @@ func FetchCompletionator(link string) (game Game) {
 	// when the data is acquired, log it and attach URL
 	c.OnScraped(func(r *colly.Response) {
 		// attach the url to the game
-		game.Url = link
+		game.CompletionatorUrl = link
 
 		// make the game not favorited
 		game.Favorite = 0

@@ -15,12 +15,13 @@ import (
 
 // INFO: STRUCTURE OF THE DB
 // games (table) {
-// 		name		string				PRIMARY KEY
-// 		url			string
-//		favorite	int
-//		main		real
-//		mainPlus	real
-//		comp		real
+// 		name					string		(text)			PRIMARY KEY
+// 		hltburl					string		(text)
+// 		completionatorurl		string		(text)
+//		favorite				int			(integer)
+//		main					float		(real)
+//		mainPlus				float		(real)
+//		comp					float		(real)
 //		}
 
 // creates the DB with table
@@ -36,7 +37,8 @@ func CreateDB() {
 	_, err = db.Exec(`
 	CREATE TABLE IF NOT EXISTS games (
 		name TEXT PRIMARY KEY,
-		url TEXT,
+		hltburl TEXT,
+		completionatorurl TEXT,
 		favorite INTEGER,
 		main REAL,
 		mainPlus REAL,
@@ -95,9 +97,14 @@ func ImportCSV() {
 
 	// create the table
 	var name string
-	err = db.QueryRow("SELECT name FROM sqlite_master WHERE type='table' AND name=?", "games").Scan(&name)
+	err = db.QueryRow(
+		"SELECT name FROM sqlite_master WHERE type='table' AND name=?",
+		"games",
+	).Scan(&name)
 	if err != nil {
-		createStmt := fmt.Sprintf("CREATE TABLE games (name TEXT PRIMARY KEY, url TEXT, favorite INTEGER, main REAL, mainPlus REAL, comp REAL)")
+		createStmt := fmt.Sprintf(
+			"CREATE TABLE games (name TEXT PRIMARY KEY, hltburl TEXT, completionatorurl TEXT, favorite INTEGER, main REAL, mainPlus REAL, comp REAL)",
+		)
 		_, err := db.Exec(createStmt)
 		if err != nil {
 			log.Fatal("Error creating table:", err)
@@ -198,7 +205,8 @@ func DeleteFromDB(gamename string) {
 // if the given game is not empty and not already existent in DB, then add to the DB
 func AddToDB(game scraper.Game) {
 	if (game.Name == "") &&
-		(game.Url == "") &&
+		(game.HLTBUrl == "") &&
+		(game.CompletionatorUrl == "") &&
 		(game.Main == -1) &&
 		(game.MainPlus == -1) &&
 		(game.Comp == -1) {
@@ -224,7 +232,16 @@ func AddToDB(game scraper.Game) {
 
 	fmt.Println("Adding the game data to the local DB")
 
-	_, err = db.Exec("INSERT OR IGNORE INTO games (name, url, favorite, main, mainPlus, comp) VALUES (?,?,?,?,?,?)", game.Name, game.Url, game.Favorite, game.Main, game.MainPlus, game.Comp)
+	_, err = db.Exec(
+		"INSERT OR IGNORE INTO games (name, hltburl, completionatorurl, favorite, main, mainPlus, comp) VALUES (?,?,?,?,?,?)",
+		game.Name,
+		game.HLTBUrl,
+		game.CompletionatorUrl,
+		game.Favorite,
+		game.Main,
+		game.MainPlus,
+		game.Comp,
+	)
 	if err != nil {
 		log.Fatal("Error inserting game: ", err)
 	}
@@ -266,7 +283,7 @@ func SortDB(sortCategory string, sortOrder bool, queryname string) (dbOutput [][
 	}
 	defer db.Close()
 
-	// if sortOrder is true => ASC. False => DESC
+	// if sortOrder is true => ASC. false => DESC
 	so := ""
 	if sortOrder {
 		so = "ASC"
@@ -274,7 +291,7 @@ func SortDB(sortCategory string, sortOrder bool, queryname string) (dbOutput [][
 		so = "DESC"
 	}
 
-	// if queryname is empty, sort DB without game name similarity search
+	// if queryname is empty, sort DB without searching for similar game names
 	var rows *sql.Rows
 	if queryname == "" {
 		rows, err = db.Query(

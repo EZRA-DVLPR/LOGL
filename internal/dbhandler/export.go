@@ -43,7 +43,7 @@ func exportSQL() {
 
 	// begin dump
 	fmt.Println("Exporting database to", outputFile)
-	file.WriteString("PRAGMA foreign_keys=OFF;\nBEGIN TRANSACTION;\n")
+	file.WriteString("BEGIN TRANSACTION;\n")
 
 	//export schema
 	rows, err := db.Query("SELECT sql FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%';")
@@ -127,7 +127,7 @@ func exportSQL() {
 	}
 
 	// end dump
-	file.WriteString("COMMIT;\nPRAGMA foreign_keys=ON;\n")
+	file.WriteString("COMMIT;\n")
 	fmt.Println("Export to SQL completed successfully.")
 
 	return
