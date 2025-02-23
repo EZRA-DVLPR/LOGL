@@ -181,7 +181,7 @@ func createAddButton(
 		// TODO: re render the dbrender widget whenever one of these is called
 		fyne.NewMenuItem("Manual Entry", func() {
 			println("Open New Window with form for game data entry")
-			// manualEntryPopup(a)
+			manualEntryPopup(a)
 		}),
 		// TODO: Fix the below functions so they re render the DB properly
 		// Should be connected to dbData
