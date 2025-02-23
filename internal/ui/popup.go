@@ -147,9 +147,10 @@ func manualEntryPopup(
 				newgame.Favorite = 0
 
 				dbhandler.AddToDB(newgame)
-
-				// re render db in program
 				updateDBData(sortCategory, sortOrder, searchText, dbData)
+
+				// refresh the DB lol
+				selectedRow.Set(0)
 				selectedRow.Set(-1)
 			}
 			w2.Close()

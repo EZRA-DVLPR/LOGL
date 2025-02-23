@@ -114,7 +114,7 @@ func AddToDB(game scraper.Game) {
 	fmt.Println("Adding the game data to the local DB")
 
 	_, err = db.Exec(
-		"INSERT OR IGNORE INTO games (name, hltburl, completionatorurl, favorite, main, mainPlus, comp) VALUES (?,?,?,?,?,?)",
+		"INSERT OR IGNORE INTO games (name, hltburl, completionatorurl, favorite, main, mainPlus, comp) VALUES (?,?,?,?,?,?,?)",
 		game.Name,
 		game.HLTBUrl,
 		game.CompletionatorUrl,

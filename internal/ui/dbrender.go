@@ -35,6 +35,8 @@ func createDBRender(
 	if dbhandler.CheckDBExists() {
 		// no initial search query so use ""
 		dbData.Set(dbhandler.SortDB(sortcat, sortord, ""))
+	} else {
+		dbhandler.CreateDB()
 	}
 	data, _ := dbData.Get()
 
