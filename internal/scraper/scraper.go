@@ -15,26 +15,20 @@ type Game struct {
 	Main, MainPlus, Comp             float32
 }
 
-var games []Game
-
-// TODO: make sure it only updates the url field when the game is searched.
-// otherwise update all fields excepts the urls
-
-// given the name of a game as a string, search HLTB, then get its data
-func SearchGameHLTB(gameName string) {
-	FetchHLTBRunner(SearchHLTB(gameName))
-
-	fmt.Println("Game data acquired for ", gameName)
-}
-
-// given a link to a particular game, fetch the data for it
-// eg. /game/42069
-func FetchHLTBRunner(gameLink string) {
-	games = append(games, FetchHLTB("https://howlongtobeat.com"+gameLink))
+// given the name of a game as a string, search HLTB, get its data and return as game struct
+func SearchGameHLTB(gameName string) Game {
+	searchRes := searchHLTB(gameName)
+	if searchRes == "" {
+		// return empty game
+		var emptyGame Game
+		return emptyGame
+	} else {
+		return fetchHLTB("https://howlongtobeat.com" + searchHLTB(gameName))
+	}
 }
 
 // given the entire proper link for HLTB, obtain information for the game
-func FetchHLTB(link string) (game Game) {
+func fetchHLTB(link string) (game Game) {
 	// declare the collector object so the scraping process can begin
 	c := colly.NewCollector()
 
@@ -98,8 +92,8 @@ func FetchHLTB(link string) (game Game) {
 
 	// set the game name
 	c.OnHTML("div.GameHeader_profile_header__q_PID", func(e *colly.HTMLElement) {
-		game.Name = strings.TrimSpace(e.Text)
 		// remove the stuff after the <br>
+		game.Name = strings.TrimSpace(e.Text)
 	})
 
 	// when the data is acquired, log it and attach URL
@@ -118,16 +112,19 @@ func FetchHLTB(link string) (game Game) {
 	return
 }
 
-func SearchGameCompletionator(gameName string) {
-	FetchCompletionatorRunner(SearchCompletionator(gameName))
+// given the name of a game as a string, search Completionator, get its data and return as game struct
+func SearchGameCompletionator(gameName string) Game {
+	searchRes := searchCompletionator(gameName)
+	if searchRes == "" {
+		// return empty game
+		var emptyGame Game
+		return emptyGame
+	} else {
+		return fetchCompletionator("https://completionator.com" + searchRes)
+	}
 }
 
-func FetchCompletionatorRunner(gameLink string) {
-	// given the partial link `Game/Details/3441` or something of the sort, performs the data scraping
-	games = append(games, FetchCompletionator("https://completionator.com"+gameLink))
-}
-
-func FetchCompletionator(link string) (game Game) {
+func fetchCompletionator(link string) (game Game) {
 	// declare the collector object so the scraping process can begin
 	c := colly.NewCollector()
 
@@ -147,25 +144,8 @@ func FetchCompletionator(link string) (game Game) {
 			// dont grab the data that is from the following categories:
 			// 		"speed run"
 			if el.ChildText("h5") != "speed run" {
-				// TODO: check if the game has special categories like "Co-op" or "single-player"
-
-				// if the current label is "Co-Op" or "Single-Player"
-				// check if there is a value for "Main Story"
-				// 			if true: compare the values and take the higher
-				// 			else: make "Main Story" data
-				// else write the the data as is
-
-				if (el.ChildText("h5") == "Co-Op") || (el.ChildText("h5") == "Single-Player") {
-					// if main story data exists, overwrite only if new data is greater
-					if (game.Main != 0) && (game.Main < cleanTime(el.ChildText("h3"))) {
-						// There's no Main Story data so write it
-						game.Main = cleanTime(el.ChildText("h3"))
-					} else if game.Main == 0 {
-						game.Main = cleanTime(el.ChildText("h3"))
-					}
-				}
-
 				// write the data for Main Story, Main + Sides, and Completionist
+				// In completionator they are saved as "core + few", "core + lots", "completionated"
 				if el.ChildText("h5") == "core + few" {
 					game.Main = cleanTime(el.ChildText("h3"))
 				}

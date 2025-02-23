@@ -28,12 +28,13 @@ func createMainWindowToolbar(
 	searchText binding.String,
 	selectedRow binding.Int,
 	dbData *MyDataBinding,
+	a fyne.App,
 ) (toolbar *fyne.Container) {
 	// create the buttons
 	sortButton := createSortButton(sortOrder)
 	exportButton := createExportButton(toolbarCanvas)
 	settingsButton := createSettingsButton()
-	addButton := createAddButton(sortOrder, toolbarCanvas)
+	addButton := createAddButton(sortOrder, toolbarCanvas, a)
 	removeButton := createRemoveButton(selectedRow, sortCategory, sortOrder, searchText, dbData)
 	helpButton := createHelpButton(toolbarCanvas)
 	randButton := createRandomButton(selectedRow, dbData)
@@ -62,7 +63,8 @@ func createMainWindowToolbar(
 		helpButton,
 	)
 
-	// TODO: change size of each button depending on the size of the given window
+	// PERF: change size of each button depending on the size of the given window
+	// 1. make toolbar use gridwraplayout
 	// toolbar = container.New(
 	// 	layout.NewGridWrapLayout(fyne.NewSize(200, 50)),
 	// 	sortButton,
@@ -75,6 +77,7 @@ func createMainWindowToolbar(
 	// 	settingsButton,
 	// 	helpButton,
 	// )
+	// 2. remove text next to buttons
 
 	return toolbar
 }
@@ -159,7 +162,11 @@ func createSettingsButton() (settingsButton *widget.Button) {
 
 // TODO: connect to dbData
 // get data and append the new value
-func createAddButton(sortOrder binding.Bool, toolbarCanvas fyne.Canvas) (addButton *widget.Button) {
+func createAddButton(
+	sortOrder binding.Bool,
+	toolbarCanvas fyne.Canvas,
+	a fyne.App,
+) (addButton *widget.Button) {
 	addButton = widget.NewButtonWithIcon("Add Game Data", theme.ContentAddIcon(), func() {
 		log.Println("dropdown menu of diff ways to add data")
 	})
@@ -169,10 +176,12 @@ func createAddButton(sortOrder binding.Bool, toolbarCanvas fyne.Canvas) (addButt
 		// TODO: re render the dbrender widget whenever one of these is called
 		fyne.NewMenuItem("Single Game Search", func() {
 			println("Open New window for single game name entry")
+			singleGameNameSearchPopup(a)
 		}),
 		// TODO: re render the dbrender widget whenever one of these is called
 		fyne.NewMenuItem("Manual Entry", func() {
 			println("Open New Window with form for game data entry")
+			// manualEntryPopup(a)
 		}),
 		// TODO: Fix the below functions so they re render the DB properly
 		// Should be connected to dbData

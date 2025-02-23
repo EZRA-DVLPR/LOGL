@@ -74,7 +74,7 @@ func StartGUI() {
 	content := container.NewBorder(
 		// top is toolbar + searchbar
 		container.NewVBox(
-			createMainWindowToolbar(w.Canvas(), sortCategory, sortOrder, searchText, selectedRow, dbData),
+			createMainWindowToolbar(w.Canvas(), sortCategory, sortOrder, searchText, selectedRow, dbData, a),
 			createSearchBar(searchText),
 		),
 		// dont render anything else in space besides DB

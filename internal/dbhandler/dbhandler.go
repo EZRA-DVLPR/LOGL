@@ -130,6 +130,25 @@ func AddToDB(game scraper.Game) {
 	fmt.Println("Finished adding the game data to the local DB")
 }
 
+// given the name of a game, search from data sites, then add struct to DB
+func SearchAddToDB(gamename string, searchStyle int) {
+	// get the data from scraper using sources
+	switch searchStyle {
+	case 0:
+		fmt.Println("Both")
+	case 1:
+		fmt.Println("HLTB")
+	case 2:
+		fmt.Println("Completionator")
+	default:
+		fmt.Println("No such searchStyle")
+	}
+	fmt.Println(gamename, searchStyle)
+
+	// var newgame scraper.Game
+	// AddToDB(newgame)
+}
+
 // if the given game is not empty, then toggle favorite
 func ToggleFavorite(gamename string) {
 	db, err := sql.Open("sqlite3", "games.db")
