@@ -34,7 +34,7 @@ func createMainWindowToolbar(
 	sortButton := createSortButton(sortOrder)
 	exportButton := createExportButton(toolbarCanvas)
 	settingsButton := createSettingsButton()
-	addButton := createAddButton(sortOrder, toolbarCanvas, a)
+	addButton := createAddButton(a, sortCategory, sortOrder, searchText, dbData, selectedRow, toolbarCanvas)
 	removeButton := createRemoveButton(selectedRow, sortCategory, sortOrder, searchText, dbData)
 	helpButton := createHelpButton(toolbarCanvas)
 	randButton := createRandomButton(selectedRow, dbData)
@@ -105,7 +105,7 @@ func createSortButton(sortOrder binding.Bool) (sortButton *widget.Button) {
 	return sortButton
 }
 
-// opens mini-menu to select export option
+// opens dropbown list to select export option
 func createExportButton(toolbarCanvas fyne.Canvas) (exportButton *widget.Button) {
 	// create a button without a function
 	exportButton = widget.NewButtonWithIcon("", theme.MailSendIcon(), nil)
@@ -146,11 +146,11 @@ func createExportButton(toolbarCanvas fyne.Canvas) (exportButton *widget.Button)
 //	delete entire db
 //	default location to store db
 //	default location to export to
-//	default website to search first: HTLB vs Completionator
-//	find way to implement menu without opening new window for window tiling managers
+//	default website to search: HTLB vs Completionator vs Both
 //
 // PERF: possible future updates?
 //
+//	find way to implement menu without opening new window for window tiling managers
 //	Theme Selector
 func createSettingsButton() (settingsButton *widget.Button) {
 	settingsButton = widget.NewButtonWithIcon("", theme.SettingsIcon(), func() {
@@ -163,9 +163,13 @@ func createSettingsButton() (settingsButton *widget.Button) {
 // TODO: connect to dbData
 // get data and append the new value
 func createAddButton(
-	sortOrder binding.Bool,
-	toolbarCanvas fyne.Canvas,
 	a fyne.App,
+	sortCategory binding.String,
+	sortOrder binding.Bool,
+	searchText binding.String,
+	dbData *MyDataBinding,
+	selectedRow binding.Int,
+	toolbarCanvas fyne.Canvas,
 ) (addButton *widget.Button) {
 	addButton = widget.NewButtonWithIcon("Add Game Data", theme.ContentAddIcon(), func() {
 		log.Println("dropdown menu of diff ways to add data")
@@ -181,7 +185,7 @@ func createAddButton(
 		// TODO: re render the dbrender widget whenever one of these is called
 		fyne.NewMenuItem("Manual Entry", func() {
 			println("Open New Window with form for game data entry")
-			manualEntryPopup(a)
+			manualEntryPopup(a, sortCategory, sortOrder, searchText, dbData, selectedRow)
 		}),
 		// TODO: Fix the below functions so they re render the DB properly
 		// Should be connected to dbData
