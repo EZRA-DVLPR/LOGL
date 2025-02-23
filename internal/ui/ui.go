@@ -23,6 +23,7 @@ func StartGUI() {
 	dbData := NewMyDataBindingEmpty()
 	wWidth := binding.NewFloat()
 	wHeight := binding.NewFloat()
+	searchSource := binding.NewString()
 
 	// INFO: The following bindings do not persist through sessions
 	searchText := binding.NewString()
@@ -31,15 +32,16 @@ func StartGUI() {
 	selectedRow.Set(-1)
 
 	// load sort category from pref storage. default to "name"  i.e. Game Name
-	storedSortCategory := prefs.String("sort_category")
-	if storedSortCategory == "" {
-		storedSortCategory = "name"
-	}
+	storedSortCategory := prefs.StringWithFallback("sort_category", "name")
 	sortCategory.Set(storedSortCategory)
 
 	// load sort order from preferences storage. default to true (ASC)
 	storedSortOrder := prefs.BoolWithFallback("sort_order", true)
 	sortOrder.Set(storedSortOrder)
+
+	// load search sort from preferences storage. default to "All"
+	storedSearchSort := prefs.StringWithFallback("search source", "All")
+	searchSource.Set(storedSearchSort)
 
 	// TODO: Handle default sizes of window when i finalize the length/size of the toolbar with icons
 	// default window size accommodates changing of "ASC"/"DESC" without changing size of window (1140, 400) (W,H)
@@ -74,7 +76,7 @@ func StartGUI() {
 	content := container.NewBorder(
 		// top is toolbar + searchbar
 		container.NewVBox(
-			createMainWindowToolbar(w.Canvas(), sortCategory, sortOrder, searchText, selectedRow, dbData, a),
+			createMainWindowToolbar(w.Canvas(), sortCategory, sortOrder, searchText, selectedRow, dbData, searchSource, a),
 			createSearchBar(searchText),
 		),
 		// dont render anything else in space besides DB
@@ -107,6 +109,10 @@ func StartGUI() {
 		wHeight.Set(float64(height))
 		wH, _ = wHeight.Get()
 		prefs.SetFloat("w_height", wH)
+
+		// save search source
+		ss, _ := searchSource.Get()
+		prefs.SetString("search_source", ss)
 	})
 
 	// runloop for the app

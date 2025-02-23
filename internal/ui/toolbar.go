@@ -28,13 +28,14 @@ func createMainWindowToolbar(
 	searchText binding.String,
 	selectedRow binding.Int,
 	dbData *MyDataBinding,
+	searchSource binding.String,
 	a fyne.App,
 ) (toolbar *fyne.Container) {
 	// create the buttons
 	sortButton := createSortButton(sortOrder)
 	exportButton := createExportButton(toolbarCanvas)
 	settingsButton := createSettingsButton()
-	addButton := createAddButton(a, sortCategory, sortOrder, searchText, dbData, selectedRow, toolbarCanvas)
+	addButton := createAddButton(a, sortCategory, sortOrder, searchText, dbData, selectedRow, searchSource, toolbarCanvas)
 	removeButton := createRemoveButton(selectedRow, sortCategory, sortOrder, searchText, dbData)
 	helpButton := createHelpButton(toolbarCanvas)
 	randButton := createRandomButton(selectedRow, dbData)
@@ -147,6 +148,7 @@ func createExportButton(toolbarCanvas fyne.Canvas) (exportButton *widget.Button)
 //	default location to store db
 //	default location to export to
 //	default website to search: HTLB vs Completionator vs Both
+//			ss, _ := searchSource.Get()
 //
 // PERF: possible future updates?
 //
@@ -169,6 +171,7 @@ func createAddButton(
 	searchText binding.String,
 	dbData *MyDataBinding,
 	selectedRow binding.Int,
+	searchSource binding.String,
 	toolbarCanvas fyne.Canvas,
 ) (addButton *widget.Button) {
 	addButton = widget.NewButtonWithIcon("Add Game Data", theme.ContentAddIcon(), func() {
@@ -180,7 +183,7 @@ func createAddButton(
 		// TODO: re render the dbrender widget whenever one of these is called
 		fyne.NewMenuItem("Single Game Search", func() {
 			println("Open New window for single game name entry")
-			singleGameNameSearchPopup(a)
+			singleGameNameSearchPopup(a, searchSource)
 		}),
 		// TODO: re render the dbrender widget whenever one of these is called
 		fyne.NewMenuItem("Manual Entry", func() {

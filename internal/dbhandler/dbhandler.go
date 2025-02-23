@@ -46,7 +46,7 @@ func CreateDB() {
 		log.Fatal("Error creating games table:", err)
 	}
 
-	fmt.Println("Created the local DBs successfully")
+	log.Println("Created the local DBs successfully")
 }
 
 func CheckDBExists() bool {
@@ -79,7 +79,7 @@ func DeleteFromDB(gamename string) {
 	}
 
 	if rowsAffected(res, gamename) {
-		fmt.Println("Game deleted: ", gamename)
+		log.Println("Game deleted: ", gamename)
 	}
 }
 
@@ -91,7 +91,7 @@ func AddToDB(game scraper.Game) {
 		(game.Main == -1) &&
 		(game.MainPlus == -1) &&
 		(game.Comp == -1) {
-		fmt.Println("No game data received for associate game.")
+		log.Println("No game data received for associate game.")
 		return
 	}
 
@@ -107,11 +107,11 @@ func AddToDB(game scraper.Game) {
 		log.Fatal("Error checking game existence", err)
 	}
 	if exists {
-		fmt.Println("Game already exists in local DB!\nSkipping insertion")
+		log.Println("Game already exists in local DB!\nSkipping insertion")
 		return
 	}
 
-	fmt.Println("Adding the game data to the local DB")
+	log.Println("Adding the game data to the local DB")
 
 	_, err = db.Exec(
 		"INSERT OR IGNORE INTO games (name, hltburl, completionatorurl, favorite, main, mainPlus, comp) VALUES (?,?,?,?,?,?,?)",
@@ -127,23 +127,23 @@ func AddToDB(game scraper.Game) {
 		log.Fatal("Error inserting game: ", err)
 	}
 
-	fmt.Println("Finished adding the game data to the local DB")
+	log.Println("Finished adding the game data to the local DB")
 }
 
 // given the name of a game, search from data sites, then add struct to DB
-func SearchAddToDB(gamename string, searchStyle int) {
+func SearchAddToDB(gamename string, searchSource string) {
 	// get the data from scraper using sources
-	switch searchStyle {
-	case 0:
-		fmt.Println("Both")
-	case 1:
-		fmt.Println("HLTB")
-	case 2:
-		fmt.Println("Completionator")
+	switch searchSource {
+	case "All":
+		log.Println("Both")
+	case "HLTB":
+		log.Println("HLTB")
+	case "COMP":
+		log.Println("Completionator")
 	default:
-		fmt.Println("No such searchStyle")
+		log.Println("No such search style")
 	}
-	fmt.Println(gamename, searchStyle)
+	fmt.Println(gamename, searchSource)
 
 	// var newgame scraper.Game
 	// AddToDB(newgame)
@@ -171,7 +171,7 @@ func ToggleFavorite(gamename string) {
 	}
 
 	if rowsAffected(res, gamename) {
-		fmt.Println("Toggled Favorite for given game:", gamename)
+		log.Println("Toggled Favorite for given game:", gamename)
 	}
 }
 
@@ -269,7 +269,7 @@ func rowsAffected(res sql.Result, name string) (wereAffected bool) {
 		log.Fatal("Error checking affected rows: ", err)
 	}
 	if rowsAffected == 0 {
-		fmt.Printf("Game `%s` not found in local database\n", name)
+		log.Printf("Game `%s` not found in local database\n", name)
 		return false
 	}
 	return true

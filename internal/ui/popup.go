@@ -16,7 +16,7 @@ import (
 // window for popup that will be modified for the following functions
 var w2 fyne.Window
 
-func singleGameNameSearchPopup(a fyne.App) {
+func singleGameNameSearchPopup(a fyne.App, searchSource binding.String) {
 	// if w2 already exists then focus it and complete task
 	if w2 != nil {
 		w2.RequestFocus()
@@ -36,7 +36,8 @@ func singleGameNameSearchPopup(a fyne.App) {
 			widget.NewButton("Begin Search", func() {
 				// if entry is non-empty then perform search
 				if entry.Text != "" {
-					dbhandler.SearchAddToDB(entry.Text, 0)
+					ss, _ := searchSource.Get()
+					dbhandler.SearchAddToDB(entry.Text, ss)
 				} else {
 					log.Println("No game name given")
 				}
