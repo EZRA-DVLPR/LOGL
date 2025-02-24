@@ -141,6 +141,19 @@ func SearchAddToDB(gamename string, searchSource string) {
 		hltbSearch := scraper.SearchGameHLTB(gamename)
 		completionatorSearch := scraper.SearchGameCompletionator(gamename)
 
+		// if both are empty, then dont add to DB
+		if hltbSearch.Name == "" &&
+			hltbSearch.Main == 0 &&
+			hltbSearch.MainPlus == 0 &&
+			hltbSearch.Comp == 0 &&
+			completionatorSearch.Name == "" &&
+			completionatorSearch.Main == 0 &&
+			completionatorSearch.MainPlus == 0 &&
+			completionatorSearch.Comp == 0 {
+			log.Println("No Game Data for game Found!")
+			return
+		}
+
 		// name might be different from each source, so save the one given from user
 		newgame.Name = gamename
 

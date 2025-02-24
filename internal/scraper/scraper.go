@@ -16,7 +16,9 @@ type Game struct {
 }
 
 // given the name of a game as a string, search HLTB, get its data and return as game struct
+// TODO: if the result is empty, prompt a google search and then obtain the first link from google
 func SearchGameHLTB(gameName string) Game {
+	log.Println("Searching HLTB for game...")
 	searchRes := searchHLTB(gameName)
 	if searchRes == "" {
 		// return empty game
@@ -113,7 +115,9 @@ func fetchHLTB(link string) (game Game) {
 }
 
 // given the name of a game as a string, search Completionator, get its data and return as game struct
+// TODO: if the result is empty, prompt a google search and then obtain the first link from google
 func SearchGameCompletionator(gameName string) Game {
+	log.Println("Searching Completionator for game...")
 	searchRes := searchCompletionator(gameName)
 	if searchRes == "" {
 		// return empty game

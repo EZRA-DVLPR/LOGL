@@ -14,7 +14,7 @@ import (
 // eg. /game/68151
 func searchHLTB(query string) (gameLink string) {
 	// Define a custom user agent
-	userAgent := "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+	userAgent := "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36"
 
 	// Set Chrome options for headless execution
 	opts := append(chromedp.DefaultExecAllocatorOptions[:],
@@ -29,7 +29,7 @@ func searchHLTB(query string) (gameLink string) {
 	defer cancel()
 
 	// 3 second timeout in the event there is no game found from search
-	ctx, cancel := context.WithTimeout(allocCtx, 5*time.Second)
+	ctx, cancel := context.WithTimeout(allocCtx, 3*time.Second)
 	defer cancel()
 
 	// Create a new Chrome context
@@ -45,9 +45,11 @@ func searchHLTB(query string) (gameLink string) {
 	)
 	if err != nil {
 		if errors.Is(err, context.DeadlineExceeded) {
-			log.Fatal("No such game found within the timeout of 3 seconds!")
+			log.Println("No such game found within the timeout of 3 seconds!")
+			return ""
 		} else {
-			log.Fatal(err)
+			log.Println(err)
+			return ""
 		}
 	}
 
