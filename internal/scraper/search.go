@@ -109,9 +109,11 @@ func searchCompletionator(query string) (gameLink string) {
 	)
 	if err != nil {
 		if errors.Is(err, context.DeadlineExceeded) {
-			log.Fatal("No such game found within the timeout of 3 seconds!")
+			log.Println("No such game found within the timeout of 3 seconds!")
+			return ""
 		} else {
-			log.Fatal(err)
+			log.Println(err)
+			return ""
 		}
 	}
 
@@ -133,40 +135,34 @@ func extractLinkCompletionator(pageHTML string) (gameLink string) {
 	return pageHTML[firstindex+ahrefindex : firstindex+ahrefindex+suffindex]
 }
 
-// searches google for game that failed HLTB query
-func SearchBing(query string) (gameLink string) {
-	log.Println("searching google..")
-
+// searches Bing for game that failed HLTB query
+func searchBing(query string) (gameLink string) {
 	userAgent := "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36"
 
-	// Set Chrome options for headless execution
 	opts := append(chromedp.DefaultExecAllocatorOptions[:],
-		chromedp.Flag("headless", true),    // Ensure Chrome runs headless
-		chromedp.Flag("disable-gpu", true), // Disable GPU to avoid issues
-		chromedp.Flag("no-sandbox", true),  // Required for some environments
-		chromedp.UserAgent(userAgent),      // Set custom user agent
+		chromedp.Flag("headless", true),
+		chromedp.Flag("disable-gpu", true),
+		chromedp.Flag("no-sandbox", true),
+		chromedp.UserAgent(userAgent),
 	)
-	// Create an allocator with the defined options
+
 	allocCtx, cancel := chromedp.NewExecAllocator(context.Background(), opts...)
 	defer cancel()
 
-	// // Timeout context to prevent hanging
 	ctx, cancel := context.WithTimeout(allocCtx, 10*time.Second)
 	defer cancel()
-	// Create a new Chrome context
+
 	ctx, cancel = chromedp.NewContext(ctx)
 	defer cancel()
 
 	var pageHTML string
-	// Run Chrome actions
 	err := chromedp.Run(ctx,
-		// Navigate to Google
+		// make bing search
 		chromedp.Navigate("https://www.bing.com/search?q=hltb+"+query),
 
 		// wait 0.5 seconds to grab data
 		chromedp.Sleep(500*time.Millisecond),
 
-		// Extract the search result titles
 		chromedp.OuterHTML("html", &pageHTML),
 	)
 	if err != nil {
@@ -197,6 +193,7 @@ func extractLinkBing(pageHTML string) (gameLink string) {
 	gameLink = pageHTML[firstindex+ahrefindexstart : firstindex+ahrefindexstart+ahrefindexend]
 
 	// use REGEX to strip the link of what is undesired
+	// `https://howlongtobeat.com/game/####` is the desired string
 
 	pattern := `https:\/\/howlongtobeat\.com\/game\/[0-9]+`
 	re := regexp.MustCompile(pattern)

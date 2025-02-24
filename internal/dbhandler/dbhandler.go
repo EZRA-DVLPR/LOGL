@@ -137,6 +137,8 @@ func SearchAddToDB(gamename string, searchSource string) {
 
 	switch searchSource {
 	case "All":
+		log.Println("Searching from all sources for game data")
+
 		// search both and obtain game structs from each source
 		hltbSearch := scraper.SearchGameHLTB(gamename)
 		completionatorSearch := scraper.SearchGameCompletionator(gamename)
@@ -151,12 +153,11 @@ func SearchAddToDB(gamename string, searchSource string) {
 			completionatorSearch.MainPlus == 0 &&
 			completionatorSearch.Comp == 0 {
 			log.Println("No Game Data for game Found!")
-			log.Println("Searching Bing")
-			scraper.SearchBing(gamename)
 			return
 		}
 
 		// name might be different from each source, so save the one given from user
+		// PERF: if only one source is retrieved with data, then use the name from that source
 		newgame.Name = gamename
 
 		// save each url
@@ -181,21 +182,9 @@ func SearchAddToDB(gamename string, searchSource string) {
 		}
 
 	case "HLTB":
-		log.Println("HLTB")
 		newgame = scraper.SearchGameHLTB(gamename)
 
-		if newgame.Name == "" &&
-			newgame.Main == 0 &&
-			newgame.MainPlus == 0 &&
-			newgame.Comp == 0 {
-			log.Println("No Game Data for game Found!")
-			log.Println("Searching Bing")
-			scraper.SearchBing(gamename)
-			return
-		}
-
 	case "COMP":
-		log.Println("Completionator")
 		newgame = scraper.SearchGameCompletionator(gamename)
 
 	default:
@@ -203,6 +192,7 @@ func SearchAddToDB(gamename string, searchSource string) {
 		return
 	}
 
+	// with the data retrieved, add it to DB
 	AddToDB(newgame)
 }
 

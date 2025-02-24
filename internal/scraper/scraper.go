@@ -1,7 +1,6 @@
 package scraper
 
 import (
-	"fmt"
 	"log"
 	"strconv"
 	"strings"
@@ -16,16 +15,29 @@ type Game struct {
 }
 
 // given the name of a game as a string, search HLTB, get its data and return as game struct
-// TODO: if the result is empty, prompt a google search and then obtain the first link from google
+// if the search fails, then searches bing and gets the first hit
 func SearchGameHLTB(gameName string) Game {
 	log.Println("Searching HLTB for game...")
+
 	searchRes := searchHLTB(gameName)
 	if searchRes == "" {
+		log.Println("Querying HLTB Failed. Retrying through Bing Search...")
+		// try via bing search
+		searchRes = searchBing(gameName)
+
 		// return empty game
-		var emptyGame Game
-		return emptyGame
+		if searchRes == "" {
+			log.Println("No Link found. Process Aborted!")
+			var emptyGame Game
+			return emptyGame
+		}
+
+		log.Println("Link obtained. Web Scraping process beginning...")
+		return fetchHLTB(searchRes)
+
 	} else {
-		return fetchHLTB("https://howlongtobeat.com" + searchHLTB(gameName))
+		log.Println("Link obtained. Web Scraping process beginning...")
+		return fetchHLTB("https://howlongtobeat.com" + searchRes)
 	}
 }
 
@@ -36,7 +48,7 @@ func fetchHLTB(link string) (game Game) {
 
 	// establish connection to HLTB
 	c.OnRequest(func(r *colly.Request) {
-		fmt.Println("Connection made to HLTB")
+		log.Println("Connection made to HLTB")
 	})
 
 	// log that there was a problem accessing the URL
@@ -106,7 +118,7 @@ func fetchHLTB(link string) (game Game) {
 		// make the game not favorited
 		game.Favorite = 0
 
-		fmt.Println("Data Obtained!", r.Request.URL)
+		log.Println("Data Obtained!", r.Request.URL)
 	})
 
 	c.Visit(link)
@@ -119,10 +131,11 @@ func SearchGameCompletionator(gameName string) Game {
 	log.Println("Searching Completionator for game...")
 	searchRes := searchCompletionator(gameName)
 	if searchRes == "" {
-		// return empty game
+		log.Println("No Link found. Process Aborted!")
 		var emptyGame Game
 		return emptyGame
 	} else {
+		log.Println("Link obtained. Web Scraping process beginning...")
 		return fetchCompletionator("https://completionator.com" + searchRes)
 	}
 }
@@ -133,7 +146,7 @@ func fetchCompletionator(link string) (game Game) {
 
 	// establish connection to Completionator
 	c.OnRequest(func(r *colly.Request) {
-		fmt.Println("Connection made to Completionator")
+		log.Println("Connection made to Completionator")
 	})
 
 	// log that there was a problem accessing the URL
@@ -187,7 +200,7 @@ func fetchCompletionator(link string) (game Game) {
 		// make the game not favorited
 		game.Favorite = 0
 
-		fmt.Println("Data Obtained!", r.Request.URL)
+		log.Println("Data Obtained!", r.Request.URL)
 	})
 
 	c.Visit(link)
@@ -214,7 +227,7 @@ func cleanTime(time string) (cleanTime float32) {
 	// convert the whole number portion to a float 32
 	cleanTimeWhole, err := strconv.ParseFloat(time, 32)
 	if err != nil {
-		fmt.Println("error converting given clean time to float", err)
+		log.Println("Error converting given Clean Time to Float", err)
 	}
 
 	cleanTime = cleanTime + float32(cleanTimeWhole)
