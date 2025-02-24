@@ -112,7 +112,6 @@ func createExportButton(toolbarCanvas fyne.Canvas) (exportButton *widget.Button)
 	exportButton = widget.NewButtonWithIcon("", theme.MailSendIcon(), nil)
 
 	// create the dropdown menu items for exporting
-	// PERF: Export the current view, not the default one in the database
 	menu := fyne.NewMenu("",
 		fyne.NewMenuItem("Export to SQL", func() {
 			println("Export to SQL")
@@ -122,6 +121,7 @@ func createExportButton(toolbarCanvas fyne.Canvas) (exportButton *widget.Button)
 			println("Export to CSV")
 			dbhandler.Export(2)
 		}),
+		// PERF: Export the current view, not the default one in the database
 		fyne.NewMenuItem("Export to Markdown", func() {
 			println("Export to Markdown")
 			dbhandler.Export(3)
@@ -183,12 +183,27 @@ func createAddButton(
 		// TODO: re render the dbrender widget whenever one of these is called
 		fyne.NewMenuItem("Single Game Search", func() {
 			println("Open New window for single game name entry")
-			singleGameNameSearchPopup(a, searchSource)
+			singleGameNameSearchPopup(
+				a,
+				searchSource,
+				sortCategory,
+				sortOrder,
+				searchText,
+				dbData,
+				selectedRow,
+			)
 		}),
 		// TODO: re render the dbrender widget whenever one of these is called
 		fyne.NewMenuItem("Manual Entry", func() {
 			println("Open New Window with form for game data entry")
-			manualEntryPopup(a, sortCategory, sortOrder, searchText, dbData, selectedRow)
+			manualEntryPopup(
+				a,
+				sortCategory,
+				sortOrder,
+				searchText,
+				dbData,
+				selectedRow,
+			)
 		}),
 		// TODO: Fix the below functions so they re render the DB properly
 		// Should be connected to dbData

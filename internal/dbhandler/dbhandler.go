@@ -133,20 +133,52 @@ func AddToDB(game scraper.Game) {
 // given the name of a game, search from data sites, then add struct to DB
 func SearchAddToDB(gamename string, searchSource string) {
 	// get the data from scraper using sources
+	var newgame scraper.Game
+
 	switch searchSource {
 	case "All":
-		log.Println("Both")
+		// search both and obtain game structs from each source
+		hltbSearch := scraper.SearchGameHLTB(gamename)
+		completionatorSearch := scraper.SearchGameCompletionator(gamename)
+
+		// name might be different from each source, so save the one given from user
+		newgame.Name = gamename
+
+		// save each url
+		newgame.HLTBUrl = hltbSearch.HLTBUrl
+		newgame.CompletionatorUrl = completionatorSearch.CompletionatorUrl
+
+		// compare the values of each game and take the higher of both from each
+		if hltbSearch.Main < completionatorSearch.Main {
+			newgame.Main = completionatorSearch.Main
+		} else {
+			newgame.Main = hltbSearch.Main
+		}
+		if hltbSearch.MainPlus < completionatorSearch.MainPlus {
+			newgame.MainPlus = completionatorSearch.MainPlus
+		} else {
+			newgame.MainPlus = hltbSearch.MainPlus
+		}
+		if hltbSearch.Comp < completionatorSearch.Comp {
+			newgame.Comp = completionatorSearch.Comp
+		} else {
+			newgame.Comp = hltbSearch.Comp
+		}
+
 	case "HLTB":
 		log.Println("HLTB")
+		newgame = scraper.SearchGameHLTB(gamename)
+
 	case "COMP":
 		log.Println("Completionator")
+		newgame = scraper.SearchGameCompletionator(gamename)
+
 	default:
 		log.Println("No such search style")
+		return
 	}
-	fmt.Println(gamename, searchSource)
 
-	// var newgame scraper.Game
-	// AddToDB(newgame)
+	AddToDB(newgame)
 }
 
 // if the given game is not empty, then toggle favorite
