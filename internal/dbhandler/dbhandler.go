@@ -151,6 +151,8 @@ func SearchAddToDB(gamename string, searchSource string) {
 			completionatorSearch.MainPlus == 0 &&
 			completionatorSearch.Comp == 0 {
 			log.Println("No Game Data for game Found!")
+			log.Println("Searching Bing")
+			scraper.SearchBing(gamename)
 			return
 		}
 
@@ -181,6 +183,16 @@ func SearchAddToDB(gamename string, searchSource string) {
 	case "HLTB":
 		log.Println("HLTB")
 		newgame = scraper.SearchGameHLTB(gamename)
+
+		if newgame.Name == "" &&
+			newgame.Main == 0 &&
+			newgame.MainPlus == 0 &&
+			newgame.Comp == 0 {
+			log.Println("No Game Data for game Found!")
+			log.Println("Searching Bing")
+			scraper.SearchBing(gamename)
+			return
+		}
 
 	case "COMP":
 		log.Println("Completionator")

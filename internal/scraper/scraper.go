@@ -115,7 +115,6 @@ func fetchHLTB(link string) (game Game) {
 }
 
 // given the name of a game as a string, search Completionator, get its data and return as game struct
-// TODO: if the result is empty, prompt a google search and then obtain the first link from google
 func SearchGameCompletionator(gameName string) Game {
 	log.Println("Searching Completionator for game...")
 	searchRes := searchCompletionator(gameName)
