@@ -14,14 +14,82 @@ import (
 func Export(choice int) {
 	switch choice {
 	case 1:
-		exportSQL()
-	case 2:
 		exportCSV()
+	case 2:
+		exportSQL()
 	case 3:
 		exportMarkdown()
 	default:
 		log.Fatal("No such export exists!")
 	}
+}
+
+func exportCSV() {
+	log.Println("Exporting to CSV")
+
+	db, err := sql.Open("sqlite3", "games.db")
+	if err != nil {
+		log.Fatal("Error opening database for export", err)
+	}
+	defer db.Close()
+
+	// get all data from table
+	rows, err := db.Query("SELECT * FROM games")
+	if err != nil {
+		log.Fatal("Error retrieving data:", err)
+	}
+	defer rows.Close()
+
+	// get col names
+	cols, err := rows.Columns()
+	if err != nil {
+		log.Fatal("Error getting column names:", err)
+	}
+
+	// open csv to write to
+	file, err := os.Create("export.csv")
+	if err != nil {
+		log.Fatal("Error creating csv file", err)
+	}
+	defer file.Close()
+
+	writer := csv.NewWriter(file)
+	defer writer.Flush()
+
+	// write col headers
+	if err := writer.Write(cols); err != nil {
+		log.Fatal("Error writing CSV headers")
+	}
+
+	// write rows of data
+	for rows.Next() {
+		values := make([]interface{}, len(cols))
+		valuePtrs := make([]interface{}, len(cols))
+		for i := range values {
+			valuePtrs[i] = &values[i]
+		}
+
+		// scan row into value ptrs
+		if err := rows.Scan(valuePtrs...); err != nil {
+			log.Fatal("Error scanning row:", err)
+		}
+
+		// convert values to string
+		stringVals := make([]string, len(cols))
+		for i, val := range values {
+			if val == nil {
+				stringVals[i] = ""
+			} else {
+				stringVals[i] = fmt.Sprintf("%v", val)
+			}
+		}
+
+		// write row to csv
+		if err := writer.Write(stringVals); err != nil {
+			log.Fatal("Error writing row to CSV:", err)
+		}
+	}
+	log.Println("Export to CSV completed successfully")
 }
 
 func exportSQL() {
@@ -132,74 +200,6 @@ func exportSQL() {
 	log.Println("Export to SQL completed successfully.")
 
 	return
-}
-
-func exportCSV() {
-	log.Println("Exporting to CSV")
-
-	db, err := sql.Open("sqlite3", "games.db")
-	if err != nil {
-		log.Fatal("Error opening database for export", err)
-	}
-	defer db.Close()
-
-	// get all data from table
-	rows, err := db.Query("SELECT * FROM games")
-	if err != nil {
-		log.Fatal("Error retrieving data:", err)
-	}
-	defer rows.Close()
-
-	// get col names
-	cols, err := rows.Columns()
-	if err != nil {
-		log.Fatal("Error getting column names:", err)
-	}
-
-	// open csv to write to
-	file, err := os.Create("export.csv")
-	if err != nil {
-		log.Fatal("Error creating csv file", err)
-	}
-	defer file.Close()
-
-	writer := csv.NewWriter(file)
-	defer writer.Flush()
-
-	// write col headers
-	if err := writer.Write(cols); err != nil {
-		log.Fatal("Error writing CSV headers")
-	}
-
-	// write rows of data
-	for rows.Next() {
-		values := make([]interface{}, len(cols))
-		valuePtrs := make([]interface{}, len(cols))
-		for i := range values {
-			valuePtrs[i] = &values[i]
-		}
-
-		// scan row into value ptrs
-		if err := rows.Scan(valuePtrs...); err != nil {
-			log.Fatal("Error scanning row:", err)
-		}
-
-		// convert values to string
-		stringVals := make([]string, len(cols))
-		for i, val := range values {
-			if val == nil {
-				stringVals[i] = ""
-			} else {
-				stringVals[i] = fmt.Sprintf("%v", val)
-			}
-		}
-
-		// write row to csv
-		if err := writer.Write(stringVals); err != nil {
-			log.Fatal("Error writing row to CSV:", err)
-		}
-	}
-	log.Println("Export to CSV completed successfully")
 }
 
 // PERF: Export the current view, not the default one in the database

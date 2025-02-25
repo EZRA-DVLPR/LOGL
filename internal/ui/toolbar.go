@@ -113,10 +113,10 @@ func createExportButton(toolbarCanvas fyne.Canvas) (exportButton *widget.Button)
 
 	// create the dropdown menu items for exporting
 	menu := fyne.NewMenu("",
-		fyne.NewMenuItem("Export to SQL", func() {
+		fyne.NewMenuItem("Export to CSV", func() {
 			dbhandler.Export(1)
 		}),
-		fyne.NewMenuItem("Export to CSV", func() {
+		fyne.NewMenuItem("Export to SQL", func() {
 			dbhandler.Export(2)
 		}),
 		// PERF: Export the current view, not the default one in the database
