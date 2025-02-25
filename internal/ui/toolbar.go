@@ -175,6 +175,8 @@ func createAddButton(
 		log.Println("dropdown menu of diff ways to add data")
 	})
 
+	ss, _ := searchSource.Get()
+
 	// TODO: Open window for Manual Entry and Single Game Search
 	menu := fyne.NewMenu("",
 		// TODO: re render the dbrender widget whenever one of these is called
@@ -205,14 +207,26 @@ func createAddButton(
 		// TODO: Fix the below functions so they re render the DB properly
 		// Should be connected to dbData
 		fyne.NewMenuItem("From CSV", func() {
-			dbhandler.Import(1)
+			dbhandler.Import(1, ss)
+
+			// update dbData and selectedRow to render changes
+			updateDBData(sortCategory, sortOrder, searchText, dbData)
+			selectedRow.Set(-1)
 		}),
 		fyne.NewMenuItem("From SQL", func() {
-			dbhandler.Import(2)
+			dbhandler.Import(2, ss)
+
+			// update dbData and selectedRow to render changes
+			updateDBData(sortCategory, sortOrder, searchText, dbData)
+			selectedRow.Set(-1)
 		}),
 		// INFO: For TXT File, they must be game names separated by new lines with 1 game per line
 		fyne.NewMenuItem("From TXT", func() {
-			dbhandler.Import(3)
+			dbhandler.Import(3, ss)
+
+			// update dbData and selectedRow to render changes
+			updateDBData(sortCategory, sortOrder, searchText, dbData)
+			selectedRow.Set(-1)
 		}),
 	)
 
@@ -329,3 +343,5 @@ func createUpdateButton(
 
 	return updateButton
 }
+
+// TODO: func to update and re-render changes to save space on lines cuz it happens so often

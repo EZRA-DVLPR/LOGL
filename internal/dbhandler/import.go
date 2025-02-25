@@ -7,25 +7,27 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strings"
 
 	_ "github.com/mattn/go-sqlite3"
 )
 
 // selector for importing
-func Import(choice int) {
+func Import(choice int, searchSource string) {
 	switch choice {
 	case 1:
 		importCSV()
 	case 2:
 		importSQL()
 	case 3:
-		importTXT()
+		importTXT(searchSource)
 	default:
 		log.Fatal("No such import exists!")
 	}
 }
 
 func importCSV() {
+	log.Println("Importing data from CSV")
 	db, err := sql.Open("sqlite3", "games.db")
 	if err != nil {
 		log.Fatal("Error opening db:", err)
@@ -98,6 +100,7 @@ func importCSV() {
 }
 
 func importSQL() {
+	log.Println("Importing data from SQL")
 	db, err := sql.Open("sqlite3", "games.db")
 	if err != nil {
 		log.Fatal(err)
@@ -118,7 +121,8 @@ func importSQL() {
 	fmt.Println("SQL database imported successfully")
 }
 
-func importTXT() {
+func importTXT(searchSource string) {
+	log.Println("Importing data from TXT file")
 	db, err := sql.Open("sqlite3", "games.db")
 	if err != nil {
 		log.Fatal("Error opening db:", err)
@@ -131,9 +135,16 @@ func importTXT() {
 	}
 	defer file.Close()
 
-	// scan file and print line by line
+	// scan file and add new obtain data and insert into gameNames []string
+	var gameNames []string
 	scanner := bufio.NewScanner(file)
 	for scanner.Scan() {
-		fmt.Println(scanner.Text())
+		gameNames = append(gameNames, strings.TrimSpace(scanner.Text()))
+	}
+
+	// for each game in gameNames, perform search and add to DB
+	for _, game := range gameNames {
+		log.Println("Obtaining Data for game", game)
+		SearchAddToDB(game, searchSource)
 	}
 }

@@ -107,7 +107,7 @@ func AddToDB(game scraper.Game) {
 		log.Fatal("Error checking game existence", err)
 	}
 	if exists {
-		log.Println("Game already exists in local DB!\nSkipping insertion")
+		log.Println("Game already exists in local DB! Skipping insertion")
 		return
 	}
 
