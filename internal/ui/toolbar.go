@@ -213,6 +213,7 @@ func createAddButton(
 			updateDBData(sortCategory, sortOrder, searchText, dbData)
 			selectedRow.Set(-1)
 		}),
+		// INFO: will drop the existing table and replace with imported SQL file
 		fyne.NewMenuItem("From SQL", func() {
 			dbhandler.Import(2, ss)
 
@@ -220,7 +221,7 @@ func createAddButton(
 			updateDBData(sortCategory, sortOrder, searchText, dbData)
 			selectedRow.Set(-1)
 		}),
-		// INFO: For TXT File, they must be game names separated by new lines with 1 game per line
+		// INFO: game names must be separated by new lines with 1 game per line
 		fyne.NewMenuItem("From TXT", func() {
 			dbhandler.Import(3, ss)
 

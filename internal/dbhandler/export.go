@@ -62,13 +62,14 @@ func exportSQL() {
 		}
 	}
 
-	//export data
+	//export tables
 	tables, err := db.Query("SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%';")
 	if err != nil {
 		log.Fatal("Error retrieving table names:", err)
 	}
 	defer tables.Close()
 
+	// for each table extract all data
 	for tables.Next() {
 		var tableName string
 		if err := tables.Scan(&tableName); err != nil {
@@ -117,7 +118,7 @@ func exportSQL() {
 			}
 
 			// write the INSERT statement
-			insertStmt := fmt.Sprintf("INSERT INTO %s (%s) VALUES (%s);\n",
+			insertStmt := fmt.Sprintf("INSERT OR IGNORE INTO %s (%s) VALUES (%s);\n",
 				tableName,
 				joinColumns(cols),
 				joinColumns(insertValues))

@@ -107,6 +107,12 @@ func importSQL() {
 	}
 	defer db.Close()
 
+	// drop the existing tables
+	_, err = db.Exec("DROP TABLE IF EXISTS games;")
+	if err != nil {
+		log.Fatal("Error dropping tables:", err)
+	}
+
 	sqlDump, err := os.ReadFile("export.sql")
 	if err != nil {
 		log.Fatal(err)
@@ -118,7 +124,7 @@ func importSQL() {
 		log.Fatal("Error importing sql database:", err)
 	}
 
-	fmt.Println("SQL database imported successfully")
+	log.Println("SQL database imported successfully")
 }
 
 func importTXT(searchSource string) {
