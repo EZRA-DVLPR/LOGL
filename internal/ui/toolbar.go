@@ -40,7 +40,7 @@ func createMainWindowToolbar(
 	helpButton := createHelpButton(toolbarCanvas)
 	randButton := createRandomButton(selectedRow, dbData)
 	faveButton := createFaveButton(selectedRow, sortCategory, sortOrder, searchText, dbData)
-	updateButton := createUpdateButton()
+	updateButton := createUpdateButton(sortCategory, sortOrder, searchText, selectedRow, dbData)
 
 	// add them to the toolbar in horizontal row
 	toolbar = container.New(
@@ -114,16 +114,13 @@ func createExportButton(toolbarCanvas fyne.Canvas) (exportButton *widget.Button)
 	// create the dropdown menu items for exporting
 	menu := fyne.NewMenu("",
 		fyne.NewMenuItem("Export to SQL", func() {
-			println("Export to SQL")
 			dbhandler.Export(1)
 		}),
 		fyne.NewMenuItem("Export to CSV", func() {
-			println("Export to CSV")
 			dbhandler.Export(2)
 		}),
 		// PERF: Export the current view, not the default one in the database
 		fyne.NewMenuItem("Export to Markdown", func() {
-			println("Export to Markdown")
 			dbhandler.Export(3)
 		}),
 	)
@@ -308,11 +305,26 @@ func createFaveButton(
 	return faveButton
 }
 
-// TODO:connect to selectedRow and dbData
-// get row value and select row from dbData
-func createUpdateButton() (updateButton *widget.Button) {
+func createUpdateButton(
+	sortCategory binding.String,
+	sortOrder binding.Bool,
+	searchText binding.String,
+	selectedRow binding.Int,
+	dbData *MyDataBinding,
+) (updateButton *widget.Button) {
 	updateButton = widget.NewButtonWithIcon("Update", theme.MediaReplayIcon(), func() {
 		log.Println("updated highlighted entry")
+		// selected row game name update game
+		selrow, _ := selectedRow.Get()
+		if selrow >= 0 {
+			// get game name and execute update
+			dbdata, _ := dbData.Get()
+			dbhandler.UpdateGame(dbdata[selrow][0])
+
+			// update dbData and selectedRow to render changes
+			updateDBData(sortCategory, sortOrder, searchText, dbData)
+			selectedRow.Set(-1)
+		}
 	})
 
 	return updateButton

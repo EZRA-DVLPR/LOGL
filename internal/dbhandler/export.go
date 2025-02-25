@@ -25,7 +25,7 @@ func Export(choice int) {
 }
 
 func exportSQL() {
-	fmt.Println("Exporting to SQL file")
+	log.Println("Exporting to SQL file")
 
 	outputFile := "export.sql"
 	db, err := sql.Open("sqlite3", "games.db")
@@ -42,7 +42,7 @@ func exportSQL() {
 	defer file.Close()
 
 	// begin dump
-	fmt.Println("Exporting database to", outputFile)
+	log.Println("Exporting database to", outputFile)
 	file.WriteString("BEGIN TRANSACTION;\n")
 
 	//export schema
@@ -128,13 +128,13 @@ func exportSQL() {
 
 	// end dump
 	file.WriteString("COMMIT;\n")
-	fmt.Println("Export to SQL completed successfully.")
+	log.Println("Export to SQL completed successfully.")
 
 	return
 }
 
 func exportCSV() {
-	fmt.Println("Exporting to CSV")
+	log.Println("Exporting to CSV")
 
 	db, err := sql.Open("sqlite3", "games.db")
 	if err != nil {
@@ -198,11 +198,12 @@ func exportCSV() {
 			log.Fatal("Error writing row to CSV:", err)
 		}
 	}
-	fmt.Println("Export to CSV completed successfully")
+	log.Println("Export to CSV completed successfully")
 }
 
+// PERF: Export the current view, not the default one in the database
 func exportMarkdown() {
-	fmt.Println("Exporting to Markdown")
+	log.Println("Exporting to Markdown")
 	db, err := sql.Open("sqlite3", "games.db")
 	if err != nil {
 		log.Fatal("Error accessing local dB: ", err)
@@ -244,7 +245,7 @@ func exportMarkdown() {
 		id += 1
 	}
 
-	fmt.Println("Export to Markdown completed successfully")
+	log.Println("Export to Markdown completed successfully")
 }
 
 // joins columns into a single string

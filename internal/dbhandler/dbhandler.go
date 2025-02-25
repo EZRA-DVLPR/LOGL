@@ -111,7 +111,7 @@ func AddToDB(game scraper.Game) {
 		return
 	}
 
-	log.Println("Adding the game data to the local DB")
+	log.Println("Adding the game data to the local DB for game:", game.Name)
 
 	_, err = db.Exec(
 		"INSERT OR IGNORE INTO games (name, hltburl, completionatorurl, favorite, main, mainPlus, comp) VALUES (?,?,?,?,?,?,?)",
@@ -127,7 +127,7 @@ func AddToDB(game scraper.Game) {
 		log.Fatal("Error inserting game: ", err)
 	}
 
-	log.Println("Finished adding the game data to the local DB")
+	log.Println("Finished adding the game data to the local DB for game", game.Name)
 }
 
 // given the name of a game, search from data sites, then add struct to DB
@@ -219,6 +219,53 @@ func ToggleFavorite(gamename string) {
 
 	if rowsAffected(res, gamename) {
 		log.Println("Toggled Favorite for given game:", gamename)
+	}
+}
+
+// given a game name, will update its contents with newer information
+// PERF: consider making a search occur if there is no URL saved
+func UpdateGame(gameName string) {
+	db, err := sql.Open("sqlite3", "games.db")
+	if err != nil {
+		log.Fatal("Failed to access db")
+	}
+	defer db.Close()
+
+	// get urls for given game
+	var hltbURL string
+	var completionatorURL string
+	err = db.QueryRow("SELECT hltburl, completionatorurl FROM games WHERE name = ?", gameName).Scan(&hltbURL, &completionatorURL)
+	if err != nil {
+		log.Fatal("Error obtaining URLs for given game")
+	}
+
+	// perform searches on each URL if nonempty
+	var newgamedata scraper.Game
+	if hltbURL == "" &&
+		completionatorURL == "" {
+		log.Println("No URL(s) found to obtain information from.")
+		return
+	} else if hltbURL != "" {
+		newgamedata = scraper.SearchGameHLTB(gameName)
+	} else if completionatorURL != "" {
+		newgamedata = scraper.SearchGameCompletionator(gameName)
+	}
+
+	// if no new data then nothing to update with
+	if newgamedata.Main == 0 &&
+		newgamedata.MainPlus == 0 &&
+		newgamedata.Comp == 0 {
+		log.Println("No New Data obtained from URL(s) saved. Check URL(s) are valid")
+		return
+	}
+
+	// overwrite the old data with the New Data
+	rows, err := db.Exec("UPDATE games SET main = ?, mainPlus = ?, comp = ? WHERE name = ?", newgamedata.Main, newgamedata.MainPlus, newgamedata.Comp, gameName)
+	if err != nil {
+		log.Println("Error updating value for game in table", gameName)
+	}
+	if rowsAffected(rows, gameName) {
+		log.Println("Successfully updated values for", gameName)
 	}
 }
 
