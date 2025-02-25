@@ -2,7 +2,6 @@ package ui
 
 import (
 	_ "embed"
-	// "fmt"
 	"log"
 	"math/rand"
 
@@ -83,7 +82,7 @@ func createMainWindowToolbar(
 	return toolbar
 }
 
-// flips sort Order (ASC->DESC->ASC)
+// toggles sort Order (ASC->DESC->ASC)
 func createSortButton(sortOrder binding.Bool) (sortButton *widget.Button) {
 	// create the button with empty label
 	sortButton = widget.NewButtonWithIcon("", theme.MenuDropUpIcon(), func() {
@@ -106,7 +105,7 @@ func createSortButton(sortOrder binding.Bool) (sortButton *widget.Button) {
 	return sortButton
 }
 
-// opens dropbown list to select export option
+// export data from db
 func createExportButton(toolbarCanvas fyne.Canvas) (exportButton *widget.Button) {
 	// create a button without a function
 	exportButton = widget.NewButtonWithIcon("", theme.MailSendIcon(), nil)
@@ -119,7 +118,6 @@ func createExportButton(toolbarCanvas fyne.Canvas) (exportButton *widget.Button)
 		fyne.NewMenuItem("Export to SQL", func() {
 			dbhandler.Export(2)
 		}),
-		// PERF: Export the current view, not the default one in the database
 		fyne.NewMenuItem("Export to Markdown", func() {
 			dbhandler.Export(3)
 		}),
@@ -145,9 +143,9 @@ func createExportButton(toolbarCanvas fyne.Canvas) (exportButton *widget.Button)
 //	default location to store db
 //	default location to export to
 //	default website to search: HTLB vs Completionator vs Both
-//			ss, _ := searchSource.Get()
+//			ss, _ := searchSource.Set("All"/"HLTB"/"COMP")
 //
-// PERF: possible future updates?
+// PERF:
 //
 //	find way to implement menu without opening new window for window tiling managers
 //	Theme Selector
@@ -159,8 +157,7 @@ func createSettingsButton() (settingsButton *widget.Button) {
 	return settingsButton
 }
 
-// TODO: connect to dbData
-// get data and append the new value
+// get data and add it to the DB
 func createAddButton(
 	a fyne.App,
 	sortCategory binding.String,
@@ -171,17 +168,11 @@ func createAddButton(
 	searchSource binding.String,
 	toolbarCanvas fyne.Canvas,
 ) (addButton *widget.Button) {
-	addButton = widget.NewButtonWithIcon("Add Game Data", theme.ContentAddIcon(), func() {
-		log.Println("dropdown menu of diff ways to add data")
-	})
-
+	// no function since we are making a dropdown menu
+	addButton = widget.NewButtonWithIcon("Add Game Data", theme.ContentAddIcon(), nil)
 	ss, _ := searchSource.Get()
-
-	// TODO: Open window for Manual Entry and Single Game Search
 	menu := fyne.NewMenu("",
-		// TODO: re render the dbrender widget whenever one of these is called
 		fyne.NewMenuItem("Single Game Search", func() {
-			println("Open New window for single game name entry")
 			singleGameNameSearchPopup(
 				a,
 				searchSource,
@@ -192,9 +183,7 @@ func createAddButton(
 				selectedRow,
 			)
 		}),
-		// TODO: re render the dbrender widget whenever one of these is called
 		fyne.NewMenuItem("Manual Entry", func() {
-			println("Open New Window with form for game data entry")
 			manualEntryPopup(
 				a,
 				sortCategory,
@@ -204,30 +193,19 @@ func createAddButton(
 				selectedRow,
 			)
 		}),
-		// TODO: Fix the below functions so they re render the DB properly
-		// Should be connected to dbData
 		fyne.NewMenuItem("From CSV", func() {
 			dbhandler.Import(1, ss)
-
-			// update dbData and selectedRow to render changes
-			updateDBData(sortCategory, sortOrder, searchText, dbData)
-			selectedRow.Set(-1)
+			forceRenderDB(sortCategory, sortOrder, searchText, dbData, selectedRow)
 		}),
 		// INFO: will drop the existing table and replace with imported SQL file
 		fyne.NewMenuItem("From SQL", func() {
 			dbhandler.Import(2, ss)
-
-			// update dbData and selectedRow to render changes
-			updateDBData(sortCategory, sortOrder, searchText, dbData)
-			selectedRow.Set(-1)
+			forceRenderDB(sortCategory, sortOrder, searchText, dbData, selectedRow)
 		}),
 		// INFO: game names must be separated by new lines with 1 game per line
 		fyne.NewMenuItem("From TXT", func() {
 			dbhandler.Import(3, ss)
-
-			// update dbData and selectedRow to render changes
-			updateDBData(sortCategory, sortOrder, searchText, dbData)
-			selectedRow.Set(-1)
+			forceRenderDB(sortCategory, sortOrder, searchText, dbData, selectedRow)
 		}),
 	)
 
@@ -239,7 +217,7 @@ func createAddButton(
 	return addButton
 }
 
-// finds selected row game name, and issues query to db
+// finds selected row game name, and deletes it from DB
 func createRemoveButton(
 	selectedRow binding.Int,
 	sortCategory binding.String,
@@ -254,15 +232,14 @@ func createRemoveButton(
 			dbdata, _ := dbData.Get()
 			dbhandler.DeleteFromDB(dbdata[selrow][0])
 
-			// update dbData and selectedRow to render changes
-			updateDBData(sortCategory, sortOrder, searchText, dbData)
-			selectedRow.Set(-1)
+			forceRenderDB(sortCategory, sortOrder, searchText, dbData, selectedRow)
 		}
 	})
 
 	return removeButton
 }
 
+// lists help options such as tutorial, manual, support, etc.
 func createHelpButton(toolbarCanvas fyne.Canvas) (helpButton *widget.Button) {
 	helpButton = widget.NewButtonWithIcon("", theme.QuestionIcon(), nil)
 	menu := fyne.NewMenu("",
@@ -285,7 +262,7 @@ func createHelpButton(toolbarCanvas fyne.Canvas) (helpButton *widget.Button) {
 	return helpButton
 }
 
-// change to random value from 1:rows
+// randomly selects a row to highlight
 func createRandomButton(selectedRow binding.Int, dbData *MyDataBinding) (removeButton *widget.Button) {
 	removeButton = widget.NewButtonWithIcon("Random Row", theme.SearchReplaceIcon(), func() {
 		dbdata, _ := dbData.Get()
@@ -311,15 +288,14 @@ func createFaveButton(
 			dbdata, _ := dbData.Get()
 			dbhandler.ToggleFavorite(dbdata[selrow][0])
 
-			// update dbData and selectedRow to render changes
-			updateDBData(sortCategory, sortOrder, searchText, dbData)
-			selectedRow.Set(-1)
+			forceRenderDB(sortCategory, sortOrder, searchText, dbData, selectedRow)
 		}
 	})
 
 	return faveButton
 }
 
+// update the selected game defined by selectedRow
 func createUpdateButton(
 	sortCategory binding.String,
 	sortOrder binding.Bool,
@@ -328,17 +304,11 @@ func createUpdateButton(
 	dbData *MyDataBinding,
 ) (updateButton *widget.Button) {
 	updateButton = widget.NewButtonWithIcon("Update", theme.MediaReplayIcon(), func() {
-		log.Println("updated highlighted entry")
-		// selected row game name update game
 		selrow, _ := selectedRow.Get()
 		if selrow >= 0 {
-			// get game name and execute update
-			dbdata, _ := dbData.Get()
-			dbhandler.UpdateGame(dbdata[selrow][0])
+			log.Println("Updating highlighted entry")
 
-			// update dbData and selectedRow to render changes
-			updateDBData(sortCategory, sortOrder, searchText, dbData)
-			selectedRow.Set(-1)
+			forceRenderDB(sortCategory, sortOrder, searchText, dbData, selectedRow)
 		}
 	})
 
@@ -346,3 +316,15 @@ func createUpdateButton(
 }
 
 // TODO: func to update and re-render changes to save space on lines cuz it happens so often
+func forceRenderDB(
+	sortCategory binding.String,
+	sortOrder binding.Bool,
+	searchText binding.String,
+	dbData *MyDataBinding,
+	selectedRow binding.Int,
+) {
+	// update dbData and selectedRow to render changes
+	updateDBData(sortCategory, sortOrder, searchText, dbData)
+	selectedRow.Set(-2)
+	selectedRow.Set(-1)
+}
