@@ -50,39 +50,47 @@ func importCSV() {
 		log.Fatal("CSV file is empty or improperly formatted")
 	}
 
-	// create the table
-	var name string
-	err = db.QueryRow(
-		"SELECT name FROM sqlite_master WHERE type='table' AND name=?",
-		"games",
-	).Scan(&name)
-	if err != nil {
-		createStmt := fmt.Sprintf(
-			"CREATE TABLE games (name TEXT PRIMARY KEY, hltburl TEXT, completionatorurl TEXT, favorite INTEGER, main REAL, mainPlus REAL, comp REAL)",
-		)
-		_, err := db.Exec(createStmt)
+	// create the table if it does not exist
+	var exists int
+	err = db.QueryRow("SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name='games'").Scan(&exists)
+	if exists != 1 {
+		var name string
+		err = db.QueryRow("SELECT name FROM sqlite_master WHERE type='table' AND name='games'").Scan(&name)
 		if err != nil {
-			log.Fatal("Error creating table:", err)
+			createStmt := fmt.Sprintf(
+				"CREATE TABLE games (name TEXT PRIMARY KEY, hltburl TEXT, completionatorurl TEXT, favorite INTEGER, main REAL, mainPlus REAL, comp REAL)",
+			)
+			_, err := db.Exec(createStmt)
+			if err != nil {
+				log.Fatal("Error creating table:", err)
+			}
+			log.Println("Table created")
+		} else {
+			log.Fatal("Error with query for table creation")
 		}
-		fmt.Println("Table created")
-	} else {
-		log.Fatal("Error with query for table creation")
 	}
 
 	// setup transaction with dummy values
+	// INSERT OR REPLACE INTO GAMES [colname] VALUES ?
 	cols := rows[0]
 	temp := make([]string, len(cols))
 	for i := range temp {
 		temp[i] = "?"
 	}
-	insertStmt := fmt.Sprintf("INSERT INTO games (%s) VALUES (%s);",
-		join(cols, ", "), join(temp, ", "))
+	insertStmt := fmt.Sprintf(
+		"INSERT OR REPLACE INTO games (%s) VALUES (%s);",
+		join(cols, ", "),
+		join(temp, ", "),
+	)
 
-	// start transaction and insert data
+	// start transaction
 	tx, err := db.Begin()
 	if err != nil {
 		log.Fatal("Error starting transaction:", err)
 	}
+	// turns `INSERT OR REPLACE INTO GAMES [colname] VALUES ?`
+	// into `INSERT OR REPLACE INTO GAMES name, ... VALUE gamename,...`
+	// and executes transaction for each row
 	for _, row := range rows[1:] {
 		_, err := tx.Exec(insertStmt, convertRowToInterface(row)...)
 		if err != nil {
@@ -96,7 +104,7 @@ func importCSV() {
 		log.Fatal("Error committing transaction:", err)
 	}
 
-	fmt.Println("Import completed successfully")
+	log.Println("Import completed successfully")
 }
 
 func importSQL() {
