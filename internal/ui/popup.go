@@ -8,14 +8,20 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/data/binding"
+	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/layout"
+	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
+
 	"github.com/EZRA-DVLPR/GameList/internal/dbhandler"
 	"github.com/EZRA-DVLPR/GameList/internal/scraper"
 )
 
 // window for popup that will be modified for the following functions
 var w2 fyne.Window
+
+// confirmation window for updating/deleting all db data
+var w3 fyne.Window
 
 func singleGameNameSearchPopup(
 	a fyne.App,
@@ -171,6 +177,119 @@ func manualEntryPopup(
 	}
 	w2.SetContent(
 		form,
+	)
+	w2.SetOnClosed(func() {
+		w2 = nil
+	})
+	w2.Show()
+}
+
+func settingsPopup(
+	a fyne.App,
+	w fyne.Window,
+) {
+	// if w2 already exists then focus it and complete task
+	if w2 != nil {
+		w2.RequestFocus()
+		return
+	}
+
+	// define w2 properties
+	w2 = a.NewWindow("Settings Window")
+	w2.Resize(fyne.NewSize(400, 600))
+
+	// TODO: make each widget have a label that describes what it is
+
+	// radio for selection of sources
+	radio := widget.NewRadioGroup([]string{"All", "HLTB", "Completionator"}, func(value string) {
+		log.Println("Radio set to", value)
+	})
+	radio.SetSelected("All")
+	// radio for selection of light/dark theme
+	combo := widget.NewSelect([]string{"Light", "Dark"}, func(value string) {
+		log.Println("Select set to", value)
+	})
+	combo.SetSelected("Light")
+	// slider for text size
+	slider := widget.NewSlider(0, 10)
+	slider.OnChangeEnded = func(res float64) {
+		log.Println("Slider was released at", res)
+	}
+	// button to update all data
+	updateAll := widget.NewButton("Update All", func() {
+		if w3 != nil {
+			w3.RequestFocus()
+			return
+		}
+		w3 = a.NewWindow("Confirm Deletion of entire Database")
+		w3.Resize(fyne.NewSize(400, 200))
+		w3.SetContent(container.New(
+			layout.NewGridLayout(2),
+			widget.NewButtonWithIcon("Cancel", theme.CancelIcon(), func() {
+				w3.Close()
+			}),
+			widget.NewButtonWithIcon("Update all data", theme.ConfirmIcon(), func() {
+				log.Println("update all entries in db")
+				w3.Close()
+			}),
+		))
+		w3.Show()
+		w3.SetOnClosed(func() {
+			w3 = nil
+		})
+	})
+	// location to store db and exports
+	storageDir := widget.NewButton("select dir", func() {
+		w.RequestFocus()
+		dialog.ShowFolderOpen(func(uri fyne.ListableURI, err error) {
+			if err != nil {
+				log.Println("error:", err)
+				w2.Close()
+				return
+			}
+			if uri == nil {
+				log.Println("no dir selected")
+				w2.Close()
+				return
+			}
+			log.Println("selected dir:", uri)
+			w2.Close()
+		}, w)
+	})
+	// button to delete all data
+	deleteAll := widget.NewButton("Delete All", func() {
+		if w3 != nil {
+			w3.RequestFocus()
+			return
+		}
+		w3 = a.NewWindow("Confirm Deletion of entire Database")
+		w3.Resize(fyne.NewSize(400, 200))
+		w3.SetContent(container.New(
+			layout.NewGridLayout(2),
+			widget.NewButtonWithIcon("Cancel", theme.CancelIcon(), func() {
+				w3.Close()
+			}),
+			widget.NewButtonWithIcon("Delete all data", theme.ConfirmIcon(), func() {
+				log.Println("drop table and shite")
+				w3.Close()
+			}),
+		))
+		w3.Show()
+		w3.SetOnClosed(func() {
+			w3 = nil
+		})
+	})
+	w2.SetContent(
+		container.New(
+			layout.NewVBoxLayout(),
+			widget.NewLabel("Settings go here..."),
+			radio,
+			combo,
+			slider,
+			updateAll,
+			storageDir,
+			deleteAll,
+		),
 	)
 	w2.SetOnClosed(func() {
 		w2 = nil

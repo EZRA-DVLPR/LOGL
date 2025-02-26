@@ -29,11 +29,12 @@ func createMainWindowToolbar(
 	dbData *MyDataBinding,
 	searchSource binding.String,
 	a fyne.App,
+	w fyne.Window,
 ) (toolbar *fyne.Container) {
 	// create the buttons
 	sortButton := createSortButton(sortOrder)
 	exportButton := createExportButton(toolbarCanvas)
-	settingsButton := createSettingsButton()
+	settingsButton := createSettingsButton(a, w)
 	addButton := createAddButton(a, sortCategory, sortOrder, searchText, dbData, selectedRow, searchSource, toolbarCanvas)
 	removeButton := createRemoveButton(selectedRow, sortCategory, sortOrder, searchText, dbData)
 	helpButton := createHelpButton(toolbarCanvas)
@@ -58,9 +59,9 @@ func createMainWindowToolbar(
 		layout.NewSpacer(),
 		exportButton,
 		layout.NewSpacer(),
-		settingsButton,
-		layout.NewSpacer(),
 		helpButton,
+		layout.NewSpacer(),
+		settingsButton,
 	)
 
 	// PERF: change size of each button depending on the size of the given window
@@ -134,26 +135,48 @@ func createExportButton(toolbarCanvas fyne.Canvas) (exportButton *widget.Button)
 	return exportButton
 }
 
-// TODO: options:
-//
-//	Light/Dark mode
-//	increase/decrease text size
-//	update all game data
-//	delete entire db
-//	default location to store db
-//	default location to export to
-//	default website to search: HTLB vs Completionator vs Both
-//			ss, _ := searchSource.Set("All"/"HLTB"/"COMP")
-//
 // PERF:
 //
 //	find way to implement menu without opening new window for window tiling managers
 //	Theme Selector
-func createSettingsButton() (settingsButton *widget.Button) {
+func createSettingsButton(
+	a fyne.App,
+	w fyne.Window,
+) (settingsButton *widget.Button) {
 	settingsButton = widget.NewButtonWithIcon("", theme.SettingsIcon(), func() {
-		log.Println("Open the dropdown menu and show options for user config")
+		settingsPopup(a, w)
 	})
 
+	// menu := fyne.NewMenu("",
+	// 	fyne.NewMenuItem("Light/Dark Mode", func() {
+	// 		log.Println("toggle L/D mode")
+	// 	}),
+	// 	fyne.NewMenuItem("Text Size", func() {
+	// 		log.Println("slider for text size")
+	// 	}),
+	// 	fyne.NewMenuItem("Update all data", func() {
+	// 		log.Println("get list of all songs and update them")
+	// 	}),
+	// 	// TODO: Add confirmation window to this one
+	// 	fyne.NewMenuItem("delete entire DB", func() {
+	// 		log.Println("drop table and then create a new empty one")
+	// 	}),
+	// 	fyne.NewMenuItem("db location", func() {
+	// 		log.Println("pick a location to store the DB")
+	// 	}),
+	// 	fyne.NewMenuItem("export location", func() {
+	// 		log.Println("pick a location to export stuff to")
+	// 	}),
+	// 	fyne.NewMenuItem("default src for data", func() {
+	// 		log.Println("checklist for sources. all, hltb, comp")
+	// 	}),
+	// )
+	//
+	// menuPopup := widget.NewPopUpMenu(menu, toolbarCanvas)
+	//
+	// settingsButton.OnTapped = func() {
+	// 	menuPopup.ShowAtPosition(settingsButton.Position().Add(fyne.NewPos(0, settingsButton.Size().Height)))
+	// }
 	return settingsButton
 }
 

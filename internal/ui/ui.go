@@ -1,9 +1,6 @@
 package ui
 
 import (
-	// "fmt"
-	// "time"
-
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
 	"fyne.io/fyne/v2/container"
@@ -76,7 +73,7 @@ func StartGUI() {
 	content := container.NewBorder(
 		// top is toolbar + searchbar
 		container.NewVBox(
-			createMainWindowToolbar(w.Canvas(), sortCategory, sortOrder, searchText, selectedRow, dbData, searchSource, a),
+			createMainWindowToolbar(w.Canvas(), sortCategory, sortOrder, searchText, selectedRow, dbData, searchSource, a, w),
 			createSearchBar(searchText),
 		),
 		// dont render anything else in space besides DB
