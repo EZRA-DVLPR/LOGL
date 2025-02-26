@@ -67,19 +67,19 @@ func CheckDBExists() bool {
 }
 
 // given a game struct, will search DB for the name of the game to delete it
-func DeleteFromDB(gamename string) {
+func DeleteFromDB(gameName string) {
 	db, err := sql.Open("sqlite3", "games.db")
 	if err != nil {
 		log.Fatal("Failed to access db")
 	}
 
-	res, err := db.Exec("DELETE FROM games WHERE name = ?", gamename)
+	res, err := db.Exec("DELETE FROM games WHERE name = ?", gameName)
 	if err != nil {
 		log.Fatal("Error deleting game from games table: ", err)
 	}
 
-	if rowsAffected(res, gamename) {
-		log.Println("Game deleted: ", gamename)
+	if rowsAffected(res, gameName) {
+		log.Println("Game deleted: ", gameName)
 	}
 }
 
@@ -131,7 +131,7 @@ func AddToDB(game scraper.Game) {
 }
 
 // given the name of a game, search from data sites, then add struct to DB
-func SearchAddToDB(gamename string, searchSource string) {
+func SearchAddToDB(gameName string, searchSource string) {
 	// get the data from scraper using sources
 	var newgame scraper.Game
 
@@ -140,52 +140,16 @@ func SearchAddToDB(gamename string, searchSource string) {
 		log.Println("Searching from all sources for game data")
 
 		// search both and obtain game structs from each source
-		hltbSearch := scraper.SearchGameHLTB(gamename)
-		completionatorSearch := scraper.SearchGameCompletionator(gamename)
+		hltbSearch := scraper.SearchGameHLTB(gameName)
+		completionatorSearch := scraper.SearchGameCompletionator(gameName)
 
-		// if both are empty, then dont add to DB
-		if hltbSearch.Name == "" &&
-			hltbSearch.Main == 0 &&
-			hltbSearch.MainPlus == 0 &&
-			hltbSearch.Comp == 0 &&
-			completionatorSearch.Name == "" &&
-			completionatorSearch.Main == 0 &&
-			completionatorSearch.MainPlus == 0 &&
-			completionatorSearch.Comp == 0 {
-			log.Println("No Game Data for game Found!")
-			return
-		}
-
-		// name might be different from each source, so save the one given from user
-		// PERF: if only one source is retrieved with data, then use the name from that source
-		newgame.Name = gamename
-
-		// save each url
-		newgame.HLTBUrl = hltbSearch.HLTBUrl
-		newgame.CompletionatorUrl = completionatorSearch.CompletionatorUrl
-
-		// compare the values of each game and take the higher of both from each
-		if hltbSearch.Main < completionatorSearch.Main {
-			newgame.Main = completionatorSearch.Main
-		} else {
-			newgame.Main = hltbSearch.Main
-		}
-		if hltbSearch.MainPlus < completionatorSearch.MainPlus {
-			newgame.MainPlus = completionatorSearch.MainPlus
-		} else {
-			newgame.MainPlus = hltbSearch.MainPlus
-		}
-		if hltbSearch.Comp < completionatorSearch.Comp {
-			newgame.Comp = completionatorSearch.Comp
-		} else {
-			newgame.Comp = hltbSearch.Comp
-		}
+		newgame = compareGetGameData(hltbSearch, completionatorSearch)
 
 	case "HLTB":
-		newgame = scraper.SearchGameHLTB(gamename)
+		newgame = scraper.SearchGameHLTB(gameName)
 
 	case "COMP":
-		newgame = scraper.SearchGameCompletionator(gamename)
+		newgame = scraper.SearchGameCompletionator(gameName)
 
 	default:
 		log.Println("No such search style")
@@ -197,7 +161,7 @@ func SearchAddToDB(gamename string, searchSource string) {
 }
 
 // if the given game is not empty, then toggle favorite
-func ToggleFavorite(gamename string) {
+func ToggleFavorite(gameName string) {
 	db, err := sql.Open("sqlite3", "games.db")
 	if err != nil {
 		log.Fatal("Failed to access db")
@@ -206,24 +170,23 @@ func ToggleFavorite(gamename string) {
 
 	// get value of favorite for given game
 	var favorite bool
-	err = db.QueryRow("SELECT favorite FROM games WHERE name = ?", gamename).Scan(&favorite)
+	err = db.QueryRow("SELECT favorite FROM games WHERE name = ?", gameName).Scan(&favorite)
 	if err != nil {
 		log.Fatal("Error obtaining favorite value from game", err)
 	}
 
 	// update game favorite value to the opposite value
-	res, err := db.Exec("UPDATE games SET favorite = ? WHERE name = ?", !favorite, gamename)
+	res, err := db.Exec("UPDATE games SET favorite = ? WHERE name = ?", !favorite, gameName)
 	if err != nil {
 		log.Fatal("Error updating game to be favorite", err)
 	}
 
-	if rowsAffected(res, gamename) {
-		log.Println("Toggled Favorite for given game:", gamename)
+	if rowsAffected(res, gameName) {
+		log.Println("Toggled Favorite for given game:", gameName)
 	}
 }
 
 // given a game name, will update its contents with newer information
-// PERF: consider making a search occur if there is no URL saved
 func UpdateGame(gameName string) {
 	db, err := sql.Open("sqlite3", "games.db")
 	if err != nil {
@@ -232,35 +195,40 @@ func UpdateGame(gameName string) {
 	defer db.Close()
 
 	// get urls for given game
-	var hltbURL string
-	var completionatorURL string
+	var hltbURL, completionatorURL string
 	err = db.QueryRow("SELECT hltburl, completionatorurl FROM games WHERE name = ?", gameName).Scan(&hltbURL, &completionatorURL)
 	if err != nil {
 		log.Fatal("Error obtaining URLs for given game")
 	}
 
-	// perform searches on each URL if nonempty
-	var newgamedata scraper.Game
-	if hltbURL == "" &&
-		completionatorURL == "" {
-		log.Println("No URL(s) found to obtain information from.")
-		return
-	} else if hltbURL != "" {
-		newgamedata = scraper.SearchGameHLTB(gameName)
-	} else if completionatorURL != "" {
-		newgamedata = scraper.SearchGameCompletionator(gameName)
+	// if no URL from source, then try to scrape data from beginning for the link.
+	// o/w directly scrape from the saved page
+	var hltbSearch, completionatorSearch scraper.Game
+	if hltbURL == "" {
+		log.Println("No URL found to obtain information from HLTB. Attempting to get link.")
+		hltbSearch = scraper.SearchGameHLTB(gameName)
+	} else {
+		hltbSearch = scraper.FetchHLTB(hltbURL)
+	}
+	if completionatorURL == "" {
+		log.Println("No URL found to obtain information from Completionator. Attempting to get link.")
+		completionatorSearch = scraper.SearchGameCompletionator(gameName)
+	} else {
+		completionatorSearch = scraper.FetchCompletionator(completionatorURL)
 	}
 
-	// if no new data then nothing to update with
-	if newgamedata.Main == 0 &&
-		newgamedata.MainPlus == 0 &&
-		newgamedata.Comp == 0 {
-		log.Println("No New Data obtained from URL(s) saved. Check URL(s) are valid")
-		return
-	}
+	newgamedata := compareGetGameData(hltbSearch, completionatorSearch)
 
-	// overwrite the old data with the New Data
-	rows, err := db.Exec("UPDATE games SET main = ?, mainPlus = ?, comp = ? WHERE name = ?", newgamedata.Main, newgamedata.MainPlus, newgamedata.Comp, gameName)
+	// overwrite the old data with the new Data
+	rows, err := db.Exec(
+		"UPDATE games SET hltburl = ?, completionatorurl = ?, main = ?, mainPlus = ?, comp = ? WHERE name = ?",
+		newgamedata.HLTBUrl,
+		newgamedata.CompletionatorUrl,
+		newgamedata.Main,
+		newgamedata.MainPlus,
+		newgamedata.Comp,
+		gameName,
+	)
 	if err != nil {
 		log.Println("Error updating value for game in table", gameName)
 	}
@@ -270,7 +238,7 @@ func UpdateGame(gameName string) {
 }
 
 // returns query from db as [][]string given cat, ord, and query
-func SortDB(sortCategory string, sortOrder bool, queryname string) (dbOutput [][]string) {
+func SortDB(sortCategory string, sortOrder bool, queryName string) (dbOutput [][]string) {
 	db, err := sql.Open("sqlite3", "games.db")
 	if err != nil {
 		log.Fatal("Error accessing local dB: ", err)
@@ -285,9 +253,9 @@ func SortDB(sortCategory string, sortOrder bool, queryname string) (dbOutput [][
 		so = "DESC"
 	}
 
-	// if queryname is empty, sort DB without searching for similar game names
+	// if queryName is empty, sort DB without searching for similar game names
 	var rows *sql.Rows
-	if queryname == "" {
+	if queryName == "" {
 		rows, err = db.Query(
 			fmt.Sprintf(`
 				SELECT name, main, mainPlus, comp 
@@ -314,7 +282,7 @@ func SortDB(sortCategory string, sortOrder bool, queryname string) (dbOutput [][
 				END %[2]s;`,
 				sortCategory,
 				so,
-			), "%"+queryname+"%")
+			), "%"+queryName+"%")
 	}
 	if err != nil {
 		log.Fatal("Error sorting games from games table: ", err)
@@ -367,4 +335,47 @@ func rowsAffected(res sql.Result, name string) (wereAffected bool) {
 		return false
 	}
 	return true
+}
+
+// WARN: if there is another source, consider making a single parameter of[]scraper.Game and
+// go by ref to that to do comparisons more effectively
+func compareGetGameData(
+	firstGame scraper.Game,
+	secondGame scraper.Game,
+) (resultGame scraper.Game) {
+	// if both are empty, then dont update anything (as no new data was found)
+	if firstGame.Name == "" &&
+		firstGame.Main == 0 &&
+		firstGame.MainPlus == 0 &&
+		firstGame.Comp == 0 &&
+		secondGame.Name == "" &&
+		secondGame.Main == 0 &&
+		secondGame.MainPlus == 0 &&
+		secondGame.Comp == 0 {
+		log.Println("No Game Data for game Found!")
+		return
+	}
+
+	// save each url
+	resultGame.HLTBUrl = firstGame.HLTBUrl
+	resultGame.CompletionatorUrl = secondGame.CompletionatorUrl
+
+	// compare the values of each game and take the higher of both from each
+	if firstGame.Main < secondGame.Main {
+		resultGame.Main = secondGame.Main
+	} else {
+		resultGame.Main = firstGame.Main
+	}
+	if firstGame.MainPlus < secondGame.MainPlus {
+		resultGame.MainPlus = secondGame.MainPlus
+	} else {
+		resultGame.MainPlus = firstGame.MainPlus
+	}
+	if firstGame.Comp < secondGame.Comp {
+		resultGame.Comp = secondGame.Comp
+	} else {
+		resultGame.Comp = firstGame.Comp
+	}
+
+	return
 }

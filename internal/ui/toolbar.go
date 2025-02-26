@@ -308,6 +308,9 @@ func createUpdateButton(
 		if selrow >= 0 {
 			log.Println("Updating highlighted entry")
 
+			dbdata, _ := dbData.Get()
+			dbhandler.UpdateGame(dbdata[selrow][0])
+
 			forceRenderDB(sortCategory, sortOrder, searchText, dbData, selectedRow)
 		}
 	})
@@ -315,7 +318,6 @@ func createUpdateButton(
 	return updateButton
 }
 
-// TODO: func to update and re-render changes to save space on lines cuz it happens so often
 func forceRenderDB(
 	sortCategory binding.String,
 	sortOrder binding.Bool,

@@ -33,16 +33,16 @@ func SearchGameHLTB(gameName string) Game {
 		}
 
 		log.Println("Link obtained. Web Scraping process beginning...")
-		return fetchHLTB(searchRes)
+		return FetchHLTB(searchRes)
 
 	} else {
 		log.Println("Link obtained. Web Scraping process beginning...")
-		return fetchHLTB("https://howlongtobeat.com" + searchRes)
+		return FetchHLTB("https://howlongtobeat.com" + searchRes)
 	}
 }
 
 // given the entire proper link for HLTB, obtain information for the game
-func fetchHLTB(link string) (game Game) {
+func FetchHLTB(link string) (game Game) {
 	// declare the collector object so the scraping process can begin
 	c := colly.NewCollector()
 
@@ -136,11 +136,11 @@ func SearchGameCompletionator(gameName string) Game {
 		return emptyGame
 	} else {
 		log.Println("Link obtained. Web Scraping process beginning...")
-		return fetchCompletionator("https://completionator.com" + searchRes)
+		return FetchCompletionator("https://completionator.com" + searchRes)
 	}
 }
 
-func fetchCompletionator(link string) (game Game) {
+func FetchCompletionator(link string) (game Game) {
 	// declare the collector object so the scraping process can begin
 	c := colly.NewCollector()
 
