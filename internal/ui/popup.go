@@ -187,6 +187,7 @@ func manualEntryPopup(
 func settingsPopup(
 	a fyne.App,
 	w fyne.Window,
+	searchSource binding.String,
 ) {
 	// if w2 already exists then focus it and complete task
 	if w2 != nil {
@@ -198,13 +199,6 @@ func settingsPopup(
 	w2 = a.NewWindow("Settings Window")
 	w2.Resize(fyne.NewSize(400, 600))
 
-	// TODO: make each widget have a label that describes what it is
-
-	// radio for selection of sources
-	radio := widget.NewRadioGroup([]string{"All", "HLTB", "Completionator"}, func(value string) {
-		log.Println("Radio set to", value)
-	})
-	radio.SetSelected("All")
 	// radio for selection of light/dark theme
 	combo := widget.NewSelect([]string{"Light", "Dark"}, func(value string) {
 		log.Println("Select set to", value)
@@ -282,12 +276,16 @@ func settingsPopup(
 	w2.SetContent(
 		container.New(
 			layout.NewVBoxLayout(),
-			widget.NewLabel("Settings go here..."),
-			radio,
+			searchSourceRadioWidget(searchSource),
+			widget.NewSeparator(),
 			combo,
+			widget.NewSeparator(),
 			slider,
+			widget.NewSeparator(),
 			updateAll,
+			widget.NewSeparator(),
 			storageDir,
+			widget.NewSeparator(),
 			deleteAll,
 		),
 	)
@@ -295,4 +293,28 @@ func settingsPopup(
 		w2 = nil
 	})
 	w2.Show()
+}
+
+// radio for selection of sources
+func searchSourceRadioWidget(searchSource binding.String) *fyne.Container {
+	searchSourceLabel := widget.NewLabel("Search Source Selection")
+
+	searchSourceRadio := widget.NewRadioGroup(
+		[]string{
+			"All",
+			"HLTB",
+			"Completionator",
+		},
+		func(value string) { searchSource.Set(value) },
+	)
+
+	// set default to search source saved
+	ss, _ := searchSource.Get()
+	searchSourceRadio.SetSelected(ss)
+
+	return container.New(
+		layout.NewVBoxLayout(),
+		searchSourceLabel,
+		searchSourceRadio,
+	)
 }

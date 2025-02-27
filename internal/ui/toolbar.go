@@ -34,7 +34,7 @@ func createMainWindowToolbar(
 	// create the buttons
 	sortButton := createSortButton(sortOrder)
 	exportButton := createExportButton(toolbarCanvas)
-	settingsButton := createSettingsButton(a, w)
+	settingsButton := createSettingsButton(a, w, searchSource)
 	addButton := createAddButton(a, sortCategory, sortOrder, searchText, dbData, selectedRow, searchSource, toolbarCanvas)
 	removeButton := createRemoveButton(selectedRow, sortCategory, sortOrder, searchText, dbData)
 	helpButton := createHelpButton(toolbarCanvas)
@@ -142,9 +142,10 @@ func createExportButton(toolbarCanvas fyne.Canvas) (exportButton *widget.Button)
 func createSettingsButton(
 	a fyne.App,
 	w fyne.Window,
+	searchSource binding.String,
 ) (settingsButton *widget.Button) {
 	settingsButton = widget.NewButtonWithIcon("", theme.SettingsIcon(), func() {
-		settingsPopup(a, w)
+		settingsPopup(a, w, searchSource)
 	})
 
 	// menu := fyne.NewMenu("",

@@ -149,7 +149,7 @@ func SearchAddToDB(gameName string, searchSource string) {
 	case "HLTB":
 		newgame = scraper.SearchGameHLTB(gameName)
 
-	case "COMP":
+	case "Completionator":
 		newgame = scraper.SearchGameCompletionator(gameName)
 
 	default:
