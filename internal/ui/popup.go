@@ -213,7 +213,7 @@ func settingsPopup(
 			widget.NewSeparator(),
 			textSlider(),
 			widget.NewSeparator(),
-			updateAllButton(a),
+			updateAllButton(a, sortCategory, sortOrder, searchText, dbData, selectedRow),
 			widget.NewSeparator(),
 			storageLocationSelector(w),
 			widget.NewSeparator(),
@@ -282,7 +282,14 @@ func textSlider() *fyne.Container {
 	)
 }
 
-func updateAllButton(a fyne.App) *fyne.Container {
+func updateAllButton(
+	a fyne.App,
+	sortCategory binding.String,
+	sortOrder binding.Bool,
+	searchText binding.String,
+	dbData *MyDataBinding,
+	selectedRow binding.Int,
+) *fyne.Container {
 	label := widget.NewLabel("Press this button to update all games within the database")
 
 	updateAll := widget.NewButton("Update All", func() {
@@ -295,11 +302,13 @@ func updateAllButton(a fyne.App) *fyne.Container {
 		w3.SetContent(container.New(
 			layout.NewGridLayout(2),
 			widget.NewButtonWithIcon("Cancel", theme.CancelIcon(), func() {
-				w2.RequestFocus()
 				w3.Close()
+				w2.RequestFocus()
 			}),
 			widget.NewButtonWithIcon("Update all data", theme.ConfirmIcon(), func() {
-				log.Println("update all entries in db")
+				dbhandler.UpdateEntireDB()
+
+				forceRenderDB(sortCategory, sortOrder, searchText, dbData, selectedRow)
 				w3.Close()
 				w2.Close()
 			}),
@@ -370,11 +379,10 @@ func deleteAllButton(
 		w3.SetContent(container.New(
 			layout.NewGridLayout(2),
 			widget.NewButtonWithIcon("Cancel", theme.CancelIcon(), func() {
-				w2.RequestFocus()
 				w3.Close()
+				w2.RequestFocus()
 			}),
 			widget.NewButtonWithIcon("Delete all data", theme.ConfirmIcon(), func() {
-				log.Println("drop table and shite")
 				dbhandler.DeleteAllDBData()
 
 				forceRenderDB(sortCategory, sortOrder, searchText, dbData, selectedRow)

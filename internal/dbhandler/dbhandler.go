@@ -78,7 +78,7 @@ func DeleteAllDBData() {
 		log.Fatal("Error deleting entire DB")
 	}
 
-	log.Println("Deleted all db data")
+	log.Println("Deleted all data in DB")
 }
 
 // given a game struct, will search DB for the name of the game to delete it
@@ -176,29 +176,33 @@ func SearchAddToDB(gameName string, searchSource string) {
 	AddToDB(newgame)
 }
 
-// if the given game is not empty, then toggle favorite
-func ToggleFavorite(gameName string) {
+func UpdateEntireDB() {
 	db, err := sql.Open("sqlite3", "games.db")
 	if err != nil {
 		log.Fatal("Failed to access db")
 	}
 	defer db.Close()
 
-	// get value of favorite for given game
-	var favorite bool
-	err = db.QueryRow("SELECT favorite FROM games WHERE name = ?", gameName).Scan(&favorite)
-	if err != nil {
-		log.Fatal("Error obtaining favorite value from game", err)
+	rows, err := db.Query("SELECT name FROM games")
+	defer rows.Close()
+
+	// for each row, get game name and append to list of game names
+	log.Println("Obtaining list of game names to update")
+	var gameNames []string
+	for rows.Next() {
+		var gameName string
+		// if error occurs scanning row, then skip it and continue updating games
+		if err := rows.Scan(&gameName); err != nil {
+			log.Println("Error scanning row:", err)
+			continue
+		}
+		gameNames = append(gameNames, gameName)
 	}
 
-	// update game favorite value to the opposite value
-	res, err := db.Exec("UPDATE games SET favorite = ? WHERE name = ?", !favorite, gameName)
-	if err != nil {
-		log.Fatal("Error updating game to be favorite", err)
-	}
-
-	if rowsAffected(res, gameName) {
-		log.Println("Toggled Favorite for given game:", gameName)
+	log.Println("List of game names obtained. Now updating each game name found")
+	for _, gameName := range gameNames {
+		log.Println("Updating game:", gameName)
+		UpdateGame(gameName)
 	}
 }
 
@@ -246,10 +250,38 @@ func UpdateGame(gameName string) {
 		gameName,
 	)
 	if err != nil {
-		log.Println("Error updating value for game in table", gameName)
+		log.Println("Error updating value in table for game:", gameName)
+		log.Println(err)
+		return
 	}
 	if rowsAffected(rows, gameName) {
 		log.Println("Successfully updated values for", gameName)
+	}
+}
+
+// if the given game is not empty, then toggle favorite
+func ToggleFavorite(gameName string) {
+	db, err := sql.Open("sqlite3", "games.db")
+	if err != nil {
+		log.Fatal("Failed to access db")
+	}
+	defer db.Close()
+
+	// get value of favorite for given game
+	var favorite bool
+	err = db.QueryRow("SELECT favorite FROM games WHERE name = ?", gameName).Scan(&favorite)
+	if err != nil {
+		log.Fatal("Error obtaining favorite value from game", err)
+	}
+
+	// update game favorite value to the opposite value
+	res, err := db.Exec("UPDATE games SET favorite = ? WHERE name = ?", !favorite, gameName)
+	if err != nil {
+		log.Fatal("Error updating game to be favorite", err)
+	}
+
+	if rowsAffected(res, gameName) {
+		log.Println("Toggled Favorite for given game:", gameName)
 	}
 }
 
