@@ -85,8 +85,7 @@ func DeleteFromDB(gameName string) {
 
 // if the given game is not empty and not already existent in DB, then add to the DB
 func AddToDB(game scraper.Game) {
-	if (game.Name == "") &&
-		(game.HLTBUrl == "") &&
+	if (game.HLTBUrl == "") &&
 		(game.CompletionatorUrl == "") &&
 		(game.Main == -1) &&
 		(game.MainPlus == -1) &&
@@ -144,6 +143,8 @@ func SearchAddToDB(gameName string, searchSource string) {
 		completionatorSearch := scraper.SearchGameCompletionator(gameName)
 
 		newgame = compareGetGameData(hltbSearch, completionatorSearch)
+
+		newgame.Name = gameName
 
 	case "HLTB":
 		newgame = scraper.SearchGameHLTB(gameName)
