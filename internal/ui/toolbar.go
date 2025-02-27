@@ -49,7 +49,7 @@ func createMainWindowToolbar(
 		layout.NewSpacer(),
 		createHelpButton(toolbarCanvas),
 		layout.NewSpacer(),
-		createSettingsButton(a, w, searchSource),
+		createSettingsButton(a, w, searchSource, sortCategory, sortOrder, searchText, selectedRow, dbData),
 	)
 
 	// PERF: change size of each button depending on the size of the given window
@@ -131,41 +131,25 @@ func createSettingsButton(
 	a fyne.App,
 	w fyne.Window,
 	searchSource binding.String,
+	sortCategory binding.String,
+	sortOrder binding.Bool,
+	searchText binding.String,
+	selectedRow binding.Int,
+	dbData *MyDataBinding,
 ) (settingsButton *widget.Button) {
 	settingsButton = widget.NewButtonWithIcon("", theme.SettingsIcon(), func() {
-		settingsPopup(a, w, searchSource)
+		settingsPopup(
+			a,
+			w,
+			searchSource,
+			sortCategory,
+			sortOrder,
+			searchText,
+			selectedRow,
+			dbData,
+		)
 	})
 
-	// menu := fyne.NewMenu("",
-	// 	fyne.NewMenuItem("Light/Dark Mode", func() {
-	// 		log.Println("toggle L/D mode")
-	// 	}),
-	// 	fyne.NewMenuItem("Text Size", func() {
-	// 		log.Println("slider for text size")
-	// 	}),
-	// 	fyne.NewMenuItem("Update all data", func() {
-	// 		log.Println("get list of all songs and update them")
-	// 	}),
-	// 	// TODO: Add confirmation window to this one
-	// 	fyne.NewMenuItem("delete entire DB", func() {
-	// 		log.Println("drop table and then create a new empty one")
-	// 	}),
-	// 	fyne.NewMenuItem("db location", func() {
-	// 		log.Println("pick a location to store the DB")
-	// 	}),
-	// 	fyne.NewMenuItem("export location", func() {
-	// 		log.Println("pick a location to export stuff to")
-	// 	}),
-	// 	fyne.NewMenuItem("default src for data", func() {
-	// 		log.Println("checklist for sources. all, hltb, comp")
-	// 	}),
-	// )
-	//
-	// menuPopup := widget.NewPopUpMenu(menu, toolbarCanvas)
-	//
-	// settingsButton.OnTapped = func() {
-	// 	menuPopup.ShowAtPosition(settingsButton.Position().Add(fyne.NewPos(0, settingsButton.Size().Height)))
-	// }
 	return settingsButton
 }
 

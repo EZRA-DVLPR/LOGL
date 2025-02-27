@@ -66,6 +66,21 @@ func CheckDBExists() bool {
 	return true
 }
 
+func DeleteAllDBData() {
+	db, err := sql.Open("sqlite3", "games.db")
+	if err != nil {
+		log.Fatal("Error opening db:", err)
+	}
+	defer db.Close()
+
+	_, err = db.Exec("DELETE FROM games")
+	if err != nil {
+		log.Fatal("Error deleting entire DB")
+	}
+
+	log.Println("Deleted all db data")
+}
+
 // given a game struct, will search DB for the name of the game to delete it
 func DeleteFromDB(gameName string) {
 	db, err := sql.Open("sqlite3", "games.db")

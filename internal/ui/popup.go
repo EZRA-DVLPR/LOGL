@@ -188,6 +188,11 @@ func settingsPopup(
 	a fyne.App,
 	w fyne.Window,
 	searchSource binding.String,
+	sortCategory binding.String,
+	sortOrder binding.Bool,
+	searchText binding.String,
+	selectedRow binding.Int,
+	dbData *MyDataBinding,
 ) {
 	// if w2 already exists then focus it and complete task
 	if w2 != nil {
@@ -212,7 +217,7 @@ func settingsPopup(
 			widget.NewSeparator(),
 			storageLocationSelector(w),
 			widget.NewSeparator(),
-			deleteAllButton(a),
+			deleteAllButton(a, sortCategory, sortOrder, searchText, dbData, selectedRow),
 		),
 	)
 	w2.SetOnClosed(func() {
@@ -290,16 +295,21 @@ func updateAllButton(a fyne.App) *fyne.Container {
 		w3.SetContent(container.New(
 			layout.NewGridLayout(2),
 			widget.NewButtonWithIcon("Cancel", theme.CancelIcon(), func() {
+				w2.RequestFocus()
 				w3.Close()
 			}),
 			widget.NewButtonWithIcon("Update all data", theme.ConfirmIcon(), func() {
 				log.Println("update all entries in db")
 				w3.Close()
+				w2.Close()
 			}),
 		))
 		w3.Show()
 		w3.SetOnClosed(func() {
 			w3 = nil
+		})
+		w2.SetOnClosed(func() {
+			w2 = nil
 		})
 	})
 	return container.New(
@@ -327,6 +337,9 @@ func storageLocationSelector(w fyne.Window) *fyne.Container {
 			}
 			log.Println("selected dir:", uri)
 			w2.Close()
+			w2.SetOnClosed(func() {
+				w2 = nil
+			})
 		}, w)
 	})
 
@@ -337,7 +350,14 @@ func storageLocationSelector(w fyne.Window) *fyne.Container {
 	)
 }
 
-func deleteAllButton(a fyne.App) *fyne.Container {
+func deleteAllButton(
+	a fyne.App,
+	sortCategory binding.String,
+	sortOrder binding.Bool,
+	searchText binding.String,
+	dbData *MyDataBinding,
+	selectedRow binding.Int,
+) *fyne.Container {
 	label := widget.NewLabel("Button to delete all games from data")
 
 	deleteAll := widget.NewButton("Delete All", func() {
@@ -350,16 +370,24 @@ func deleteAllButton(a fyne.App) *fyne.Container {
 		w3.SetContent(container.New(
 			layout.NewGridLayout(2),
 			widget.NewButtonWithIcon("Cancel", theme.CancelIcon(), func() {
+				w2.RequestFocus()
 				w3.Close()
 			}),
 			widget.NewButtonWithIcon("Delete all data", theme.ConfirmIcon(), func() {
 				log.Println("drop table and shite")
+				dbhandler.DeleteAllDBData()
+
+				forceRenderDB(sortCategory, sortOrder, searchText, dbData, selectedRow)
 				w3.Close()
+				w2.Close()
 			}),
 		))
 		w3.Show()
 		w3.SetOnClosed(func() {
 			w3 = nil
+		})
+		w2.SetOnClosed(func() {
+			w2 = nil
 		})
 	})
 	return container.New(
