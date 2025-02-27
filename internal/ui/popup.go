@@ -199,75 +199,6 @@ func settingsPopup(
 	w2 = a.NewWindow("Settings Window")
 	w2.Resize(fyne.NewSize(400, 600))
 
-	// slider for text size
-	slider := widget.NewSlider(0, 10)
-	slider.OnChangeEnded = func(res float64) {
-		log.Println("Slider was released at", res)
-	}
-	// button to update all data
-	updateAll := widget.NewButton("Update All", func() {
-		if w3 != nil {
-			w3.RequestFocus()
-			return
-		}
-		w3 = a.NewWindow("Confirm Deletion of entire Database")
-		w3.Resize(fyne.NewSize(400, 200))
-		w3.SetContent(container.New(
-			layout.NewGridLayout(2),
-			widget.NewButtonWithIcon("Cancel", theme.CancelIcon(), func() {
-				w3.Close()
-			}),
-			widget.NewButtonWithIcon("Update all data", theme.ConfirmIcon(), func() {
-				log.Println("update all entries in db")
-				w3.Close()
-			}),
-		))
-		w3.Show()
-		w3.SetOnClosed(func() {
-			w3 = nil
-		})
-	})
-	// location to store db and exports
-	storageDir := widget.NewButton("select dir", func() {
-		w.RequestFocus()
-		dialog.ShowFolderOpen(func(uri fyne.ListableURI, err error) {
-			if err != nil {
-				log.Println("error:", err)
-				w2.Close()
-				return
-			}
-			if uri == nil {
-				log.Println("no dir selected")
-				w2.Close()
-				return
-			}
-			log.Println("selected dir:", uri)
-			w2.Close()
-		}, w)
-	})
-	// button to delete all data
-	deleteAll := widget.NewButton("Delete All", func() {
-		if w3 != nil {
-			w3.RequestFocus()
-			return
-		}
-		w3 = a.NewWindow("Confirm Deletion of entire Database")
-		w3.Resize(fyne.NewSize(400, 200))
-		w3.SetContent(container.New(
-			layout.NewGridLayout(2),
-			widget.NewButtonWithIcon("Cancel", theme.CancelIcon(), func() {
-				w3.Close()
-			}),
-			widget.NewButtonWithIcon("Delete all data", theme.ConfirmIcon(), func() {
-				log.Println("drop table and shite")
-				w3.Close()
-			}),
-		))
-		w3.Show()
-		w3.SetOnClosed(func() {
-			w3 = nil
-		})
-	})
 	w2.SetContent(
 		container.New(
 			layout.NewVBoxLayout(),
@@ -275,13 +206,13 @@ func settingsPopup(
 			widget.NewSeparator(),
 			themeSelector(),
 			widget.NewSeparator(),
-			slider,
+			textSlider(),
 			widget.NewSeparator(),
-			updateAll,
+			updateAllButton(a),
 			widget.NewSeparator(),
-			storageDir,
+			storageLocationSelector(w),
 			widget.NewSeparator(),
-			deleteAll,
+			deleteAllButton(a),
 		),
 	)
 	w2.SetOnClosed(func() {
@@ -329,5 +260,111 @@ func themeSelector() *fyne.Container {
 		layout.NewVBoxLayout(),
 		label,
 		selector,
+	)
+}
+
+func textSlider() *fyne.Container {
+	label := widget.NewLabel("Text Size changer")
+
+	slider := widget.NewSlider(0, 10)
+	slider.OnChangeEnded = func(res float64) {
+		log.Println("Slider was released at", res)
+	}
+	return container.New(
+		layout.NewVBoxLayout(),
+		label,
+		slider,
+	)
+}
+
+func updateAllButton(a fyne.App) *fyne.Container {
+	label := widget.NewLabel("Press this button to update all games within the database")
+
+	updateAll := widget.NewButton("Update All", func() {
+		if w3 != nil {
+			w3.RequestFocus()
+			return
+		}
+		w3 = a.NewWindow("Confirm Deletion of entire Database")
+		w3.Resize(fyne.NewSize(400, 200))
+		w3.SetContent(container.New(
+			layout.NewGridLayout(2),
+			widget.NewButtonWithIcon("Cancel", theme.CancelIcon(), func() {
+				w3.Close()
+			}),
+			widget.NewButtonWithIcon("Update all data", theme.ConfirmIcon(), func() {
+				log.Println("update all entries in db")
+				w3.Close()
+			}),
+		))
+		w3.Show()
+		w3.SetOnClosed(func() {
+			w3 = nil
+		})
+	})
+	return container.New(
+		layout.NewVBoxLayout(),
+		label,
+		updateAll,
+	)
+}
+
+func storageLocationSelector(w fyne.Window) *fyne.Container {
+	label := widget.NewLabel("Button to change location to store database and export files")
+
+	storageDir := widget.NewButton("select dir", func() {
+		w.RequestFocus()
+		dialog.ShowFolderOpen(func(uri fyne.ListableURI, err error) {
+			if err != nil {
+				log.Println("error:", err)
+				w2.Close()
+				return
+			}
+			if uri == nil {
+				log.Println("no dir selected")
+				w2.Close()
+				return
+			}
+			log.Println("selected dir:", uri)
+			w2.Close()
+		}, w)
+	})
+
+	return container.New(
+		layout.NewVBoxLayout(),
+		label,
+		storageDir,
+	)
+}
+
+func deleteAllButton(a fyne.App) *fyne.Container {
+	label := widget.NewLabel("Button to delete all games from data")
+
+	deleteAll := widget.NewButton("Delete All", func() {
+		if w3 != nil {
+			w3.RequestFocus()
+			return
+		}
+		w3 = a.NewWindow("Confirm Deletion of entire Database")
+		w3.Resize(fyne.NewSize(400, 200))
+		w3.SetContent(container.New(
+			layout.NewGridLayout(2),
+			widget.NewButtonWithIcon("Cancel", theme.CancelIcon(), func() {
+				w3.Close()
+			}),
+			widget.NewButtonWithIcon("Delete all data", theme.ConfirmIcon(), func() {
+				log.Println("drop table and shite")
+				w3.Close()
+			}),
+		))
+		w3.Show()
+		w3.SetOnClosed(func() {
+			w3 = nil
+		})
+	})
+	return container.New(
+		layout.NewVBoxLayout(),
+		label,
+		deleteAll,
 	)
 }
