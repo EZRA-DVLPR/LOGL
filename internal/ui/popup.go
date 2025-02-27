@@ -199,11 +199,6 @@ func settingsPopup(
 	w2 = a.NewWindow("Settings Window")
 	w2.Resize(fyne.NewSize(400, 600))
 
-	// radio for selection of light/dark theme
-	combo := widget.NewSelect([]string{"Light", "Dark"}, func(value string) {
-		log.Println("Select set to", value)
-	})
-	combo.SetSelected("Light")
 	// slider for text size
 	slider := widget.NewSlider(0, 10)
 	slider.OnChangeEnded = func(res float64) {
@@ -278,7 +273,7 @@ func settingsPopup(
 			layout.NewVBoxLayout(),
 			searchSourceRadioWidget(searchSource),
 			widget.NewSeparator(),
-			combo,
+			themeSelector(),
 			widget.NewSeparator(),
 			slider,
 			widget.NewSeparator(),
@@ -297,9 +292,9 @@ func settingsPopup(
 
 // radio for selection of sources
 func searchSourceRadioWidget(searchSource binding.String) *fyne.Container {
-	searchSourceLabel := widget.NewLabel("Search Source Selection")
+	label := widget.NewLabel("Search Source Selection")
 
-	searchSourceRadio := widget.NewRadioGroup(
+	radio := widget.NewRadioGroup(
 		[]string{
 			"All",
 			"HLTB",
@@ -310,11 +305,29 @@ func searchSourceRadioWidget(searchSource binding.String) *fyne.Container {
 
 	// set default to search source saved
 	ss, _ := searchSource.Get()
-	searchSourceRadio.SetSelected(ss)
+	radio.SetSelected(ss)
 
 	return container.New(
 		layout.NewVBoxLayout(),
-		searchSourceLabel,
-		searchSourceRadio,
+		label,
+		radio,
+	)
+}
+
+// selector for the theme of the application
+// PERF: allow custom themes
+// TODO: Add binding to have a default theme
+func themeSelector() *fyne.Container {
+	label := widget.NewLabel("Theme Selection")
+
+	selector := widget.NewSelect([]string{"Light", "Dark"}, func(value string) {
+		log.Println("Select set to", value)
+	})
+	selector.SetSelected("Light")
+
+	return container.New(
+		layout.NewVBoxLayout(),
+		label,
+		selector,
 	)
 }
