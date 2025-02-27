@@ -31,37 +31,25 @@ func createMainWindowToolbar(
 	a fyne.App,
 	w fyne.Window,
 ) (toolbar *fyne.Container) {
-	// create the buttons
-	sortButton := createSortButton(sortOrder)
-	exportButton := createExportButton(toolbarCanvas)
-	settingsButton := createSettingsButton(a, w, searchSource)
-	addButton := createAddButton(a, sortCategory, sortOrder, searchText, dbData, selectedRow, searchSource, toolbarCanvas)
-	removeButton := createRemoveButton(selectedRow, sortCategory, sortOrder, searchText, dbData)
-	helpButton := createHelpButton(toolbarCanvas)
-	randButton := createRandomButton(selectedRow, dbData)
-	faveButton := createFaveButton(selectedRow, sortCategory, sortOrder, searchText, dbData)
-	updateButton := createUpdateButton(sortCategory, sortOrder, searchText, selectedRow, dbData)
-
-	// add them to the toolbar in horizontal row
 	toolbar = container.New(
 		layout.NewHBoxLayout(),
-		sortButton,
+		createSortButton(sortOrder),
 		layout.NewSpacer(),
-		addButton,
+		createAddButton(a, sortCategory, sortOrder, searchText, dbData, selectedRow, searchSource, toolbarCanvas),
 		layout.NewSpacer(),
-		updateButton,
+		createUpdateButton(sortCategory, sortOrder, searchText, selectedRow, dbData),
 		layout.NewSpacer(),
-		removeButton,
+		createRemoveButton(selectedRow, sortCategory, sortOrder, searchText, dbData),
 		layout.NewSpacer(),
-		randButton,
+		createRandomButton(selectedRow, dbData),
 		layout.NewSpacer(),
-		faveButton,
+		createFaveButton(selectedRow, sortCategory, sortOrder, searchText, dbData),
 		layout.NewSpacer(),
-		exportButton,
+		createExportButton(toolbarCanvas),
 		layout.NewSpacer(),
-		helpButton,
+		createHelpButton(toolbarCanvas),
 		layout.NewSpacer(),
-		settingsButton,
+		createSettingsButton(a, w, searchSource),
 	)
 
 	// PERF: change size of each button depending on the size of the given window
