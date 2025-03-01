@@ -251,8 +251,6 @@ func searchSourceRadioWidget(searchSource binding.String) *fyne.Container {
 }
 
 // selector for the theme of the application
-// PERF: allow custom themes
-// TODO: Add binding to have a default theme
 func themeSelector() *fyne.Container {
 	label := widget.NewLabel("Theme Selection")
 
