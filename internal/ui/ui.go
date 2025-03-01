@@ -8,7 +8,7 @@ import (
 )
 
 func StartGUI() {
-	a := app.NewWithID("GameListID") // FIX: IDK what the id does or how to use it properly
+	a := app.NewWithID(".EZRA-DVLPR.GameList")
 	w := a.NewWindow("Main window - GameList")
 
 	// set up prefs for app
