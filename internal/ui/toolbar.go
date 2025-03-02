@@ -72,6 +72,7 @@ func createMainWindowToolbar(
 }
 
 // toggles sort Order (ASC->DESC->ASC)
+// TODO: change the value of selected Row and re-render the dbrender
 func createSortButton(sortOrder binding.Bool) (sortButton *widget.Button) {
 	// create the button with empty label
 	sortButton = widget.NewButtonWithIcon("", theme.MenuDropUpIcon(), func() {
