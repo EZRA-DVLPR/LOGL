@@ -1,0 +1,7 @@
+name: Dark
+background: '#282828'
+foreground: '#ebdbb2'
+primary: '#d79921'
+button: '#98971a'
+placeholder: '#a89984'
+hover: '#3c3836'
