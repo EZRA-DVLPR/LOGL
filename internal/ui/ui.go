@@ -1,10 +1,15 @@
 package ui
 
 import (
+	"log"
+
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
+	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/data/binding"
+	"fyne.io/fyne/v2/theme"
+	"fyne.io/fyne/v2/widget"
 )
 
 func StartGUI() {
@@ -13,6 +18,63 @@ func StartGUI() {
 
 	// set up prefs for app
 	prefs := a.Preferences()
+
+	// load available themes
+	themesDir := "themes"
+	availableThemes, err := loadAllThemes(themesDir)
+	if err != nil {
+		log.Fatal("Error loading themes from themes folder:", err)
+	}
+
+	// TODO: Change colors to be the theme last saved from the user if it exists. Otherwise, default to light
+	customTheme := &CustomTheme{
+		Theme:    theme.DefaultTheme(),
+		textSize: theme.DefaultTheme().Size(theme.SizeNameText),
+		colors:   availableThemes["Light"],
+	}
+
+	// Create three buttons for different text sizes
+	smallButton := widget.NewButton("Small Text", func() {
+		customTheme.textSize = 12
+		a.Settings().SetTheme(customTheme)
+	})
+
+	mediumButton := widget.NewButton("Medium Text", func() {
+		customTheme.textSize = 16
+		a.Settings().SetTheme(customTheme)
+	})
+
+	largeButton := widget.NewButton("Large Text", func() {
+		customTheme.textSize = 24
+		a.Settings().SetTheme(customTheme)
+	})
+
+	sizechanger := container.NewVBox(
+		smallButton,
+		mediumButton,
+		largeButton,
+	)
+
+	// Create theme selection buttons
+	themeLabel := widget.NewLabel("Current Theme: Default")
+	themeButtonContainer := container.NewHBox()
+	for themeName, themeColors := range availableThemes {
+		button := widget.NewButton(themeName, func(name string, colors ColorTheme) func() {
+			return func() {
+				customTheme.colors = colors
+				themeLabel.SetText("Current Theme: " + name)
+				a.Settings().SetTheme(customTheme)
+			}
+		}(themeName, themeColors))
+
+		// Add a color indicator next to the button
+		colorPreview := canvas.NewRectangle(hexToColor(themeColors.Primary))
+		colorPreview.SetMinSize(fyne.NewSize(20, 20))
+
+		themeOption := container.NewHBox(button, colorPreview)
+		themeButtonContainer.Add(themeOption)
+	}
+	a.Settings().SetTheme(customTheme)
 
 	// create all bindings here
 	sortCategory := binding.NewString()
@@ -77,7 +139,7 @@ func StartGUI() {
 			createSearchBar(searchText),
 		),
 		// dont render anything else in space besides DB
-		nil, nil, nil,
+		themeButtonContainer, sizechanger, themeLabel,
 		// default to display names ASC
 		createDBRender(selectedRow, sortCategory, sortOrder, searchText, dbData),
 	)

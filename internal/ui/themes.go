@@ -1,8 +1,10 @@
 package ui
 
 import (
+	"errors"
 	"fmt"
 	"image/color"
+	"log"
 	"os"
 	"path/filepath"
 
@@ -12,16 +14,26 @@ import (
 )
 
 // YAML file contents must match this struct
+//
+// INFO: This struct affects the following fields of the theme which govern the look of the entire app:
+// background: background color of the window
+// foreground: text colors used for all text and buttons
+// primary: settings -> highlighted (selected) src
+// buttoncolor: color for buttons
+// placeholderText: color of placeholder text in entry widget
+// hovercolor: color when mouse cursor hovers an interactive widget
+// inputbackgroundcolor: color for input fields background
+// scrollbarcolor: color of scroll bar
 type ColorTheme struct {
-	Name            string `yaml:"name"`
-	Background      string `yaml:"background"`
-	Foreground      string `yaml:"foreground"`
-	Primary         string `yaml:"primary"`
-	ButtonColor     string `yaml:"button"`
-	TextColor       string `yaml:"text"`
-	DisabledColor   string `yaml:"disabled"`
-	PlaceholderText string `yaml:"placeholder"`
-	HoverColor      string `yaml:"hover"`
+	Name                 string `yaml:"name"`
+	Background           string `yaml:"background"`
+	Foreground           string `yaml:"foreground"`
+	Primary              string `yaml:"primary"`
+	ButtonColor          string `yaml:"button"`
+	PlaceholderText      string `yaml:"placeholder"`
+	HoverColor           string `yaml:"hover"`
+	InputBackgroundColor string `yaml:"inputBackground"`
+	ScrollBarColor       string `yaml:"scrollBar"`
 }
 
 // overwrite the theme from fyne to allow for alternate text sizes and colors
@@ -42,12 +54,12 @@ func (t *CustomTheme) Color(name fyne.ThemeColorName, variant fyne.ThemeVariant)
 		return hexToColor(t.colors.Primary)
 	case theme.ColorNameButton:
 		return hexToColor(t.colors.ButtonColor)
-	case theme.ColorNameDisabled:
-		return hexToColor(t.colors.DisabledColor)
 	case theme.ColorNamePlaceHolder:
 		return hexToColor(t.colors.PlaceholderText)
-	case theme.ColorNameHover:
+	case theme.ColorNameHover, theme.ColorNameFocus:
 		return hexToColor(t.colors.HoverColor)
+	case theme.ColorNameScrollBar:
+		return hexToColor(t.colors.ScrollBarColor)
 	default:
 		return t.Theme.Color(name, variant)
 	}
@@ -75,6 +87,7 @@ func hexToColor(hex string) color.Color {
 
 // loads theme from YAML file
 func loadTheme(filename string) (ColorTheme, error) {
+	log.Println("loading theme from yaml file:", filename)
 	var theme ColorTheme
 
 	// if error reading file, return empty colortheme + error
@@ -90,33 +103,35 @@ func loadTheme(filename string) (ColorTheme, error) {
 
 // makes default L/D themes as yaml files
 func createLDThemes(themesDir string) {
+	log.Println("creating l/d themes")
 	lightTheme := ColorTheme{
-		Name:            "Light",
-		Background:      "#ffffff",
-		Foreground:      "#000000",
-		Primary:         "#3f51b5",
-		ButtonColor:     "#2196f3",
-		TextColor:       "#212121",
-		DisabledColor:   "#9e9e9e",
-		PlaceholderText: "#757575",
-		HoverColor:      "#e0e0e0",
+		Name:                 "Light",
+		Background:           "#ffffff",
+		Foreground:           "#9e9e9e",
+		Primary:              "#3f51b5",
+		ButtonColor:          "#2196f3",
+		PlaceholderText:      "#700575",
+		HoverColor:           "#e0e000",
+		InputBackgroundColor: "#3c3836",
+		ScrollBarColor:       "#665c54",
 	}
 
 	darkTheme := ColorTheme{
-		Name:            "Dark",
-		Background:      "#282828",
-		Foreground:      "#ebdbb2",
-		Primary:         "#d79921",
-		ButtonColor:     "#98971a",
-		TextColor:       "#fbf1c7",
-		DisabledColor:   "#7c6f64",
-		PlaceholderText: "#a89984",
-		HoverColor:      "#3c3836",
+		Name:                 "Dark",
+		Background:           "#282828",
+		Foreground:           "#ebdbb2",
+		Primary:              "#d79921",
+		ButtonColor:          "#98971a",
+		PlaceholderText:      "#a89984",
+		HoverColor:           "#3c3836",
+		InputBackgroundColor: "#3c3836",
+		ScrollBarColor:       "#665c54",
 	}
 
 	// add the above defined themes to themes array
 	themes := []ColorTheme{lightTheme, darkTheme}
 
+	log.Println("Making yaml files")
 	// for each theme, make a yaml file
 	for _, theme := range themes {
 		data, _ := yaml.Marshal(theme)
@@ -126,9 +141,10 @@ func createLDThemes(themesDir string) {
 
 // loads all theme files from dir called "themes"
 // INFO: this dir is in the same dir as where export files and db are stored
-func loadAllthemes(themesDir string) (map[string]ColorTheme, error) {
+func loadAllThemes(themesDir string) (map[string]ColorTheme, error) {
 	themes := make(map[string]ColorTheme)
 
+	log.Println("checking existence of themes dir")
 	// if dir doesnt exist then create it
 	if _, err := os.Stat(themesDir); os.IsNotExist(err) {
 		err := os.MkdirAll(themesDir, 0755)
@@ -139,6 +155,7 @@ func loadAllthemes(themesDir string) (map[string]ColorTheme, error) {
 		// create the standard L/D themes (as yaml files)
 		createLDThemes(themesDir)
 	}
+	log.Println("reading themes dir")
 
 	files, err := os.ReadDir(themesDir)
 	if err != nil {
@@ -146,6 +163,15 @@ func loadAllthemes(themesDir string) (map[string]ColorTheme, error) {
 		return themes, err
 	}
 
+	// check if the light/dark.yaml files exist and if not then create them
+	_, errLight := os.Stat(themesDir + "/Light.yaml")
+	_, errDark := os.Stat(themesDir + "/Dark.yaml")
+	if (errors.Is(errLight, os.ErrNotExist)) || (errors.Is(errDark, os.ErrNotExist)) {
+		log.Println("Error finding Default themes: Light and Dark. Creating them inside of :", themesDir)
+		createLDThemes(themesDir)
+	}
+
+	log.Println("Extracting themes from themes dir")
 	// for all files in themesDir, extract the theme as ColorTheme struct and add to map
 	for _, file := range files {
 		if (!file.IsDir()) && (filepath.Ext(file.Name()) == ".yaml") {
