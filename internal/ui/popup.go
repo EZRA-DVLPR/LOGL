@@ -323,24 +323,6 @@ func themeSelector(
 	)
 }
 
-// return a string thats abbreviated if it needs to be abbreviated
-func abbrevName(name string) string {
-	var returnname string
-	if len(name) > 12 {
-		returnname = name[:12] + "..."
-	} else {
-		returnname = name
-	}
-	return returnname
-}
-
-// create rectangles for the preview of the color theme
-func fixedHeightRect(color color.Color) *canvas.Rectangle {
-	rect := canvas.NewRectangle(color)
-	rect.SetMinSize(fyne.NewSize(0, 40))
-	return rect
-}
-
 // TODO: Binding for themesDir location
 func textSlider(
 	selectedTheme binding.String,
@@ -353,7 +335,7 @@ func textSlider(
 		log.Fatal("Error loading themes from themes folder:", err)
 	}
 	label := widget.NewLabelWithStyle(
-		"Text Size",
+		"Change Text Size",
 		fyne.TextAlignCenter,
 		fyne.TextStyle{Bold: true},
 	)
@@ -399,7 +381,7 @@ func updateAllButton(
 	selectedRow binding.Int,
 ) *fyne.Container {
 	label := widget.NewLabelWithStyle(
-		"Update Data for All Games",
+		"Update All Games",
 		fyne.TextAlignCenter,
 		fyne.TextStyle{Bold: true},
 	)
@@ -484,12 +466,12 @@ func deleteAllButton(
 	selectedRow binding.Int,
 ) *fyne.Container {
 	label := widget.NewLabelWithStyle(
-		"Delete All Saved Data",
+		"Delete All Data",
 		fyne.TextAlignCenter,
 		fyne.TextStyle{Bold: true},
 	)
 
-	deleteAll := widget.NewButton("Delete All", func() {
+	deleteAll := widget.NewButton("Delete All Data", func() {
 		if w3 != nil {
 			w3.RequestFocus()
 			return
@@ -502,7 +484,7 @@ func deleteAllButton(
 				w3.Close()
 				w2.RequestFocus()
 			}),
-			widget.NewButtonWithIcon("Delete all data", theme.ConfirmIcon(), func() {
+			widget.NewButtonWithIcon("DELETE ALL DATA", theme.ConfirmIcon(), func() {
 				dbhandler.DeleteAllDBData()
 
 				forceRenderDB(sortCategory, sortOrder, searchText, dbData, selectedRow)
@@ -523,4 +505,22 @@ func deleteAllButton(
 		label,
 		deleteAll,
 	)
+}
+
+// return a string thats abbreviated if it needs to be abbreviated
+func abbrevName(name string) string {
+	var returnname string
+	if len(name) > 12 {
+		returnname = name[:12] + "..."
+	} else {
+		returnname = name
+	}
+	return returnname
+}
+
+// create rectangles for the preview of the color theme
+func fixedHeightRect(color color.Color) *canvas.Rectangle {
+	rect := canvas.NewRectangle(color)
+	rect.SetMinSize(fyne.NewSize(0, 40))
+	return rect
 }
