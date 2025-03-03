@@ -2,6 +2,7 @@ package ui
 
 import (
 	"fmt"
+	"image/color"
 	"log"
 	"strconv"
 	"strings"
@@ -209,19 +210,21 @@ func settingsPopup(
 	w2.Resize(fyne.NewSize(400, 600))
 
 	w2.SetContent(
-		container.New(
-			layout.NewVBoxLayout(),
-			searchSourceRadioWidget(searchSource),
-			widget.NewSeparator(),
-			themeSelector(selectedTheme, textSize, a),
-			widget.NewSeparator(),
-			textSlider(selectedTheme, textSize, a),
-			widget.NewSeparator(),
-			updateAllButton(a, sortCategory, sortOrder, searchText, dbData, selectedRow),
-			widget.NewSeparator(),
-			storageLocationSelector(w),
-			widget.NewSeparator(),
-			deleteAllButton(a, sortCategory, sortOrder, searchText, dbData, selectedRow),
+		container.NewVScroll(
+			container.New(
+				layout.NewVBoxLayout(),
+				searchSourceRadioWidget(searchSource),
+				widget.NewSeparator(),
+				themeSelector(selectedTheme, textSize, a),
+				widget.NewSeparator(),
+				textSlider(selectedTheme, textSize, a),
+				widget.NewSeparator(),
+				updateAllButton(a, sortCategory, sortOrder, searchText, dbData, selectedRow),
+				widget.NewSeparator(),
+				storageLocationSelector(w),
+				widget.NewSeparator(),
+				deleteAllButton(a, sortCategory, sortOrder, searchText, dbData, selectedRow),
+			),
 		),
 	)
 	w2.SetOnClosed(func() {
@@ -270,15 +273,15 @@ func themeSelector(
 		log.Fatal("Error loading themes from themes folder:", err)
 	}
 	themeList := container.New(
-		layout.NewGridLayout(1),
+		layout.NewVBoxLayout(),
 	)
 
+	// TODO: if themename is too long, want to abbreviate and append '...'
 	for themeName, themeColors := range availableThemes {
 		button := widget.NewButton(themeName, func(name string, colors ColorTheme) func() {
 			return func() {
 				label.SetText(fmt.Sprintf("Current Theme: %v", name))
 				selectedTheme.Set(name)
-
 				ts, _ := textSize.Get()
 				a.Settings().SetTheme(
 					&CustomTheme{
@@ -289,13 +292,18 @@ func themeSelector(
 				)
 			}
 		}(themeName, themeColors))
+		themeList.Add(button)
 
-		// Add a color indicator next to the button
-		colorPreview := canvas.NewRectangle(hexToColor(themeColors.Primary))
-		colorPreview.SetMinSize(fyne.NewSize(20, 20))
-
-		themeOption := container.NewHBox(button, colorPreview)
-		themeList.Add(themeOption)
+		colorPreviews := container.New(
+			layout.NewGridLayout(6),
+			fixedHeightRect(hexToColor(themeColors.Background)),
+			fixedHeightRect(hexToColor(themeColors.Foreground)),
+			fixedHeightRect(hexToColor(themeColors.Primary)),
+			fixedHeightRect(hexToColor(themeColors.ButtonColor)),
+			fixedHeightRect(hexToColor(themeColors.HoverColor)),
+			fixedHeightRect(hexToColor(themeColors.InputBackgroundColor)),
+		)
+		themeList.Add(colorPreviews)
 	}
 
 	return container.New(
@@ -303,6 +311,12 @@ func themeSelector(
 		label,
 		themeList,
 	)
+}
+
+func fixedHeightRect(color color.Color) *canvas.Rectangle {
+	rect := canvas.NewRectangle(color)
+	rect.SetMinSize(fyne.NewSize(0, 40))
+	return rect
 }
 
 // TODO: Binding for themesDir location
