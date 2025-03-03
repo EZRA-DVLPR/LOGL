@@ -295,13 +295,15 @@ func themeSelector(
 		themeList.Add(button)
 
 		colorPreviews := container.New(
-			layout.NewGridLayout(6),
+			layout.NewGridLayout(8),
 			fixedHeightRect(hexToColor(themeColors.Background)),
 			fixedHeightRect(hexToColor(themeColors.Foreground)),
 			fixedHeightRect(hexToColor(themeColors.Primary)),
 			fixedHeightRect(hexToColor(themeColors.ButtonColor)),
+			fixedHeightRect(hexToColor(themeColors.PlaceholderText)),
 			fixedHeightRect(hexToColor(themeColors.HoverColor)),
 			fixedHeightRect(hexToColor(themeColors.InputBackgroundColor)),
+			fixedHeightRect(hexToColor(themeColors.ScrollBarColor)),
 		)
 		themeList.Add(colorPreviews)
 	}
@@ -313,6 +315,7 @@ func themeSelector(
 	)
 }
 
+// create rectangles for the preview of the color theme
 func fixedHeightRect(color color.Color) *canvas.Rectangle {
 	rect := canvas.NewRectangle(color)
 	rect.SetMinSize(fyne.NewSize(0, 40))
