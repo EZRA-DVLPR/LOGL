@@ -58,6 +58,8 @@ func (t *CustomTheme) Color(name fyne.ThemeColorName, variant fyne.ThemeVariant)
 		return hexToColor(t.colors.PlaceholderText)
 	case theme.ColorNameHover, theme.ColorNameFocus:
 		return hexToColor(t.colors.HoverColor)
+	case theme.ColorNameInputBackground:
+		return hexToColor(t.colors.InputBackgroundColor)
 	case theme.ColorNameScrollBar:
 		return hexToColor(t.colors.ScrollBarColor)
 	default:

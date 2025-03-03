@@ -1,7 +1,9 @@
 name: Light
 background: '#ffffff'
-foreground: '#9e9e9e'
-primary: '#3f51b5'
-button: '#2196f3'
-placeholder: '#700575'
+foreground: '#b2b2b2'
+primary: '#0087ff'
+button: '#0000af'
+placeholder: '#00ffff'
 hover: '#e0e000'
+inputBackground: "#8a8a8a"
+scrollBar:       "#0000ff"
