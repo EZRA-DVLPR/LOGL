@@ -19,63 +19,6 @@ func StartGUI() {
 	// set up prefs for app
 	prefs := a.Preferences()
 
-	// load available themes
-	themesDir := "themes"
-	availableThemes, err := loadAllThemes(themesDir)
-	if err != nil {
-		log.Fatal("Error loading themes from themes folder:", err)
-	}
-
-	// TODO: Change colors to be the theme last saved from the user if it exists. Otherwise, default to light
-	customTheme := &CustomTheme{
-		Theme:    theme.DefaultTheme(),
-		textSize: theme.DefaultTheme().Size(theme.SizeNameText),
-		colors:   availableThemes["Light"],
-	}
-
-	// Create three buttons for different text sizes
-	smallButton := widget.NewButton("Small Text", func() {
-		customTheme.textSize = 12
-		a.Settings().SetTheme(customTheme)
-	})
-
-	mediumButton := widget.NewButton("Medium Text", func() {
-		customTheme.textSize = 16
-		a.Settings().SetTheme(customTheme)
-	})
-
-	largeButton := widget.NewButton("Large Text", func() {
-		customTheme.textSize = 24
-		a.Settings().SetTheme(customTheme)
-	})
-
-	sizechanger := container.NewVBox(
-		smallButton,
-		mediumButton,
-		largeButton,
-	)
-
-	// Create theme selection buttons
-	themeLabel := widget.NewLabel("Current Theme: Default")
-	themeButtonContainer := container.NewHBox()
-	for themeName, themeColors := range availableThemes {
-		button := widget.NewButton(themeName, func(name string, colors ColorTheme) func() {
-			return func() {
-				customTheme.colors = colors
-				themeLabel.SetText("Current Theme: " + name)
-				a.Settings().SetTheme(customTheme)
-			}
-		}(themeName, themeColors))
-
-		// Add a color indicator next to the button
-		colorPreview := canvas.NewRectangle(hexToColor(themeColors.Primary))
-		colorPreview.SetMinSize(fyne.NewSize(20, 20))
-
-		themeOption := container.NewHBox(button, colorPreview)
-		themeButtonContainer.Add(themeOption)
-	}
-	a.Settings().SetTheme(customTheme)
-
 	// create all bindings here
 	sortCategory := binding.NewString()
 	sortOrder := binding.NewBool()
@@ -83,6 +26,8 @@ func StartGUI() {
 	wWidth := binding.NewFloat()
 	wHeight := binding.NewFloat()
 	searchSource := binding.NewString()
+	textSize := binding.NewFloat()
+	selectedTheme := binding.NewString()
 
 	// INFO: The following bindings do not persist through sessions
 	searchText := binding.NewString()
@@ -124,6 +69,77 @@ func StartGUI() {
 
 	// the app will close when the main window (w) is closed
 	w.SetMaster()
+
+	// load available themes
+	themesDir := "themes"
+	availableThemes, err := loadAllThemes(themesDir)
+	if err != nil {
+		log.Fatal("Error loading themes from themes folder:", err)
+	}
+
+	// load saved text size from prefs
+	ts := prefs.FloatWithFallback("text_size", 18)
+	textSize.Set(ts)
+
+	// load saved theme from prefs
+	// TODO: Base light/dark as default based on system settings
+	st := prefs.StringWithFallback("selected_theme", "Light")
+	selectedTheme.Set(st)
+
+	customTheme := &CustomTheme{
+		Theme:    theme.DefaultTheme(),
+		textSize: float32(ts),
+		colors:   availableThemes[st],
+	}
+
+	// Create three buttons for different text sizes
+	smallButton := widget.NewButton("Small Text", func() {
+		textSize.Set(12)
+		customTheme.textSize = 12
+		a.Settings().SetTheme(customTheme)
+	})
+
+	mediumButton := widget.NewButton("Medium Text", func() {
+		textSize.Set(18)
+		customTheme.textSize = 18
+		a.Settings().SetTheme(customTheme)
+	})
+
+	largeButton := widget.NewButton("Large Text", func() {
+		textSize.Set(24)
+		customTheme.textSize = 24
+		a.Settings().SetTheme(customTheme)
+	})
+
+	sizechanger := container.NewVBox(
+		smallButton,
+		mediumButton,
+		largeButton,
+	)
+
+	// Create theme selection buttons
+	themeLabel := widget.NewLabel(availableThemes[st].Name)
+	themeButtonContainer := container.NewHBox()
+	for themeName, themeColors := range availableThemes {
+		button := widget.NewButton(themeName, func(name string, colors ColorTheme) func() {
+			return func() {
+				customTheme.colors = colors
+				themeLabel.SetText(name)
+				selectedTheme.Set(name)
+
+				a.Settings().SetTheme(customTheme)
+			}
+		}(themeName, themeColors))
+
+		// Add a color indicator next to the button
+		colorPreview := canvas.NewRectangle(hexToColor(themeColors.Primary))
+		colorPreview.SetMinSize(fyne.NewSize(20, 20))
+
+		themeOption := container.NewHBox(button, colorPreview)
+		themeButtonContainer.Add(themeOption)
+	}
+
+	a.Settings().SetTheme(customTheme)
 
 	//See diagram in documentation for clearer illustration
 	//
@@ -172,6 +188,19 @@ func StartGUI() {
 		// save search source
 		ss, _ := searchSource.Get()
 		prefs.SetString("search_source", ss)
+
+		// save text size
+		ts, _ := textSize.Get()
+		prefs.SetFloat("text_size", ts)
+
+		// save theme selection
+		st, _ = selectedTheme.Get()
+		prefs.SetString("selected_theme", st)
+
+		// debugging what values saved are:
+		// ts, _ = textSize.Get()
+		// st, _ = selectedTheme.Get()
+		// log.Println(ts, st)
 	})
 
 	// runloop for the app
