@@ -5,11 +5,9 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
-	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/data/binding"
 	"fyne.io/fyne/v2/theme"
-	"fyne.io/fyne/v2/widget"
 )
 
 func StartGUI() {
@@ -92,28 +90,6 @@ func StartGUI() {
 		colors:   availableThemes[st],
 	}
 
-	// Create theme selection buttons
-	themeLabel := widget.NewLabel(availableThemes[st].Name)
-	themeButtonContainer := container.NewHBox()
-	for themeName, themeColors := range availableThemes {
-		button := widget.NewButton(themeName, func(name string, colors ColorTheme) func() {
-			return func() {
-				customTheme.colors = colors
-				themeLabel.SetText(name)
-				selectedTheme.Set(name)
-
-				a.Settings().SetTheme(customTheme)
-			}
-		}(themeName, themeColors))
-
-		// Add a color indicator next to the button
-		colorPreview := canvas.NewRectangle(hexToColor(themeColors.Primary))
-		colorPreview.SetMinSize(fyne.NewSize(20, 20))
-
-		themeOption := container.NewHBox(button, colorPreview)
-		themeButtonContainer.Add(themeOption)
-	}
-
 	a.Settings().SetTheme(customTheme)
 
 	//See diagram in documentation for clearer illustration
@@ -130,8 +106,7 @@ func StartGUI() {
 			createSearchBar(searchText),
 		),
 		// dont render anything else in space besides DB
-		themeButtonContainer, nil, themeLabel,
-		// nil, nil, nil
+		nil, nil, nil,
 		// default to display names ASC
 		createDBRender(selectedRow, sortCategory, sortOrder, searchText, dbData),
 	)

@@ -1,11 +1,13 @@
 package ui
 
 import (
+	"fmt"
 	"log"
 	"strconv"
 	"strings"
 
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/data/binding"
 	"fyne.io/fyne/v2/dialog"
@@ -211,7 +213,7 @@ func settingsPopup(
 			layout.NewVBoxLayout(),
 			searchSourceRadioWidget(searchSource),
 			widget.NewSeparator(),
-			themeSelector(),
+			themeSelector(selectedTheme, textSize, a),
 			widget.NewSeparator(),
 			textSlider(selectedTheme, textSize, a),
 			widget.NewSeparator(),
@@ -253,18 +255,53 @@ func searchSourceRadioWidget(searchSource binding.String) *fyne.Container {
 }
 
 // selector for the theme of the application
-func themeSelector() *fyne.Container {
-	label := widget.NewLabel("Theme Selection")
+// TODO: Binding for themesDir location
+func themeSelector(
+	selectedTheme binding.String,
+	textSize binding.Float,
+	a fyne.App,
+) *fyne.Container {
+	st, _ := selectedTheme.Get()
+	label := widget.NewLabel(fmt.Sprintf("Current Theme: %v", st))
 
-	selector := widget.NewSelect([]string{"Light", "Dark"}, func(value string) {
-		log.Println("Select set to", value)
-	})
-	selector.SetSelected("Light")
+	// TODO: Binding for themesDir location
+	availableThemes, err := loadAllThemes("themes")
+	if err != nil {
+		log.Fatal("Error loading themes from themes folder:", err)
+	}
+	themeList := container.New(
+		layout.NewGridLayout(1),
+	)
+
+	for themeName, themeColors := range availableThemes {
+		button := widget.NewButton(themeName, func(name string, colors ColorTheme) func() {
+			return func() {
+				label.SetText(fmt.Sprintf("Current Theme: %v", name))
+				selectedTheme.Set(name)
+
+				ts, _ := textSize.Get()
+				a.Settings().SetTheme(
+					&CustomTheme{
+						Theme:    theme.DefaultTheme(),
+						textSize: float32(ts),
+						colors:   availableThemes[name],
+					},
+				)
+			}
+		}(themeName, themeColors))
+
+		// Add a color indicator next to the button
+		colorPreview := canvas.NewRectangle(hexToColor(themeColors.Primary))
+		colorPreview.SetMinSize(fyne.NewSize(20, 20))
+
+		themeOption := container.NewHBox(button, colorPreview)
+		themeList.Add(themeOption)
+	}
 
 	return container.New(
 		layout.NewVBoxLayout(),
 		label,
-		selector,
+		themeList,
 	)
 }
 
