@@ -28,6 +28,8 @@ func createMainWindowToolbar(
 	selectedRow binding.Int,
 	dbData *MyDataBinding,
 	searchSource binding.String,
+	textSize binding.Float,
+	selectedTheme binding.String,
 	a fyne.App,
 	w fyne.Window,
 ) (toolbar *fyne.Container) {
@@ -49,7 +51,7 @@ func createMainWindowToolbar(
 		layout.NewSpacer(),
 		createHelpButton(toolbarCanvas),
 		layout.NewSpacer(),
-		createSettingsButton(a, w, searchSource, sortCategory, sortOrder, searchText, selectedRow, dbData),
+		createSettingsButton(a, w, searchSource, sortCategory, sortOrder, searchText, selectedRow, dbData, textSize, selectedTheme),
 	)
 
 	// PERF: change size of each button depending on the size of the given window
@@ -137,6 +139,8 @@ func createSettingsButton(
 	searchText binding.String,
 	selectedRow binding.Int,
 	dbData *MyDataBinding,
+	textSize binding.Float,
+	selectedTheme binding.String,
 ) (settingsButton *widget.Button) {
 	settingsButton = widget.NewButtonWithIcon("", theme.SettingsIcon(), func() {
 		settingsPopup(
@@ -148,6 +152,8 @@ func createSettingsButton(
 			searchText,
 			selectedRow,
 			dbData,
+			textSize,
+			selectedTheme,
 		)
 	})
 

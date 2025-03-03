@@ -193,6 +193,8 @@ func settingsPopup(
 	searchText binding.String,
 	selectedRow binding.Int,
 	dbData *MyDataBinding,
+	textSize binding.Float,
+	selectedTheme binding.String,
 ) {
 	// if w2 already exists then focus it and complete task
 	if w2 != nil {
@@ -211,7 +213,7 @@ func settingsPopup(
 			widget.NewSeparator(),
 			themeSelector(),
 			widget.NewSeparator(),
-			textSlider(),
+			textSlider(selectedTheme, textSize, a),
 			widget.NewSeparator(),
 			updateAllButton(a, sortCategory, sortOrder, searchText, dbData, selectedRow),
 			widget.NewSeparator(),
@@ -266,12 +268,30 @@ func themeSelector() *fyne.Container {
 	)
 }
 
-func textSlider() *fyne.Container {
-	label := widget.NewLabel("Text Size changer")
+// TODO: Binding for themesDir location
+func textSlider(
+	selectedTheme binding.String,
+	textSize binding.Float,
+	a fyne.App,
+) *fyne.Container {
+	// TODO: Binding for themesDir location
+	availableThemes, err := loadAllThemes("themes")
+	if err != nil {
+		log.Fatal("Error loading themes from themes folder:", err)
+	}
+	label := widget.NewLabel("Text Size Changer")
 
-	slider := widget.NewSlider(0, 10)
+	slider := widget.NewSliderWithData(12, 24, textSize)
 	slider.OnChangeEnded = func(res float64) {
-		log.Println("Slider was released at", res)
+		res32 := float32(res)
+		st, _ := selectedTheme.Get()
+		a.Settings().SetTheme(
+			&CustomTheme{
+				Theme:    theme.DefaultTheme(),
+				textSize: res32,
+				colors:   availableThemes[st],
+			},
+		)
 	}
 	return container.New(
 		layout.NewVBoxLayout(),

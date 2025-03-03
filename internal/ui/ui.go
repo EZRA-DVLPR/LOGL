@@ -92,31 +92,6 @@ func StartGUI() {
 		colors:   availableThemes[st],
 	}
 
-	// Create three buttons for different text sizes
-	smallButton := widget.NewButton("Small Text", func() {
-		textSize.Set(12)
-		customTheme.textSize = 12
-		a.Settings().SetTheme(customTheme)
-	})
-
-	mediumButton := widget.NewButton("Medium Text", func() {
-		textSize.Set(18)
-		customTheme.textSize = 18
-		a.Settings().SetTheme(customTheme)
-	})
-
-	largeButton := widget.NewButton("Large Text", func() {
-		textSize.Set(24)
-		customTheme.textSize = 24
-		a.Settings().SetTheme(customTheme)
-	})
-
-	sizechanger := container.NewVBox(
-		smallButton,
-		mediumButton,
-		largeButton,
-	)
-
 	// Create theme selection buttons
 	themeLabel := widget.NewLabel(availableThemes[st].Name)
 	themeButtonContainer := container.NewHBox()
@@ -151,11 +126,12 @@ func StartGUI() {
 	content := container.NewBorder(
 		// top is toolbar + searchbar
 		container.NewVBox(
-			createMainWindowToolbar(w.Canvas(), sortCategory, sortOrder, searchText, selectedRow, dbData, searchSource, a, w),
+			createMainWindowToolbar(w.Canvas(), sortCategory, sortOrder, searchText, selectedRow, dbData, searchSource, textSize, selectedTheme, a, w),
 			createSearchBar(searchText),
 		),
 		// dont render anything else in space besides DB
-		themeButtonContainer, sizechanger, themeLabel,
+		themeButtonContainer, nil, themeLabel,
+		// nil, nil, nil
 		// default to display names ASC
 		createDBRender(selectedRow, sortCategory, sortOrder, searchText, dbData),
 	)
