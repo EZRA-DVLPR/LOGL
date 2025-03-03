@@ -268,12 +268,7 @@ func themeSelector(
 	a fyne.App,
 ) *fyne.Container {
 	st, _ := selectedTheme.Get()
-	var newName string
-	if len(st) > 12 {
-		newName = st[:12] + "..."
-	} else {
-		newName = st
-	}
+	newName := abbrevName(st)
 	label := widget.NewLabelWithStyle(
 		fmt.Sprintf("Current Theme: %v", newName),
 		fyne.TextAlignCenter,
@@ -289,21 +284,10 @@ func themeSelector(
 	)
 
 	for themeName, themeColors := range availableThemes {
-		// abbreviate the themename if its too long
-		if len(themeName) > 12 {
-			newName = themeName[:12] + "..."
-		} else {
-			newName = themeName
-		}
-
+		newName = abbrevName(themeName)
 		button := widget.NewButton(newName, func(name string, colors ColorTheme) func() {
 			return func() {
-				// abbreviate the name if its too long
-				if len(name) > 12 {
-					newName = name[:12] + "..."
-				} else {
-					newName = name
-				}
+				newName = abbrevName(name)
 				label.SetText(fmt.Sprintf("Current Theme: %v", newName))
 				selectedTheme.Set(themeName)
 				ts, _ := textSize.Get()
@@ -337,6 +321,17 @@ func themeSelector(
 		label,
 		themeList,
 	)
+}
+
+// return a string thats abbreviated if it needs to be abbreviated
+func abbrevName(name string) string {
+	var returnname string
+	if len(name) > 12 {
+		returnname = name[:12] + "..."
+	} else {
+		returnname = name
+	}
+	return returnname
 }
 
 // create rectangles for the preview of the color theme
