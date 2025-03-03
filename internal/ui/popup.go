@@ -331,11 +331,22 @@ func textSlider(
 		log.Fatal("Error loading themes from themes folder:", err)
 	}
 	label := widget.NewLabel("Text Size Changer")
+	ts, _ := textSize.Get()
+	currSize := widget.NewLabel(fmt.Sprintf("Current size is: %v", ts))
+	moveSize := widget.NewLabel("")
+	moveSize.Hide()
 
 	slider := widget.NewSliderWithData(12, 24, textSize)
+	slider.OnChanged = func(res float64) {
+		moveSize.Show()
+		res32 := float32(res)
+		moveSize.SetText(fmt.Sprintf("New Size will be: %v", res32))
+	}
 	slider.OnChangeEnded = func(res float64) {
+		moveSize.Hide()
 		res32 := float32(res)
 		st, _ := selectedTheme.Get()
+		currSize.SetText(fmt.Sprintf("Current size is: %v", res32))
 		a.Settings().SetTheme(
 			&CustomTheme{
 				Theme:    theme.DefaultTheme(),
@@ -347,7 +358,9 @@ func textSlider(
 	return container.New(
 		layout.NewVBoxLayout(),
 		label,
+		currSize,
 		slider,
+		moveSize,
 	)
 }
 
