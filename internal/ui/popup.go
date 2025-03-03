@@ -235,8 +235,11 @@ func settingsPopup(
 
 // radio for selection of sources
 func searchSourceRadioWidget(searchSource binding.String) *fyne.Container {
-	label := widget.NewLabel("Search Source Selection")
-
+	label := widget.NewLabelWithStyle(
+		"Search Source Selection",
+		fyne.TextAlignCenter,
+		fyne.TextStyle{Bold: true},
+	)
 	radio := widget.NewRadioGroup(
 		[]string{
 			"All",
@@ -265,8 +268,17 @@ func themeSelector(
 	a fyne.App,
 ) *fyne.Container {
 	st, _ := selectedTheme.Get()
-	label := widget.NewLabel(fmt.Sprintf("Current Theme: %v", st))
-
+	var newName string
+	if len(st) > 12 {
+		newName = st[:12] + "..."
+	} else {
+		newName = st
+	}
+	label := widget.NewLabelWithStyle(
+		fmt.Sprintf("Current Theme: %v", newName),
+		fyne.TextAlignCenter,
+		fyne.TextStyle{Bold: true},
+	)
 	// TODO: Binding for themesDir location
 	availableThemes, err := loadAllThemes("themes")
 	if err != nil {
@@ -276,9 +288,8 @@ func themeSelector(
 		layout.NewVBoxLayout(),
 	)
 
-	// TODO: if themename is too long, want to abbreviate and append '...'
 	for themeName, themeColors := range availableThemes {
-		var newName string
+		// abbreviate the themename if its too long
 		if len(themeName) > 12 {
 			newName = themeName[:12] + "..."
 		} else {
@@ -287,14 +298,20 @@ func themeSelector(
 
 		button := widget.NewButton(newName, func(name string, colors ColorTheme) func() {
 			return func() {
-				label.SetText(fmt.Sprintf("Current Theme: %v", name))
-				selectedTheme.Set(name)
+				// abbreviate the name if its too long
+				if len(name) > 12 {
+					newName = name[:12] + "..."
+				} else {
+					newName = name
+				}
+				label.SetText(fmt.Sprintf("Current Theme: %v", newName))
+				selectedTheme.Set(themeName)
 				ts, _ := textSize.Get()
 				a.Settings().SetTheme(
 					&CustomTheme{
 						Theme:    theme.DefaultTheme(),
 						textSize: float32(ts),
-						colors:   availableThemes[name],
+						colors:   availableThemes[themeName],
 					},
 				)
 			}
@@ -340,7 +357,11 @@ func textSlider(
 	if err != nil {
 		log.Fatal("Error loading themes from themes folder:", err)
 	}
-	label := widget.NewLabel("Text Size Changer")
+	label := widget.NewLabelWithStyle(
+		"Text Size",
+		fyne.TextAlignCenter,
+		fyne.TextStyle{Bold: true},
+	)
 	ts, _ := textSize.Get()
 	currSize := widget.NewLabel(fmt.Sprintf("Current size is: %v", ts))
 	moveSize := widget.NewLabel("")
@@ -425,7 +446,11 @@ func updateAllButton(
 }
 
 func storageLocationSelector(w fyne.Window) *fyne.Container {
-	label := widget.NewLabel("Storage Location Selector")
+	label := widget.NewLabelWithStyle(
+		"Storage Location Selector",
+		fyne.TextAlignCenter,
+		fyne.TextStyle{Bold: true},
+	)
 
 	storageDir := widget.NewButton("select dir", func() {
 		w.RequestFocus()
@@ -463,7 +488,11 @@ func deleteAllButton(
 	dbData *MyDataBinding,
 	selectedRow binding.Int,
 ) *fyne.Container {
-	label := widget.NewLabel("Delete All Saved Data")
+	label := widget.NewLabelWithStyle(
+		"Delete All Saved Data",
+		fyne.TextAlignCenter,
+		fyne.TextStyle{Bold: true},
+	)
 
 	deleteAll := widget.NewButton("Delete All", func() {
 		if w3 != nil {
