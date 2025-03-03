@@ -278,7 +278,14 @@ func themeSelector(
 
 	// TODO: if themename is too long, want to abbreviate and append '...'
 	for themeName, themeColors := range availableThemes {
-		button := widget.NewButton(themeName, func(name string, colors ColorTheme) func() {
+		var newName string
+		if len(themeName) > 12 {
+			newName = themeName[:12] + "..."
+		} else {
+			newName = themeName
+		}
+
+		button := widget.NewButton(newName, func(name string, colors ColorTheme) func() {
 			return func() {
 				label.SetText(fmt.Sprintf("Current Theme: %v", name))
 				selectedTheme.Set(name)
@@ -375,7 +382,11 @@ func updateAllButton(
 	dbData *MyDataBinding,
 	selectedRow binding.Int,
 ) *fyne.Container {
-	label := widget.NewLabel("Press this button to update all games within the database")
+	label := widget.NewLabelWithStyle(
+		"Update Data for All Games",
+		fyne.TextAlignCenter,
+		fyne.TextStyle{Bold: true},
+	)
 
 	updateAll := widget.NewButton("Update All", func() {
 		if w3 != nil {
@@ -414,7 +425,7 @@ func updateAllButton(
 }
 
 func storageLocationSelector(w fyne.Window) *fyne.Container {
-	label := widget.NewLabel("Button to change location to store database and export files")
+	label := widget.NewLabel("Storage Location Selector")
 
 	storageDir := widget.NewButton("select dir", func() {
 		w.RequestFocus()
@@ -452,7 +463,7 @@ func deleteAllButton(
 	dbData *MyDataBinding,
 	selectedRow binding.Int,
 ) *fyne.Container {
-	label := widget.NewLabel("Button to delete all games from data")
+	label := widget.NewLabel("Delete All Saved Data")
 
 	deleteAll := widget.NewButton("Delete All", func() {
 		if w3 != nil {
