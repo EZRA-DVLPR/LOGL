@@ -69,7 +69,7 @@ func (t *CustomTheme) Color(name fyne.ThemeColorName, variant fyne.ThemeVariant)
 
 // override dflt txt size
 func (t *CustomTheme) Size(name fyne.ThemeSizeName) float32 {
-	if name == theme.SizeNameText {
+	if name == theme.SizeNameText || name == theme.SizeNameInlineIcon {
 		return t.textSize
 	}
 	return t.Theme.Size(name)
