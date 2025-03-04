@@ -2,9 +2,9 @@ package ui
 
 import (
 	"fmt"
-	"image/color"
-	// "log"
+	"log"
 	"strings"
+	"time"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
@@ -13,6 +13,8 @@ import (
 	"fyne.io/fyne/v2/widget"
 	"github.com/EZRA-DVLPR/GameList/internal/dbhandler"
 )
+
+var prevWidth float32
 
 // makes the table and reflects changes based on values of bindings
 // TODO: make the favorited rows be a diff color than the others
@@ -24,7 +26,9 @@ func createDBRender(
 	sortCategory binding.String,
 	sortOrder binding.Bool,
 	searchText binding.String,
+	selectedTheme binding.String,
 	dbData *MyDataBinding,
+	w fyne.Window,
 ) (dbRender *widget.Table) {
 	// given the bindings create the table with the new set of data
 	sortcat, _ := sortCategory.Get()
@@ -46,13 +50,22 @@ func createDBRender(
 		numRows = len(data)
 	}
 
+	// TODO: Binding for themesDir location
+	availableThemes, err := loadAllThemes("themes")
+	if err != nil {
+		log.Fatal("Error loading themes from themes folder:", err)
+	}
+
+	st, _ := selectedTheme.Get()
+	currTheme := availableThemes[st]
+
 	// populate table with info
 	dbRender = widget.NewTableWithHeaders(
 		// table dims
 		func() (int, int) { return numRows, 4 },
 		// create empty cells with dflt bg color and empty text
 		func() fyne.CanvasObject {
-			bg := canvas.NewRectangle(color.Black)
+			bg := canvas.NewRectangle(hexToColor(currTheme.Background))
 			label := widget.NewLabel("")
 			return container.NewStack(bg, label)
 		},
@@ -80,7 +93,7 @@ func createDBRender(
 			}
 
 			// no selected row, so make all cells have bg color
-			bg.FillColor = color.Black
+			bg.FillColor = hexToColor(currTheme.Background)
 		},
 	)
 
@@ -92,35 +105,40 @@ func createDBRender(
 	}
 
 	// set up the headers
-	dbRender = headerSetup(sortCategory, dbRender)
+	width := w.Content().Size().Width
+	dbRender = headerSetup(sortCategory, selectedTheme, dbRender, width)
 
 	// change contents of dbData binding when sort order changes
 	sortOrder.AddListener(binding.NewDataListener(func() {
 		updateDBData(sortCategory, sortOrder, searchText, dbData)
-		dbRender = updateTable(sortCategory, selectedRow, dbData, dbRender)
-		selectedRow.Set(-1)
+		width := w.Content().Size().Width
+		dbRender = updateTable(sortCategory, selectedRow, dbData, selectedTheme, dbRender, width)
+		forceRenderDB(sortCategory, sortOrder, searchText, dbData, selectedRow)
 		dbRender.Refresh()
 	}))
 
 	// change contents of dbData binding when sort category changes
 	sortCategory.AddListener(binding.NewDataListener(func() {
 		updateDBData(sortCategory, sortOrder, searchText, dbData)
-		dbRender = updateTable(sortCategory, selectedRow, dbData, dbRender)
-		selectedRow.Set(-1)
+		width := w.Content().Size().Width
+		dbRender = updateTable(sortCategory, selectedRow, dbData, selectedTheme, dbRender, width)
+		forceRenderDB(sortCategory, sortOrder, searchText, dbData, selectedRow)
 		dbRender.Refresh()
 	}))
 
 	// change contents of dbData binding when search text changes
 	searchText.AddListener(binding.NewDataListener(func() {
 		updateDBData(sortCategory, sortOrder, searchText, dbData)
-		dbRender = updateTable(sortCategory, selectedRow, dbData, dbRender)
-		selectedRow.Set(-1)
+		width := w.Content().Size().Width
+		dbRender = updateTable(sortCategory, selectedRow, dbData, selectedTheme, dbRender, width)
+		forceRenderDB(sortCategory, sortOrder, searchText, dbData, selectedRow)
 		dbRender.Refresh()
 	}))
 
 	// selectedRow changes
 	selectedRow.AddListener(binding.NewDataListener(func() {
 		selRow, _ := selectedRow.Get()
+		width := w.Content().Size().Width
 		dbRender.UpdateCell = func(id widget.TableCellID, obj fyne.CanvasObject) {
 			// get the label from the stack
 			stack := obj.(*fyne.Container)
@@ -130,12 +148,12 @@ func createDBRender(
 
 			// highlighting
 			if id.Row == selRow {
-				bg.FillColor = color.RGBA{0, 0, 180, 255}
+				bg.FillColor = hexToColor(currTheme.HoverColor)
 			} else {
-				bg.FillColor = color.Black
+				bg.FillColor = hexToColor(currTheme.Background)
 			}
 		}
-		dbRender = updateTable(sortCategory, selectedRow, dbData, dbRender)
+		dbRender = updateTable(sortCategory, selectedRow, dbData, selectedTheme, dbRender, width)
 
 		// scroll to the new location selected
 		var selCell widget.TableCellID
@@ -146,6 +164,15 @@ func createDBRender(
 
 		dbRender.Refresh()
 	}))
+
+	// refresh DBRender when the theme changes
+	selectedTheme.AddListener(binding.NewDataListener(func() {
+		forceRenderDB(sortCategory, sortOrder, searchText, dbData, selectedRow)
+		dbRender.Refresh()
+	}))
+
+	// goroutine to adjust col widths every 0.25 s
+	go fixTableSize(sortCategory, selectedRow, dbData, selectedTheme, dbRender, w)
 
 	return
 }
@@ -169,7 +196,9 @@ func updateTable(
 	sortCategory binding.String,
 	selectedRow binding.Int,
 	dbData *MyDataBinding,
+	selectedTheme binding.String,
 	dbRender *widget.Table,
+	width float32,
 ) *widget.Table {
 	selRow, _ := selectedRow.Get()
 
@@ -179,6 +208,16 @@ func updateTable(
 	if len(data) != 0 {
 		numRows = len(data)
 	}
+
+	// TODO: Binding for themesDir location
+	availableThemes, err := loadAllThemes("themes")
+	if err != nil {
+		log.Fatal("Error loading themes from themes folder:", err)
+	}
+
+	st, _ := selectedTheme.Get()
+
+	currTheme := availableThemes[st]
 
 	// set dims
 	dbRender.Length = func() (int, int) { return numRows, 4 }
@@ -208,24 +247,40 @@ func updateTable(
 
 		// highlighting
 		if id.Row == selRow {
-			bg.FillColor = color.RGBA{200, 200, 255, 255}
+			bg.FillColor = hexToColor(currTheme.HoverColor)
 		} else {
-			bg.FillColor = color.Black
+			bg.FillColor = hexToColor(currTheme.Background)
 		}
 	}
 
 	// setup headers
-	dbRender = headerSetup(sortCategory, dbRender)
+	dbRender = headerSetup(sortCategory, selectedTheme, dbRender, width)
 	return dbRender
 }
 
-func headerSetup(sortCategory binding.String, dbTable *widget.Table) *widget.Table {
+func headerSetup(
+	sortCategory binding.String,
+	selectedTheme binding.String,
+	dbTable *widget.Table,
+	width float32,
+) *widget.Table {
+	// TODO: Binding for themesDir location
+	availableThemes, err := loadAllThemes("themes")
+	if err != nil {
+		log.Fatal("Error loading themes from themes folder:", err)
+	}
+
+	st, _ := selectedTheme.Get()
+
+	currTheme := availableThemes[st]
+
 	// name of each column header
 	headers := []string{"Game Name", "Main Story", "Main + Sides", "Completionist"}
 
 	// setup for creating the headers
 	dbTable.CreateHeader = func() fyne.CanvasObject {
 		return container.NewStack(
+			canvas.NewRectangle(hexToColor(currTheme.ScrollBarColor)),
 			widget.NewLabelWithStyle(
 				"------",
 				fyne.TextAlignCenter,
@@ -238,12 +293,14 @@ func headerSetup(sortCategory binding.String, dbTable *widget.Table) *widget.Tab
 	// make headers display content
 	dbTable.UpdateHeader = func(id widget.TableCellID, obj fyne.CanvasObject) {
 		containerObj := obj.(*fyne.Container)
-		label := containerObj.Objects[0].(*widget.Label)
-		button := containerObj.Objects[1].(*widget.Button)
+		labelBG := containerObj.Objects[0].(*canvas.Rectangle)
+		label := containerObj.Objects[1].(*widget.Label)
+		button := containerObj.Objects[2].(*widget.Button)
 
 		if id.Row == -1 {
 			// display column header buttons
 			button.Show()
+			labelBG.Hide()
 			label.Hide()
 			button.SetText(headers[id.Col])
 			button.OnTapped = func() {
@@ -262,14 +319,47 @@ func headerSetup(sortCategory binding.String, dbTable *widget.Table) *widget.Tab
 			// display row label index, from 1:rows
 			button.Hide()
 			label.Show()
+			labelBG.Show()
+			labelBG.FillColor = hexToColor(currTheme.InputBackgroundColor)
 			label.SetText(fmt.Sprintf("%d", id.Row+1))
 		}
+		labelBG.Refresh()
 	}
 
 	// set column widths
 	dbTable.SetColumnWidth(0, 400)
-	dbTable.SetColumnWidth(1, 200)
-	dbTable.SetColumnWidth(2, 200)
-	dbTable.SetColumnWidth(3, 200)
+
+	// game name has 400, and the row headers take ~70 spacing
+	// all other space is to be given to the other columns
+	spacing := (width - 400 - 70) / 3
+
+	dbTable.SetColumnWidth(1, spacing)
+	dbTable.SetColumnWidth(2, spacing)
+	dbTable.SetColumnWidth(3, spacing)
 	return dbTable
+}
+
+// check window size every 0.25 and adjust size of table if it changes
+func fixTableSize(
+	sortCategory binding.String,
+	selectedRow binding.Int,
+	dbData *MyDataBinding,
+	selectedTheme binding.String,
+	dbRender *widget.Table,
+	w fyne.Window,
+) {
+	ticker := time.NewTicker(250 * time.Millisecond)
+	defer ticker.Stop()
+
+	for {
+		width := w.Content().Size().Width
+		if prevWidth != width {
+			select {
+			case <-ticker.C:
+				prevWidth = width
+				updateTable(sortCategory, selectedRow, dbData, selectedTheme, dbRender, width)
+				dbRender.Refresh()
+			}
+		}
+	}
 }

@@ -6,4 +6,4 @@ button: '#0000af'
 placeholder: '#00ffff'
 hover: '#e0e000'
 inputBackground: "#8a8a8a"
-scrollBar:       "#0000ff"
+scrollBar:       "#FFAAFF"

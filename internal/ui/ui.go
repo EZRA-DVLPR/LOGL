@@ -108,7 +108,7 @@ func StartGUI() {
 		// dont render anything else in space besides DB
 		nil, nil, nil,
 		// default to display names ASC
-		createDBRender(selectedRow, sortCategory, sortOrder, searchText, dbData),
+		createDBRender(selectedRow, sortCategory, sortOrder, searchText, selectedTheme, dbData, w),
 	)
 
 	w.SetContent(content)
@@ -147,11 +147,6 @@ func StartGUI() {
 		// save theme selection
 		st, _ = selectedTheme.Get()
 		prefs.SetString("selected_theme", st)
-
-		// debugging what values saved are:
-		// ts, _ = textSize.Get()
-		// st, _ = selectedTheme.Get()
-		// log.Println(ts, st)
 	})
 
 	// runloop for the app
