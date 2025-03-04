@@ -331,7 +331,7 @@ func textSlider(
 		log.Fatal("Error loading themes from themes folder:", err)
 	}
 	label := widget.NewLabelWithStyle(
-		"Change Text Size",
+		"Change Text and Icon Size",
 		fyne.TextAlignCenter,
 		fyne.TextStyle{Bold: true},
 	)
@@ -434,7 +434,7 @@ func deleteAllButton(
 		fyne.TextStyle{Bold: true},
 	)
 
-	deleteAll := widget.NewButton("Delete All Data", func() {
+	deleteAll := widget.NewButton("Delete All", func() {
 		if w3 != nil {
 			w3.RequestFocus()
 			return
