@@ -438,15 +438,15 @@ func storageLocationSelector(w fyne.Window) *fyne.Container {
 				return
 			}
 			if uri == nil {
-				log.Println("no dir selected")
+				log.Println("No directory Selected")
 				w2.Close()
 				return
 			}
-			log.Println("selected dir:", uri)
-			w2.Close()
+			log.Println("Selected Dir:", uri)
 			w2.SetOnClosed(func() {
 				w2 = nil
 			})
+			w2.Close()
 		}, w)
 	})
 

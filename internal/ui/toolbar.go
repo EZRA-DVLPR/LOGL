@@ -58,15 +58,15 @@ func createMainWindowToolbar(
 	// 1. make toolbar use gridwraplayout
 	// toolbar = container.New(
 	// 	layout.NewGridWrapLayout(fyne.NewSize(200, 50)),
-	// 	sortButton,
-	// 	addButton,
-	// 	updateButton,
-	// 	removeButton,
-	// 	randButton,
-	// 	faveButton,
-	// 	exportButton,
-	// 	settingsButton,
-	// 	helpButton,
+	// 	createSortButton(sortOrder),
+	// 	createAddButton(a, sortCategory, sortOrder, searchText, dbData, selectedRow, searchSource, toolbarCanvas),
+	// 	createUpdateButton(sortCategory, sortOrder, searchText, selectedRow, dbData),
+	// 	createRemoveButton(selectedRow, sortCategory, sortOrder, searchText, dbData),
+	// 	createRandomButton(selectedRow, dbData),
+	// 	createFaveButton(selectedRow, sortCategory, sortOrder, searchText, dbData),
+	// 	createExportButton(toolbarCanvas),
+	// 	createHelpButton(toolbarCanvas),
+	// 	createSettingsButton(a, w, searchSource, sortCategory, sortOrder, searchText, selectedRow, dbData, textSize, selectedTheme),
 	// )
 	// 2. remove text next to buttons
 
@@ -103,6 +103,7 @@ func createExportButton(toolbarCanvas fyne.Canvas) (exportButton *widget.Button)
 	exportButton = widget.NewButtonWithIcon("", theme.MailSendIcon(), nil)
 
 	// create the dropdown menu items for exporting
+	// TODO: Open file explorer to choose location to export
 	menu := fyne.NewMenu("",
 		fyne.NewMenuItem("Export to CSV", func() {
 			dbhandler.Export(1)
@@ -129,7 +130,6 @@ func createExportButton(toolbarCanvas fyne.Canvas) (exportButton *widget.Button)
 // PERF:
 //
 //	find way to implement menu without opening new window for window tiling managers
-//	Theme Selector
 func createSettingsButton(
 	a fyne.App,
 	w fyne.Window,
@@ -172,7 +172,7 @@ func createAddButton(
 	toolbarCanvas fyne.Canvas,
 ) (addButton *widget.Button) {
 	// no function since we are making a dropdown menu
-	addButton = widget.NewButtonWithIcon("Add Game Data", theme.ContentAddIcon(), nil)
+	addButton = widget.NewButtonWithIcon("Add Game", theme.ContentAddIcon(), nil)
 	ss, _ := searchSource.Get()
 	menu := fyne.NewMenu("",
 		fyne.NewMenuItem("Single Game Search", func() {
@@ -196,6 +196,7 @@ func createAddButton(
 				selectedRow,
 			)
 		}),
+		// TODO: Add file explorer option to select the location for this stuff
 		fyne.NewMenuItem("From CSV", func() {
 			dbhandler.Import(1, ss)
 			forceRenderDB(sortCategory, sortOrder, searchText, dbData, selectedRow)
@@ -228,7 +229,7 @@ func createRemoveButton(
 	searchText binding.String,
 	dbData *MyDataBinding,
 ) (removeButton *widget.Button) {
-	removeButton = widget.NewButtonWithIcon("Remove Game Data", theme.ContentRemoveIcon(), func() {
+	removeButton = widget.NewButtonWithIcon("Remove Game", theme.ContentRemoveIcon(), func() {
 		selrow, _ := selectedRow.Get()
 		if selrow >= 0 {
 			// get the game name and send query for deletion
@@ -266,7 +267,10 @@ func createHelpButton(toolbarCanvas fyne.Canvas) (helpButton *widget.Button) {
 }
 
 // randomly selects a row to highlight
-func createRandomButton(selectedRow binding.Int, dbData *MyDataBinding) (removeButton *widget.Button) {
+func createRandomButton(
+	selectedRow binding.Int,
+	dbData *MyDataBinding,
+) (removeButton *widget.Button) {
 	removeButton = widget.NewButtonWithIcon("Random Row", theme.SearchReplaceIcon(), func() {
 		dbdata, _ := dbData.Get()
 		selectedRow.Set(rand.Intn(len(dbdata)))
