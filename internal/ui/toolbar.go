@@ -8,7 +8,9 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/data/binding"
+	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/layout"
+	"fyne.io/fyne/v2/storage"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 	"github.com/EZRA-DVLPR/GameList/internal/dbhandler"
@@ -37,7 +39,7 @@ func createMainWindowToolbar(
 		layout.NewHBoxLayout(),
 		createSortButton(sortOrder),
 		layout.NewSpacer(),
-		createAddButton(a, sortCategory, sortOrder, searchText, dbData, selectedRow, searchSource, toolbarCanvas),
+		createAddButton(a, sortCategory, sortOrder, searchText, dbData, selectedRow, searchSource, toolbarCanvas, w),
 		layout.NewSpacer(),
 		createUpdateButton(sortCategory, sortOrder, searchText, selectedRow, dbData),
 		layout.NewSpacer(),
@@ -51,7 +53,7 @@ func createMainWindowToolbar(
 		layout.NewSpacer(),
 		createHelpButton(toolbarCanvas),
 		layout.NewSpacer(),
-		createSettingsButton(a, w, searchSource, sortCategory, sortOrder, searchText, selectedRow, dbData, textSize, selectedTheme),
+		createSettingsButton(a, searchSource, sortCategory, sortOrder, searchText, selectedRow, dbData, textSize, selectedTheme),
 	)
 
 	// PERF: change size of each button depending on the size of the given window
@@ -132,7 +134,6 @@ func createExportButton(toolbarCanvas fyne.Canvas) (exportButton *widget.Button)
 //	find way to implement menu without opening new window for window tiling managers
 func createSettingsButton(
 	a fyne.App,
-	w fyne.Window,
 	searchSource binding.String,
 	sortCategory binding.String,
 	sortOrder binding.Bool,
@@ -145,7 +146,6 @@ func createSettingsButton(
 	settingsButton = widget.NewButtonWithIcon("", theme.SettingsIcon(), func() {
 		settingsPopup(
 			a,
-			w,
 			searchSource,
 			sortCategory,
 			sortOrder,
@@ -170,6 +170,7 @@ func createAddButton(
 	selectedRow binding.Int,
 	searchSource binding.String,
 	toolbarCanvas fyne.Canvas,
+	w fyne.Window,
 ) (addButton *widget.Button) {
 	// no function since we are making a dropdown menu
 	addButton = widget.NewButtonWithIcon("Add Game", theme.ContentAddIcon(), nil)
@@ -198,8 +199,23 @@ func createAddButton(
 		}),
 		// TODO: Add file explorer option to select the location for this stuff
 		fyne.NewMenuItem("From CSV", func() {
-			dbhandler.Import(1, ss)
-			forceRenderDB(sortCategory, sortOrder, searchText, dbData, selectedRow)
+			fileDialog := dialog.NewFileOpen(func(uri fyne.URIReadCloser, err error) {
+				if err != nil {
+					log.Println("Error opening CSV file:", err)
+					return
+				}
+				if uri == nil {
+					log.Println("No file Selected")
+					return
+				}
+				defer uri.Close() // close uri when dialog closes
+				log.Println("Selected File:", uri.URI().Path())
+				// dbhandler.Import(1, ss)
+				// forceRenderDB(sortCategory, sortOrder, searchText, dbData, selectedRow)
+			}, w)
+			// set file extension to only allow csv files
+			fileDialog.SetFilter(storage.NewExtensionFileFilter([]string{".csv"}))
+			fileDialog.Show()
 		}),
 		// INFO: will drop the existing table and replace with imported SQL file
 		fyne.NewMenuItem("From SQL", func() {

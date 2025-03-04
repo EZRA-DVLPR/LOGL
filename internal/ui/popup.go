@@ -11,7 +11,6 @@ import (
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/data/binding"
-	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
@@ -189,7 +188,6 @@ func manualEntryPopup(
 
 func settingsPopup(
 	a fyne.App,
-	w fyne.Window,
 	searchSource binding.String,
 	sortCategory binding.String,
 	sortOrder binding.Bool,
@@ -220,8 +218,6 @@ func settingsPopup(
 				textSlider(selectedTheme, textSize, a),
 				widget.NewSeparator(),
 				updateAllButton(a, sortCategory, sortOrder, searchText, dbData, selectedRow),
-				widget.NewSeparator(),
-				storageLocationSelector(w),
 				widget.NewSeparator(),
 				deleteAllButton(a, sortCategory, sortOrder, searchText, dbData, selectedRow),
 			),
@@ -372,6 +368,7 @@ func textSlider(
 	)
 }
 
+// PERF: use dialog confirmation
 func updateAllButton(
 	a fyne.App,
 	sortCategory binding.String,
@@ -422,41 +419,7 @@ func updateAllButton(
 	)
 }
 
-func storageLocationSelector(w fyne.Window) *fyne.Container {
-	label := widget.NewLabelWithStyle(
-		"Storage Location Selector",
-		fyne.TextAlignCenter,
-		fyne.TextStyle{Bold: true},
-	)
-
-	storageDir := widget.NewButton("select dir", func() {
-		w.RequestFocus()
-		dialog.ShowFolderOpen(func(uri fyne.ListableURI, err error) {
-			if err != nil {
-				log.Println("error:", err)
-				w2.Close()
-				return
-			}
-			if uri == nil {
-				log.Println("No directory Selected")
-				w2.Close()
-				return
-			}
-			log.Println("Selected Dir:", uri)
-			w2.SetOnClosed(func() {
-				w2 = nil
-			})
-			w2.Close()
-		}, w)
-	})
-
-	return container.New(
-		layout.NewVBoxLayout(),
-		label,
-		storageDir,
-	)
-}
-
+// PERF: use dialog confirmation
 func deleteAllButton(
 	a fyne.App,
 	sortCategory binding.String,
