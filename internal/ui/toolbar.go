@@ -174,7 +174,7 @@ func createAddButton(
 ) (addButton *widget.Button) {
 	// no function since we are making a dropdown menu
 	addButton = widget.NewButtonWithIcon("Add Game", theme.ContentAddIcon(), nil)
-	ss, _ := searchSource.Get()
+	// ss, _ := searchSource.Get()
 	menu := fyne.NewMenu("",
 		fyne.NewMenuItem("Single Game Search", func() {
 			singleGameNameSearchPopup(
@@ -219,13 +219,43 @@ func createAddButton(
 		}),
 		// INFO: will drop the existing table and replace with imported SQL file
 		fyne.NewMenuItem("From SQL", func() {
-			dbhandler.Import(2, ss)
-			forceRenderDB(sortCategory, sortOrder, searchText, dbData, selectedRow)
+			fileDialog := dialog.NewFileOpen(func(uri fyne.URIReadCloser, err error) {
+				if err != nil {
+					log.Println("Error opening SQL file:", err)
+					return
+				}
+				if uri == nil {
+					log.Println("No file Selected")
+					return
+				}
+				defer uri.Close() // close uri when dialog closes
+				log.Println("Selected File:", uri.URI().Path())
+				// dbhandler.Import(2, ss)
+				// forceRenderDB(sortCategory, sortOrder, searchText, dbData, selectedRow)
+			}, w)
+			// set file extension to only allow csv files
+			fileDialog.SetFilter(storage.NewExtensionFileFilter([]string{".sql"}))
+			fileDialog.Show()
 		}),
 		// INFO: game names must be separated by new lines with 1 game per line
 		fyne.NewMenuItem("From TXT", func() {
-			dbhandler.Import(3, ss)
-			forceRenderDB(sortCategory, sortOrder, searchText, dbData, selectedRow)
+			fileDialog := dialog.NewFileOpen(func(uri fyne.URIReadCloser, err error) {
+				if err != nil {
+					log.Println("Error opening TXT file:", err)
+					return
+				}
+				if uri == nil {
+					log.Println("No file Selected")
+					return
+				}
+				defer uri.Close() // close uri when dialog closes
+				log.Println("Selected File:", uri.URI().Path())
+				// dbhandler.Import(3, ss)
+				// forceRenderDB(sortCategory, sortOrder, searchText, dbData, selectedRow)
+			}, w)
+			// set file extension to only allow csv files
+			fileDialog.SetFilter(storage.NewExtensionFileFilter([]string{".txt"}))
+			fileDialog.Show()
 		}),
 	)
 
