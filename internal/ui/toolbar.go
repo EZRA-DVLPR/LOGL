@@ -35,7 +35,7 @@ func createMainWindowToolbar(
 	a fyne.App,
 	w fyne.Window,
 ) (toolbar *fyne.Container) {
-	toolbar = container.New(
+	return container.New(
 		layout.NewHBoxLayout(),
 		createSortButton(sortOrder),
 		layout.NewSpacer(),
@@ -49,7 +49,7 @@ func createMainWindowToolbar(
 		layout.NewSpacer(),
 		createFaveButton(selectedRow, sortCategory, sortOrder, searchText, dbData),
 		layout.NewSpacer(),
-		createExportButton(toolbarCanvas),
+		createExportButton(toolbarCanvas, w),
 		layout.NewSpacer(),
 		createHelpButton(toolbarCanvas),
 		layout.NewSpacer(),
@@ -58,7 +58,7 @@ func createMainWindowToolbar(
 
 	// PERF: change size of each button depending on the size of the given window
 	// 1. make toolbar use gridwraplayout
-	// toolbar = container.New(
+	// container.New(
 	// 	layout.NewGridWrapLayout(fyne.NewSize(200, 50)),
 	// 	createSortButton(sortOrder),
 	// 	createAddButton(a, sortCategory, sortOrder, searchText, dbData, selectedRow, searchSource, toolbarCanvas),
@@ -71,8 +71,6 @@ func createMainWindowToolbar(
 	// 	createSettingsButton(a, w, searchSource, sortCategory, sortOrder, searchText, selectedRow, dbData, textSize, selectedTheme),
 	// )
 	// 2. remove text next to buttons
-
-	return toolbar
 }
 
 // toggles sort Order (ASC->DESC->ASC)
@@ -100,21 +98,74 @@ func createSortButton(sortOrder binding.Bool) (sortButton *widget.Button) {
 }
 
 // export data from db
-func createExportButton(toolbarCanvas fyne.Canvas) (exportButton *widget.Button) {
+func createExportButton(
+	toolbarCanvas fyne.Canvas,
+	w fyne.Window,
+) (exportButton *widget.Button) {
 	// create a button without a function
 	exportButton = widget.NewButtonWithIcon("", theme.MailSendIcon(), nil)
 
 	// create the dropdown menu items for exporting
-	// TODO: Open file explorer to choose location to export
 	menu := fyne.NewMenu("",
 		fyne.NewMenuItem("Export to CSV", func() {
-			dbhandler.Export(1)
+			dialog.ShowFileSave(func(uri fyne.URIWriteCloser, err error) {
+				if err != nil {
+					log.Println("Error writing to CSV file:", err)
+					return
+				}
+				if uri == nil {
+					log.Println("No file Selected")
+					return
+				}
+				defer uri.Close() // close uri when dialog closes
+				log.Println("Created File:", uri.URI().Path())
+
+				// check if user input a file extension.
+				// if so, replace with .csv,
+				// send to dbhandler to export with given name (and extension)
+
+				// dbhandler.Export(1)
+			}, w)
 		}),
 		fyne.NewMenuItem("Export to SQL", func() {
-			dbhandler.Export(2)
+			dialog.ShowFileSave(func(uri fyne.URIWriteCloser, err error) {
+				if err != nil {
+					log.Println("Error writing to SQL file:", err)
+					return
+				}
+				if uri == nil {
+					log.Println("No file Selected")
+					return
+				}
+				defer uri.Close() // close uri when dialog closes
+				log.Println("Created File:", uri.URI().Path())
+
+				// check if user input a file extension.
+				// if so, replace with .sql,
+				// send to dbhandler to export with given name (and extension)
+
+				// dbhandler.Export(2)
+			}, w)
 		}),
 		fyne.NewMenuItem("Export to Markdown", func() {
-			dbhandler.Export(3)
+			dialog.ShowFileSave(func(uri fyne.URIWriteCloser, err error) {
+				if err != nil {
+					log.Println("Error writing to MD file:", err)
+					return
+				}
+				if uri == nil {
+					log.Println("No file Selected")
+					return
+				}
+				defer uri.Close() // close uri when dialog closes
+				log.Println("Created File:", uri.URI().Path())
+
+				// check if user input a file extension.
+				// if so, replace with .md,
+				// send to dbhandler to export with given name (and extension)
+
+				// dbhandler.Export(3)
+			}, w)
 		}),
 	)
 
@@ -197,7 +248,6 @@ func createAddButton(
 				selectedRow,
 			)
 		}),
-		// TODO: Add file explorer option to select the location for this stuff
 		fyne.NewMenuItem("From CSV", func() {
 			fileDialog := dialog.NewFileOpen(func(uri fyne.URIReadCloser, err error) {
 				if err != nil {
