@@ -54,13 +54,11 @@ func importCSV() {
 	var exists int
 	err = db.QueryRow("SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name='games'").Scan(&exists)
 	if exists != 1 {
+		log.Println("Table does not exist. Creating table to insert data")
 		var name string
 		err = db.QueryRow("SELECT name FROM sqlite_master WHERE type='table' AND name='games'").Scan(&name)
 		if err != nil {
-			createStmt := fmt.Sprintf(
-				"CREATE TABLE games (name TEXT PRIMARY KEY, hltburl TEXT, completionatorurl TEXT, favorite INTEGER, main REAL, mainPlus REAL, comp REAL)",
-			)
-			_, err := db.Exec(createStmt)
+			_, err := db.Exec("CREATE TABLE games (name TEXT PRIMARY KEY, hltburl TEXT, completionatorurl TEXT, favorite INTEGER, main REAL, mainPlus REAL, comp REAL)")
 			if err != nil {
 				log.Fatal("Error creating table:", err)
 			}
@@ -71,7 +69,7 @@ func importCSV() {
 	}
 
 	// setup transaction with dummy values
-	// INSERT OR REPLACE INTO GAMES [colname] VALUES ?
+	// INSERT OR REPLACE INTO GAMES [colname], [colname], ... VALUES ?,?,...
 	cols := rows[0]
 	temp := make([]string, len(cols))
 	for i := range temp {
@@ -104,7 +102,7 @@ func importCSV() {
 		log.Fatal("Error committing transaction:", err)
 	}
 
-	log.Println("Import completed successfully")
+	log.Println("Import from CSV completed successfully")
 }
 
 func importSQL() {
@@ -116,6 +114,7 @@ func importSQL() {
 	defer db.Close()
 
 	// drop the existing tables
+	log.Println("Deleting previous data")
 	_, err = db.Exec("DROP TABLE IF EXISTS games;")
 	if err != nil {
 		log.Fatal("Error dropping tables:", err)
@@ -127,6 +126,7 @@ func importSQL() {
 	}
 
 	// perform the import (dump)
+	log.Println("Dumping SQL contents")
 	_, err = db.Exec(string(sqlDump))
 	if err != nil {
 		log.Fatal("Error importing sql database:", err)
@@ -161,4 +161,6 @@ func importTXT(searchSource string) {
 		log.Println("Obtaining Data for game", game)
 		SearchAddToDB(game, searchSource)
 	}
+
+	log.Println("Finished obtaining data for games in txt file")
 }

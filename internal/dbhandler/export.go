@@ -34,6 +34,7 @@ func exportCSV() {
 	defer db.Close()
 
 	// get all data from table
+	log.Println("Getting all game data")
 	rows, err := db.Query("SELECT * FROM games")
 	if err != nil {
 		log.Fatal("Error retrieving data:", err)
@@ -41,6 +42,7 @@ func exportCSV() {
 	defer rows.Close()
 
 	// get col names
+	log.Println("Getting column names")
 	cols, err := rows.Columns()
 	if err != nil {
 		log.Fatal("Error getting column names:", err)
@@ -57,6 +59,7 @@ func exportCSV() {
 	defer writer.Flush()
 
 	// write col headers
+	log.Println("Writing to csv file")
 	if err := writer.Write(cols); err != nil {
 		log.Fatal("Error writing CSV headers")
 	}
@@ -114,6 +117,7 @@ func exportSQL() {
 	file.WriteString("BEGIN TRANSACTION;\n")
 
 	//export schema
+	log.Println("Extracting Schema")
 	rows, err := db.Query("SELECT sql FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%';")
 	if err != nil {
 		log.Fatal("Error retrieving schema:", err)
@@ -131,6 +135,7 @@ func exportSQL() {
 	}
 
 	//export tables
+	log.Println("Extracting table")
 	tables, err := db.Query("SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%';")
 	if err != nil {
 		log.Fatal("Error retrieving table names:", err)
@@ -145,6 +150,7 @@ func exportSQL() {
 		}
 
 		// fetch all rows from the table
+		log.Println("Obtaining Row data")
 		rows, err := db.Query(fmt.Sprintf("SELECT * FROM %s;", tableName))
 		if err != nil {
 			log.Fatalf("Error retrieving data from %s: %v", tableName, err)
@@ -152,6 +158,7 @@ func exportSQL() {
 
 		// get column names
 		cols, err := rows.Columns()
+		log.Println("Obtaining Column data")
 		if err != nil {
 			log.Fatal("Error getting columns:", err)
 		}
@@ -165,6 +172,7 @@ func exportSQL() {
 		}
 
 		// iterate through rows and generate INSERT statements for all values in each row
+		log.Println("Writing table contents")
 		for rows.Next() {
 			if err := rows.Scan(valuePtrs...); err != nil {
 				log.Fatal("Error scanning row:", err)
@@ -186,11 +194,12 @@ func exportSQL() {
 			}
 
 			// write the INSERT statement
-			insertStmt := fmt.Sprintf("INSERT OR IGNORE INTO %s (%s) VALUES (%s);\n",
-				tableName,
-				joinColumns(cols),
-				joinColumns(insertValues))
-			file.WriteString(insertStmt)
+			file.WriteString(
+				fmt.Sprintf("INSERT OR IGNORE INTO %s (%s) VALUES (%s);\n",
+					tableName,
+					joinColumns(cols),
+					joinColumns(insertValues)),
+			)
 		}
 		rows.Close()
 	}
@@ -212,6 +221,7 @@ func exportMarkdown() {
 	defer db.Close()
 
 	// select everything except the url to be grabbed
+	log.Println("Obtaining Game Data")
 	rows, err := db.Query("SELECT name, favorite, main, mainPlus, comp FROM games")
 	if err != nil {
 		log.Fatal("Error retrieving games: ", err)
@@ -225,6 +235,7 @@ func exportMarkdown() {
 	}
 	defer mdfile.Close()
 
+	log.Println("Writing Headers")
 	_, err = mdfile.WriteString("| No. | **Game Name** | **Main Story** | **Main + Sides** | **Completionist** | Favorite |\n")
 	_, err = mdfile.WriteString("| :----: | :---- | ---- | ---- | ---- | ---- |\n")
 	if err != nil {
@@ -233,6 +244,7 @@ func exportMarkdown() {
 
 	id := 1
 	// for each row in games, add a line in the markdown file
+	log.Println("Writing Game Data")
 	for rows.Next() {
 		var name string
 		var main, mainPlus, comp float32
