@@ -6,25 +6,32 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strings"
 
 	_ "github.com/mattn/go-sqlite3"
 )
 
 // selector for exporting
-func Export(choice int) {
+func Export(choice int, filename string) {
+	// check filename for extension and remove it
+	hasExt := strings.Index(filename, ".")
+	if hasExt != -1 {
+		filename = filename[:hasExt]
+	}
+
 	switch choice {
 	case 1:
-		exportCSV()
+		exportCSV(filename)
 	case 2:
-		exportSQL()
+		exportSQL(filename)
 	case 3:
-		exportMarkdown()
+		exportMarkdown(filename)
 	default:
 		log.Fatal("No such export exists!")
 	}
 }
 
-func exportCSV() {
+func exportCSV(filename string) {
 	log.Println("Exporting to CSV")
 
 	db, err := sql.Open("sqlite3", "games.db")
@@ -49,7 +56,7 @@ func exportCSV() {
 	}
 
 	// open csv to write to
-	file, err := os.Create("export.csv")
+	file, err := os.Create(filename + ".csv")
 	if err != nil {
 		log.Fatal("Error creating csv file", err)
 	}
@@ -95,10 +102,9 @@ func exportCSV() {
 	log.Println("Export to CSV completed successfully")
 }
 
-func exportSQL() {
+func exportSQL(filename string) {
 	log.Println("Exporting to SQL file")
 
-	outputFile := "export.sql"
 	db, err := sql.Open("sqlite3", "games.db")
 	if err != nil {
 		log.Fatal("Error opening database for copying", err)
@@ -106,14 +112,13 @@ func exportSQL() {
 	defer db.Close()
 
 	// open file for writing sql dump
-	file, err := os.Create(outputFile)
+	file, err := os.Create(filename + ".sql")
 	if err != nil {
 		log.Fatal("Error creating SQL (dump) file:", err)
 	}
 	defer file.Close()
 
 	// begin dump
-	log.Println("Exporting database to", outputFile)
 	file.WriteString("BEGIN TRANSACTION;\n")
 
 	//export schema
@@ -212,7 +217,7 @@ func exportSQL() {
 }
 
 // PERF: Export the current view, not the default one in the database
-func exportMarkdown() {
+func exportMarkdown(filename string) {
 	log.Println("Exporting to Markdown")
 	db, err := sql.Open("sqlite3", "games.db")
 	if err != nil {
@@ -229,7 +234,7 @@ func exportMarkdown() {
 	defer rows.Close()
 
 	// open the markdown file we are going to be writing to
-	mdfile, err := os.Create("GameList.md")
+	mdfile, err := os.Create(filename + ".md")
 	if err != nil {
 		log.Fatal("Error creating markdown file", err)
 	}

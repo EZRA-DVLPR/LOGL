@@ -4,6 +4,7 @@ import (
 	_ "embed"
 	"log"
 	"math/rand"
+	"os"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
@@ -108,6 +109,7 @@ func createExportButton(
 	// create the dropdown menu items for exporting
 	menu := fyne.NewMenu("",
 		fyne.NewMenuItem("Export to CSV", func() {
+			// idea is to have user pick folder, then entry for filename
 			dialog.ShowFileSave(func(uri fyne.URIWriteCloser, err error) {
 				if err != nil {
 					log.Println("Error writing to CSV file:", err)
@@ -118,13 +120,12 @@ func createExportButton(
 					return
 				}
 				defer uri.Close() // close uri when dialog closes
-				log.Println("Created File:", uri.URI().Path())
 
-				// check if user input a file extension.
-				// if so, replace with .csv,
-				// send to dbhandler to export with given name (and extension)
+				// delete the partially created file as i will create it in export function
+				os.Remove(uri.URI().Path())
 
-				// dbhandler.Export(1)
+				//export
+				dbhandler.Export(1, uri.URI().Path())
 			}, w)
 		}),
 		fyne.NewMenuItem("Export to SQL", func() {
@@ -138,13 +139,8 @@ func createExportButton(
 					return
 				}
 				defer uri.Close() // close uri when dialog closes
-				log.Println("Created File:", uri.URI().Path())
-
-				// check if user input a file extension.
-				// if so, replace with .sql,
-				// send to dbhandler to export with given name (and extension)
-
-				// dbhandler.Export(2)
+				os.Remove(uri.URI().Path())
+				dbhandler.Export(2, uri.URI().Path())
 			}, w)
 		}),
 		fyne.NewMenuItem("Export to Markdown", func() {
@@ -158,13 +154,8 @@ func createExportButton(
 					return
 				}
 				defer uri.Close() // close uri when dialog closes
-				log.Println("Created File:", uri.URI().Path())
-
-				// check if user input a file extension.
-				// if so, replace with .md,
-				// send to dbhandler to export with given name (and extension)
-
-				// dbhandler.Export(3)
+				os.Remove(uri.URI().Path())
+				dbhandler.Export(3, uri.URI().Path())
 			}, w)
 		}),
 	)
