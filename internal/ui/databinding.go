@@ -63,18 +63,3 @@ func (b *MyDataBinding) AddListener(listener binding.DataListener) {
 
 	b.listener = append(b.listener, listener)
 }
-
-// PERF: I wont be removing listeners, but it might be interesting to keep it in the future
-// consider removing if never used
-func (b *MyDataBinding) RemoveListener(Rlistener binding.DataListener) {
-	b.lock.Lock()
-	defer b.lock.Unlock()
-
-	// remove the listener
-	for i, listener := range b.listener {
-		if listener == Rlistener {
-			b.listener = append(b.listener[:i], b.listener[i+1:]...)
-			break
-		}
-	}
-}
