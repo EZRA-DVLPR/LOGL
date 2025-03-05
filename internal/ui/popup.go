@@ -24,9 +24,6 @@ import (
 // window for popup that will be modified for the following functions
 var w2 fyne.Window
 
-// confirmation window for updating/deleting all db data
-var w3 fyne.Window
-
 func singleGameNameSearchPopup(
 	a fyne.App,
 	searchSource binding.String,
@@ -291,9 +288,9 @@ func settingsPopup(
 				widget.NewSeparator(),
 				textSlider(selectedTheme, textSize, a),
 				widget.NewSeparator(),
-				updateAllButton(a, sortCategory, sortOrder, searchText, dbData, selectedRow),
+				updateAllButton(sortCategory, sortOrder, searchText, dbData, selectedRow),
 				widget.NewSeparator(),
-				deleteAllButton(a, sortCategory, sortOrder, searchText, dbData, selectedRow),
+				deleteAllButton(sortCategory, sortOrder, searchText, dbData, selectedRow),
 			),
 		),
 	)
@@ -442,9 +439,7 @@ func textSlider(
 	)
 }
 
-// PERF: use dialog confirmation
 func updateAllButton(
-	a fyne.App,
 	sortCategory binding.String,
 	sortOrder binding.Bool,
 	searchText binding.String,
@@ -458,33 +453,17 @@ func updateAllButton(
 	)
 
 	updateAll := widget.NewButton("Update All", func() {
-		if w3 != nil {
-			w3.RequestFocus()
-			return
-		}
-		w3 = a.NewWindow("Confirm Deletion of entire Database")
-		w3.Resize(fyne.NewSize(400, 200))
-		w3.SetContent(container.New(
-			layout.NewGridLayout(2),
-			widget.NewButtonWithIcon("Cancel", theme.CancelIcon(), func() {
-				w3.Close()
-				w2.RequestFocus()
-			}),
-			widget.NewButtonWithIcon("Update all data", theme.ConfirmIcon(), func() {
-				dbhandler.UpdateEntireDB()
-
-				forceRenderDB(sortCategory, sortOrder, searchText, dbData, selectedRow)
-				w3.Close()
-				w2.Close()
-			}),
-		))
-		w3.Show()
-		w3.SetOnClosed(func() {
-			w3 = nil
-		})
-		w2.SetOnClosed(func() {
-			w2 = nil
-		})
+		dialog.ShowConfirm(
+			"Update All Game information",
+			"Update All",
+			func(submitted bool) {
+				if submitted {
+					dbhandler.UpdateEntireDB()
+					forceRenderDB(sortCategory, sortOrder, searchText, dbData, selectedRow)
+				}
+			},
+			w2,
+		)
 	})
 	return container.New(
 		layout.NewVBoxLayout(),
@@ -493,9 +472,7 @@ func updateAllButton(
 	)
 }
 
-// PERF: use dialog confirmation
 func deleteAllButton(
-	a fyne.App,
 	sortCategory binding.String,
 	sortOrder binding.Bool,
 	searchText binding.String,
@@ -509,33 +486,17 @@ func deleteAllButton(
 	)
 
 	deleteAll := widget.NewButton("Delete All", func() {
-		if w3 != nil {
-			w3.RequestFocus()
-			return
-		}
-		w3 = a.NewWindow("Confirm Deletion of entire Database")
-		w3.Resize(fyne.NewSize(400, 200))
-		w3.SetContent(container.New(
-			layout.NewGridLayout(2),
-			widget.NewButtonWithIcon("Cancel", theme.CancelIcon(), func() {
-				w3.Close()
-				w2.RequestFocus()
-			}),
-			widget.NewButtonWithIcon("DELETE ALL DATA", theme.ConfirmIcon(), func() {
-				dbhandler.DeleteAllDBData()
-
-				forceRenderDB(sortCategory, sortOrder, searchText, dbData, selectedRow)
-				w3.Close()
-				w2.Close()
-			}),
-		))
-		w3.Show()
-		w3.SetOnClosed(func() {
-			w3 = nil
-		})
-		w2.SetOnClosed(func() {
-			w2 = nil
-		})
+		dialog.ShowConfirm(
+			"Delete All Game information",
+			"Delete All",
+			func(submitted bool) {
+				if submitted {
+					dbhandler.DeleteAllDBData()
+					forceRenderDB(sortCategory, sortOrder, searchText, dbData, selectedRow)
+				}
+			},
+			w2,
+		)
 	})
 	return container.New(
 		layout.NewVBoxLayout(),
