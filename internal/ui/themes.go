@@ -17,6 +17,7 @@ import (
 //
 // INFO: This struct affects the following fields of the theme which govern the look of the entire app:
 // background: background color of the window
+// altBackground: used for dbrender to show difference between odd/even rows
 // foreground: text colors used for all text and buttons
 // primary: settings -> highlighted (selected) src
 // buttoncolor: color for buttons
@@ -27,6 +28,7 @@ import (
 type ColorTheme struct {
 	Name                 string `yaml:"name"`
 	Background           string `yaml:"background"`
+	AltBackground        string `yaml:"altBackground"`
 	Foreground           string `yaml:"foreground"`
 	Primary              string `yaml:"primary"`
 	ButtonColor          string `yaml:"button"`

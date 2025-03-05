@@ -18,9 +18,6 @@ var prevWidth float32
 
 // makes the table and reflects changes based on values of bindings
 // TODO: make the favorited rows be a diff color than the others
-// PERF: make my own widget (EZRATableWidget) that has the following features:
-//  1. get column widths for each column
-//  2. set size of column based on size of window
 func createDBRender(
 	selectedRow binding.Int,
 	sortCategory binding.String,
@@ -92,8 +89,12 @@ func createDBRender(
 				label.SetText("No Data")
 			}
 
-			// no selected row, so make all cells have bg color
-			bg.FillColor = hexToColor(currTheme.Background)
+			// no selected row, so apply background and alt background
+			if id.Row%2 == 0 {
+				bg.FillColor = hexToColor(currTheme.Background)
+			} else {
+				bg.FillColor = hexToColor(currTheme.AltBackground)
+			}
 		},
 	)
 
@@ -150,7 +151,11 @@ func createDBRender(
 			if id.Row == selRow {
 				bg.FillColor = hexToColor(currTheme.HoverColor)
 			} else {
-				bg.FillColor = hexToColor(currTheme.Background)
+				if id.Row%2 == 0 {
+					bg.FillColor = hexToColor(currTheme.Background)
+				} else {
+					bg.FillColor = hexToColor(currTheme.AltBackground)
+				}
 			}
 		}
 		dbRender = updateTable(sortCategory, selectedRow, dbData, selectedTheme, dbRender, width)
@@ -249,7 +254,11 @@ func updateTable(
 		if id.Row == selRow {
 			bg.FillColor = hexToColor(currTheme.HoverColor)
 		} else {
-			bg.FillColor = hexToColor(currTheme.Background)
+			if id.Row%2 == 0 {
+				bg.FillColor = hexToColor(currTheme.Background)
+			} else {
+				bg.FillColor = hexToColor(currTheme.AltBackground)
+			}
 		}
 	}
 

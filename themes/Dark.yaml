@@ -1,7 +1,10 @@
 name: Dark
 background: '#282828'
+altBackground: '#ff00ff'
 foreground: '#ebdbb2'
 primary: '#d79921'
 button: '#98971a'
 placeholder: '#a89984'
 hover: '#3c3836'
+inputBackground: "#8a8a8a"
+scrollBar:       "#FFAAFF"

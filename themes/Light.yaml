@@ -1,5 +1,6 @@
 name: Light
 background: '#ffffff'
+altBackground: '#ff00ff'
 foreground: '#b2b2b2'
 primary: '#0087ff'
 button: '#0000af'

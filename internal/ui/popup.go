@@ -370,8 +370,9 @@ func themeSelector(
 		themeList.Add(button)
 
 		colorPreviews := container.New(
-			layout.NewGridLayout(8),
+			layout.NewGridLayout(9),
 			fixedHeightRect(hexToColor(themeColors.Background)),
+			fixedHeightRect(hexToColor(themeColors.AltBackground)),
 			fixedHeightRect(hexToColor(themeColors.Foreground)),
 			fixedHeightRect(hexToColor(themeColors.Primary)),
 			fixedHeightRect(hexToColor(themeColors.ButtonColor)),
