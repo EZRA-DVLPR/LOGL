@@ -4,28 +4,20 @@ import (
 	"context"
 	"fmt"
 	"log"
-	"os"
 	"time"
 
+	"github.com/EZRA-DVLPR/GameList/internal/dbhandler"
 	"github.com/chromedp/cdproto/network"
 	"github.com/chromedp/chromedp"
-	"github.com/joho/godotenv"
 )
 
-func GetAllGamesSteam(profile string) {
+func GetAllGamesSteam(profile string, cookie string, searchSource string) {
 	fmt.Println("Getting products from Steam...")
 
 	url := "https://steamcommunity.com/id/" + profile + "/games/?tab-all=&tab=all"
 
-	// load the env file
-	err := godotenv.Load()
-	if err != nil {
-		log.Fatal("Error loading .env file")
-	}
-
 	// define the cookie
 	cookieName := "steamLoginSecure"
-	cookieValue := os.Getenv("steamloginsecure")
 	cookieDomain := "steamcommunity.com"
 
 	ctx, cancel := chromedp.NewContext(context.Background())
@@ -41,13 +33,13 @@ func GetAllGamesSteam(profile string) {
 
 	var gameNames []string
 
-	err = chromedp.Run(ctx,
+	err := chromedp.Run(ctx,
 		// enable network to set cookies
 		network.Enable(),
 
 		// set the cookie
 		chromedp.ActionFunc(func(ctx context.Context) error {
-			return network.SetCookie(cookieName, cookieValue).
+			return network.SetCookie(cookieName, cookie).
 				WithDomain(cookieDomain).
 				WithPath("/").
 				Do(ctx)
@@ -70,5 +62,6 @@ func GetAllGamesSteam(profile string) {
 	fmt.Println("Owned Games:")
 	for _, name := range gameNames {
 		fmt.Println(name)
+		dbhandler.SearchAddToDB(name, searchSource)
 	}
 }

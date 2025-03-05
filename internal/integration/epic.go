@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+
+	"github.com/EZRA-DVLPR/GameList/internal/dbhandler"
 )
 
 type EPICPage struct {
@@ -24,7 +26,7 @@ type EPICGame struct {
 	Logo            any    `json:"-"`
 }
 
-func GetAllGamesEpicString(input string) {
+func GetAllGamesEpicString(input string, searchSource string) {
 	fmt.Println("Getting products from Epic Games string...")
 
 	var epicpage EPICPage
@@ -35,5 +37,6 @@ func GetAllGamesEpicString(input string) {
 
 	for _, app := range epicpage.Data.Applications {
 		fmt.Println(app.ApplicationName)
+		dbhandler.SearchAddToDB(app.ApplicationName, searchSource)
 	}
 }

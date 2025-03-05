@@ -6,9 +6,8 @@ import (
 	"io"
 	"log"
 	"net/http"
-	"os"
 
-	"github.com/joho/godotenv"
+	"github.com/EZRA-DVLPR/GameList/internal/dbhandler"
 )
 
 type GOGPage struct {
@@ -52,7 +51,7 @@ type GOGProduct struct {
 	IsHidden             any    `json:"-"`
 }
 
-func GetAllGamesGOG() {
+func GetAllGamesGOG(cookie string, searchSource string) {
 	fmt.Println("Getting products from GOG...")
 
 	url := "https://embed.gog.com/account/getFilteredProducts?mediaType=1&page=1"
@@ -64,15 +63,9 @@ func GetAllGamesGOG() {
 		return
 	}
 
-	// authentication cookie
-	err = godotenv.Load()
-	if err != nil {
-		log.Fatal("Error loading .env file")
-	}
 	// TEST: gog_us is the name of the cookie i have (US atm)
 	// what about other nations/countries/regions? eg. EU? Oceania? Asia?
-	req.Header.Set("Cookie", fmt.Sprintf("gog_us=%s", os.Getenv("gogcookie")))
-
+	req.Header.Set("Cookie", fmt.Sprintf("gog_us=%s", cookie))
 	req.Header.Set("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36")
 	req.Header.Set("Accept", "application/json, text/javascript, */*; q=0.01")
 	req.Header.Set("Referer", "https://embed.gog.com/")
@@ -106,16 +99,18 @@ func GetAllGamesGOG() {
 
 	// for each page in range [2:totalPages] inclusive, want to grab all games from each page
 	for i := 2; i <= gogpage.TotalPages; i++ {
-		gameList = append(gameList, getGOGGames(i)...) // unpack the elts from the search from each page and append to gameList
+		// unpack the elts from the search from each page and append to gameList
+		gameList = append(gameList, getGOGGames(i, cookie)...)
 	}
 
 	// we now have the entire list of games
 	for _, game := range gameList {
 		fmt.Println(game)
+		dbhandler.SearchAddToDB(game, searchSource)
 	}
 }
 
-func getGOGGames(pagenumber int) (gameList []string) {
+func getGOGGames(pagenumber int, cookie string) (gameList []string) {
 	url := fmt.Sprintf("https://embed.gog.com/account/getFilteredProducts?mediaType=1&page=%d", pagenumber)
 
 	client := &http.Client{}
@@ -125,14 +120,9 @@ func getGOGGames(pagenumber int) (gameList []string) {
 		return
 	}
 
-	// authentication cookie
-	err = godotenv.Load()
-	if err != nil {
-		log.Fatal("Error loading .env file")
-	}
 	// TEST: gog_us is the name of the cookie i have (US atm)
 	// what about other nations/countries/regions? eg. EU? Oceania? Asia?
-	req.Header.Set("Cookie", fmt.Sprintf("gog_us=%s", os.Getenv("gogcookie")))
+	req.Header.Set("Cookie", fmt.Sprintf("gog_us=%s", cookie))
 
 	req.Header.Set("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36")
 	req.Header.Set("Accept", "application/json, text/javascript, */*; q=0.01")

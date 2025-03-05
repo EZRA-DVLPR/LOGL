@@ -9,10 +9,11 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/EZRA-DVLPR/GameList/internal/dbhandler"
 	"github.com/chromedp/chromedp"
 )
 
-func GetAllGamesPS(profile string) {
+func GetAllGamesPS(profile string, searchSource string) {
 	fmt.Println("Getting games for PSN...")
 
 	// final list holding all games from all pages
@@ -29,6 +30,7 @@ func GetAllGamesPS(profile string) {
 	gameList = append(gameList, gamepartlist...)
 	for _, game := range gameList {
 		fmt.Println(game)
+		dbhandler.SearchAddToDB(game, searchSource)
 	}
 }
 

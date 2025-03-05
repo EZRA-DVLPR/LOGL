@@ -293,6 +293,18 @@ func createAddButton(
 			fileDialog.SetFilter(storage.NewExtensionFileFilter([]string{".txt"}))
 			fileDialog.Show()
 		}),
+		fyne.NewMenuItem("From GOG", func() {
+			integrationImport(searchSource, "gog", w)
+		}),
+		fyne.NewMenuItem("From psn", func() {
+			integrationImport(searchSource, "psn", w)
+		}),
+		fyne.NewMenuItem("From steam", func() {
+			integrationImport(searchSource, "steam", w)
+		}),
+		fyne.NewMenuItem("From Epic", func() {
+			integrationImport(searchSource, "epic", w)
+		}),
 	)
 
 	menuPopup := widget.NewPopUpMenu(menu, toolbarCanvas)

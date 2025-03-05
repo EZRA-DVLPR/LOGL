@@ -11,11 +11,13 @@ import (
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/data/binding"
+	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 
 	"github.com/EZRA-DVLPR/GameList/internal/dbhandler"
+	"github.com/EZRA-DVLPR/GameList/internal/integration"
 	"github.com/EZRA-DVLPR/GameList/internal/scraper"
 )
 
@@ -186,6 +188,80 @@ func manualEntryPopup(
 	w2.Show()
 }
 
+func integrationImport(
+	searchSource binding.String,
+	name string,
+	w fyne.Window,
+) {
+	var main string
+	var cookie string
+
+	switch name {
+	case "gog":
+		main = "Enter `gog_us` cookie"
+	case "psn":
+		main = "Enter PSN profile name"
+	case "steam":
+		main = "Enter Steam profile name"
+		cookie = "Enter `sessionid` cookie"
+	case "epic":
+		main = "Enter Epic JSON data"
+	}
+
+	// open popup with entry to receive cookie/json/profile data
+	var list []*widget.FormItem
+	var cookieWidget *widget.Entry
+
+	// all options have a required main data
+	mainWidget := widget.NewEntry()
+	list = append(list, widget.NewFormItem(main, mainWidget))
+
+	// steam requires the cookie as well
+	if name == "steam" {
+		cookieWidget = widget.NewEntry()
+		list = append(list, widget.NewFormItem(cookie, cookieWidget))
+	}
+
+	dialog.ShowForm(
+		"Enter Required Information Here",
+		"Confirm",
+		"Cancel",
+		list,
+		func(submitted bool) {
+			if submitted {
+				// check if all fields have proper information
+				valid := true
+				for _, ent := range list {
+					if strings.TrimSpace(ent.Widget.(*widget.Entry).Text) == "" {
+						valid = false
+						break
+					}
+				}
+
+				if valid {
+					ss, _ := searchSource.Get()
+					switch name {
+					case "gog":
+						integration.GetAllGamesGOG(mainWidget.Text, ss)
+					case "psn":
+						integration.GetAllGamesPS(mainWidget.Text, ss)
+					case "steam":
+						integration.GetAllGamesSteam(mainWidget.Text, cookieWidget.Text, ss)
+					case "epic":
+						integration.GetAllGamesEpicString(mainWidget.Text, ss)
+					}
+				} else {
+					log.Println("Please ensure all fields have proper input for:", name)
+				}
+
+			} else {
+				log.Println("Canceled input for:", name)
+			}
+		},
+		w,
+	)
+}
+
 func settingsPopup(
 	a fyne.App,
 	searchSource binding.String,
@@ -197,13 +273,11 @@ func settingsPopup(
 	textSize binding.Float,
 	selectedTheme binding.String,
 ) {
-	// if w2 already exists then focus it and complete task
 	if w2 != nil {
 		w2.RequestFocus()
 		return
 	}
 
-	// define w2 properties
 	w2 = a.NewWindow("Settings Window")
 	w2.Resize(fyne.NewSize(400, 600))
 
