@@ -13,28 +13,28 @@ import (
 )
 
 // selector for importing
-func Import(choice int, searchSource string) {
+func Import(choice int, searchSource string, filename string) {
 	switch choice {
 	case 1:
-		importCSV()
+		importCSV(filename)
 	case 2:
-		importSQL()
+		importSQL(filename)
 	case 3:
-		importTXT(searchSource)
+		importTXT(searchSource, filename)
 	default:
 		log.Fatal("No such import exists!")
 	}
 }
 
-func importCSV() {
-	log.Println("Importing data from CSV")
+func importCSV(filename string) {
+	log.Println("Importing data from CSV: ", filename)
 	db, err := sql.Open("sqlite3", "games.db")
 	if err != nil {
 		log.Fatal("Error opening db:", err)
 	}
 	defer db.Close()
 
-	file, err := os.Open("export.csv")
+	file, err := os.Open(filename)
 	if err != nil {
 		log.Fatal("error opening CSV:", err)
 	}
@@ -105,8 +105,8 @@ func importCSV() {
 	log.Println("Import from CSV completed successfully")
 }
 
-func importSQL() {
-	log.Println("Importing data from SQL")
+func importSQL(filename string) {
+	log.Println("Importing data from SQL:", filename)
 	db, err := sql.Open("sqlite3", "games.db")
 	if err != nil {
 		log.Fatal(err)
@@ -120,7 +120,7 @@ func importSQL() {
 		log.Fatal("Error dropping tables:", err)
 	}
 
-	sqlDump, err := os.ReadFile("export.sql")
+	sqlDump, err := os.ReadFile(filename)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -135,15 +135,15 @@ func importSQL() {
 	log.Println("SQL database imported successfully")
 }
 
-func importTXT(searchSource string) {
-	log.Println("Importing data from TXT file")
+func importTXT(searchSource string, filename string) {
+	log.Println("Importing data from TXT:", filename)
 	db, err := sql.Open("sqlite3", "games.db")
 	if err != nil {
 		log.Fatal("Error opening db:", err)
 	}
 	defer db.Close()
 
-	file, err := os.Open("gamenames.txt")
+	file, err := os.Open(filename)
 	if err != nil {
 		log.Fatal("error opening txt file:", err)
 	}

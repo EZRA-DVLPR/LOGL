@@ -216,7 +216,7 @@ func createAddButton(
 ) (addButton *widget.Button) {
 	// no function since we are making a dropdown menu
 	addButton = widget.NewButtonWithIcon("Add Game", theme.ContentAddIcon(), nil)
-	// ss, _ := searchSource.Get()
+	ss, _ := searchSource.Get()
 	menu := fyne.NewMenu("",
 		fyne.NewMenuItem("Single Game Search", func() {
 			singleGameNameSearchPopup(
@@ -250,9 +250,8 @@ func createAddButton(
 					return
 				}
 				defer uri.Close() // close uri when dialog closes
-				log.Println("Selected File:", uri.URI().Path())
-				// dbhandler.Import(1, ss)
-				// forceRenderDB(sortCategory, sortOrder, searchText, dbData, selectedRow)
+				dbhandler.Import(1, ss, uri.URI().Path())
+				forceRenderDB(sortCategory, sortOrder, searchText, dbData, selectedRow)
 			}, w)
 			// set file extension to only allow csv files
 			fileDialog.SetFilter(storage.NewExtensionFileFilter([]string{".csv"}))
@@ -269,12 +268,10 @@ func createAddButton(
 					log.Println("No file Selected")
 					return
 				}
-				defer uri.Close() // close uri when dialog closes
-				log.Println("Selected File:", uri.URI().Path())
-				// dbhandler.Import(2, ss)
-				// forceRenderDB(sortCategory, sortOrder, searchText, dbData, selectedRow)
+				defer uri.Close()
+				dbhandler.Import(2, ss, uri.URI().Path())
+				forceRenderDB(sortCategory, sortOrder, searchText, dbData, selectedRow)
 			}, w)
-			// set file extension to only allow csv files
 			fileDialog.SetFilter(storage.NewExtensionFileFilter([]string{".sql"}))
 			fileDialog.Show()
 		}),
@@ -289,12 +286,10 @@ func createAddButton(
 					log.Println("No file Selected")
 					return
 				}
-				defer uri.Close() // close uri when dialog closes
-				log.Println("Selected File:", uri.URI().Path())
-				// dbhandler.Import(3, ss)
-				// forceRenderDB(sortCategory, sortOrder, searchText, dbData, selectedRow)
+				defer uri.Close()
+				dbhandler.Import(3, ss, uri.URI().Path())
+				forceRenderDB(sortCategory, sortOrder, searchText, dbData, selectedRow)
 			}, w)
-			// set file extension to only allow csv files
 			fileDialog.SetFilter(storage.NewExtensionFileFilter([]string{".txt"}))
 			fileDialog.Show()
 		}),
