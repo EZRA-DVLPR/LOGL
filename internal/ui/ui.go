@@ -171,7 +171,7 @@ func StartGUI() {
 		log.Println("Search Source:", ss)
 		log.Println("Text Size:", ts)
 		log.Println("Selected Theme:", sth)
-		log.Println("App closed")
+		log.Println("App closed!")
 	})
 
 	// runloop for the app
