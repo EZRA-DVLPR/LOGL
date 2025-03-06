@@ -177,7 +177,7 @@ func createDBRender(
 	}))
 
 	// goroutine to adjust col widths every 0.25 s
-	go fixTableSize(sortCategory, selectedRow, dbData, selectedTheme, dbRender, w)
+	go fixTableSize(dbRender, w)
 
 	return
 }
@@ -348,12 +348,8 @@ func headerSetup(
 	return dbTable
 }
 
-// check window size every 0.25 and adjust size of table if it changes
+// check window size every 0.25 and adjust size of table col widths if it changes
 func fixTableSize(
-	sortCategory binding.String,
-	selectedRow binding.Int,
-	dbData *MyDataBinding,
-	selectedTheme binding.String,
 	dbRender *widget.Table,
 	w fyne.Window,
 ) {
@@ -365,8 +361,20 @@ func fixTableSize(
 		if prevWidth != width {
 			select {
 			case <-ticker.C:
+				// update the table widths
 				prevWidth = width
-				updateTable(sortCategory, selectedRow, dbData, selectedTheme, dbRender, width)
+
+				// set name col width
+				dbRender.SetColumnWidth(0, 400)
+
+				// game name has 400, and the row headers take ~70 spacing
+				// all other space is to be given to the other columns
+				spacing := (width - 400 - 70) / 3
+
+				dbRender.SetColumnWidth(1, spacing)
+				dbRender.SetColumnWidth(2, spacing)
+				dbRender.SetColumnWidth(3, spacing)
+
 				dbRender.Refresh()
 			}
 		}

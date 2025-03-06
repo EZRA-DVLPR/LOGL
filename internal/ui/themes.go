@@ -106,8 +106,9 @@ func loadTheme(filename string) (ColorTheme, error) {
 }
 
 // makes default L/D themes as yaml files
+// TODO: Make sure the themes look good and are properly described
 func createLDThemes(themesDir string) {
-	log.Println("creating l/d themes")
+	log.Println("Creating Light/Dark themes")
 	lightTheme := ColorTheme{
 		Name:                 "Light",
 		Background:           "#ffffff",

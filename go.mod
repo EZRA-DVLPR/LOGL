@@ -7,7 +7,6 @@ require (
 	github.com/chromedp/cdproto v0.0.0-20250126231910-1730200a0f74
 	github.com/chromedp/chromedp v0.12.1
 	github.com/gocolly/colly v1.2.0
-	github.com/joho/godotenv v1.5.1
 	github.com/mattn/go-sqlite3 v1.14.24
 	gopkg.in/yaml.v3 v3.0.1
 )
