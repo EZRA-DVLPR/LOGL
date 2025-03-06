@@ -7,6 +7,7 @@ import (
 
 // PERF: make tests for the following
 // 1. Epic
-// 2. GOG
-// 3. PS
+// 2. PS
+// 3. GOG
 // 4. Steam
+// NOTE: 3 & 4 require cookies (read from env)

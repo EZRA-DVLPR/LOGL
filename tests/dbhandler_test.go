@@ -24,3 +24,8 @@ import (
 //		a. CSV
 //		b. SQL
 //		c. TXT
+// NOTE: Will need to have several databases:
+// 1. Full database with variety of data types. Will be copied from and never modified.
+// 2. Empty DB
+// 3. File that was converted to db file but isn't. Eg. PDF -> db
+// 4. Full database to modify
