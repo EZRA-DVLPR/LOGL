@@ -269,6 +269,7 @@ func settingsPopup(
 	dbData *MyDataBinding,
 	textSize binding.Float,
 	selectedTheme binding.String,
+	availableThemes map[string]ColorTheme,
 ) {
 	if w2 != nil {
 		w2.RequestFocus()
@@ -284,9 +285,9 @@ func settingsPopup(
 				layout.NewVBoxLayout(),
 				searchSourceRadioWidget(searchSource),
 				widget.NewSeparator(),
-				themeSelector(selectedTheme, textSize, a),
+				themeSelector(selectedTheme, textSize, availableThemes, a),
 				widget.NewSeparator(),
-				textSlider(selectedTheme, textSize, a),
+				textSlider(selectedTheme, textSize, availableThemes, a),
 				widget.NewSeparator(),
 				updateAllButton(sortCategory, sortOrder, searchText, dbData, selectedRow),
 				widget.NewSeparator(),
@@ -328,10 +329,10 @@ func searchSourceRadioWidget(searchSource binding.String) *fyne.Container {
 }
 
 // selector for the theme of the application
-// TODO: Binding for themesDir location
 func themeSelector(
 	selectedTheme binding.String,
 	textSize binding.Float,
+	availableThemes map[string]ColorTheme,
 	a fyne.App,
 ) *fyne.Container {
 	st, _ := selectedTheme.Get()
@@ -341,11 +342,6 @@ func themeSelector(
 		fyne.TextAlignCenter,
 		fyne.TextStyle{Bold: true},
 	)
-	// TODO: Binding for themesDir location
-	availableThemes, err := loadAllThemes("themes")
-	if err != nil {
-		log.Fatal("Error loading themes from themes folder:", err)
-	}
 	themeList := container.New(
 		layout.NewVBoxLayout(),
 	)
@@ -391,17 +387,12 @@ func themeSelector(
 	)
 }
 
-// TODO: Binding for themesDir location
 func textSlider(
 	selectedTheme binding.String,
 	textSize binding.Float,
+	availableThemes map[string]ColorTheme,
 	a fyne.App,
 ) *fyne.Container {
-	// TODO: Binding for themesDir location
-	availableThemes, err := loadAllThemes("themes")
-	if err != nil {
-		log.Fatal("Error loading themes from themes folder:", err)
-	}
 	label := widget.NewLabelWithStyle(
 		"Change Text and Icon Size",
 		fyne.TextAlignCenter,

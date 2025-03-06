@@ -26,11 +26,11 @@ func StartGUI() {
 	searchSource := binding.NewString()
 	textSize := binding.NewFloat()
 	selectedTheme := binding.NewString()
-
 	// INFO: The following bindings do not persist through sessions
 	searchText := binding.NewString()
 	selectedRow := binding.NewInt()
-	// dont highlight any row
+
+	// dont highlight any row on app start
 	selectedRow.Set(-1)
 
 	// load sort category from pref storage. default to "name"  i.e. Game Name
@@ -47,17 +47,10 @@ func StartGUI() {
 
 	// TODO: Handle default sizes of window when i finalize the length/size of the toolbar with icons
 	// default window size accommodates changing of "ASC"/"DESC" without changing size of window (1140, 400) (W,H)
-	// It seems that the first row doesnt render properly initially if the width is too great...
-	storedWWidth := prefs.Float("w_width")
-	if storedWWidth == 0 {
-		storedWWidth = 1140
-	}
+	storedWWidth := prefs.FloatWithFallback("w_width", 1140)
 	wWidth.Set(storedWWidth)
 
-	storedWHeight := prefs.Float("w_height")
-	if storedWHeight == 0 {
-		storedWHeight = 400
-	}
+	storedWHeight := prefs.FloatWithFallback("w_height", 400)
 	wHeight.Set(storedWHeight)
 
 	wW, _ := wWidth.Get()
@@ -68,9 +61,8 @@ func StartGUI() {
 	// the app will close when the main window (w) is closed
 	w.SetMaster()
 
-	// load available themes
-	themesDir := "themes"
-	availableThemes, err := loadAllThemes(themesDir)
+	// load available themes from /themes dir
+	availableThemes, err := loadAllThemes("themes")
 	if err != nil {
 		log.Fatal("Error loading themes from themes folder:", err)
 	}
@@ -80,25 +72,18 @@ func StartGUI() {
 	textSize.Set(ts)
 
 	// load saved theme from prefs
-	// TODO: Base light/dark as default based on system settings
+	// PERF: Base light/dark as default based on system settings
 	st := prefs.StringWithFallback("selected_theme", "Light")
 	selectedTheme.Set(st)
+	a.Settings().SetTheme(
+		&CustomTheme{
+			Theme:    theme.DefaultTheme(),
+			textSize: float32(ts),
+			colors:   availableThemes[st],
+		},
+	)
 
-	customTheme := &CustomTheme{
-		Theme:    theme.DefaultTheme(),
-		textSize: float32(ts),
-		colors:   availableThemes[st],
-	}
-
-	a.Settings().SetTheme(customTheme)
-
-	//See diagram in documentation for clearer illustration
-	//
-	//--------toolbar--------
-	//Search-TypingBoxSearch-
-	//id|GameName|M|M+S|C----
-	//~~~~~~~~~~~~~~~~~~~~~~~
-	//~~~~~~~~~~~~~~~~~~~~~~~
+	// display the contents of the app
 	content := container.NewBorder(
 		// top is toolbar + searchbar
 		container.NewVBox(
@@ -112,6 +97,7 @@ func StartGUI() {
 				searchSource,
 				textSize,
 				selectedTheme,
+				availableThemes,
 				a,
 				w,
 			),
@@ -119,7 +105,6 @@ func StartGUI() {
 		),
 		// dont render anything else in space besides DB
 		nil, nil, nil,
-		// default to display names ASC
 		createDBRender(
 			selectedRow,
 			sortCategory,
@@ -127,6 +112,7 @@ func StartGUI() {
 			searchText,
 			selectedTheme,
 			dbData,
+			availableThemes,
 			w,
 		),
 	)
@@ -134,7 +120,7 @@ func StartGUI() {
 	w.SetContent(content)
 	w.Show()
 
-	// when main window closes, save preferences for future session
+	// when main window closes, save preferences for future sessions
 	w.SetOnClosed(func() {
 		// save sort type
 		st, _ := sortCategory.Get()

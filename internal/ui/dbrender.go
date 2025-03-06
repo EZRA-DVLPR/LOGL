@@ -17,7 +17,6 @@ import (
 var prevWidth float32
 
 // makes the table and reflects changes based on values of bindings
-// TODO: make the favorited rows be a diff color than the others
 func createDBRender(
 	selectedRow binding.Int,
 	sortCategory binding.String,
@@ -25,6 +24,7 @@ func createDBRender(
 	searchText binding.String,
 	selectedTheme binding.String,
 	dbData *MyDataBinding,
+	availableThemes map[string]ColorTheme,
 	w fyne.Window,
 ) (dbRender *widget.Table) {
 	// given the bindings create the table with the new set of data
@@ -33,6 +33,7 @@ func createDBRender(
 
 	// if db exists then get the data
 	// NOTE: notice there is no search text, because we initialize without any search text from the user
+	log.Println("Checking local DB")
 	if dbhandler.CheckDBExists() {
 		// no initial search query so use ""
 		dbData.Set(dbhandler.SortDB(sortcat, sortord, ""))
@@ -45,12 +46,6 @@ func createDBRender(
 	numRows := 1
 	if len(data) != 0 {
 		numRows = len(data)
-	}
-
-	// TODO: Binding for themesDir location
-	availableThemes, err := loadAllThemes("themes")
-	if err != nil {
-		log.Fatal("Error loading themes from themes folder:", err)
 	}
 
 	st, _ := selectedTheme.Get()
@@ -107,13 +102,13 @@ func createDBRender(
 
 	// set up the headers
 	width := w.Content().Size().Width
-	dbRender = headerSetup(sortCategory, selectedTheme, dbRender, width)
+	dbRender = headerSetup(sortCategory, selectedTheme, dbRender, width, availableThemes)
 
 	// change contents of dbData binding when sort order changes
 	sortOrder.AddListener(binding.NewDataListener(func() {
 		updateDBData(sortCategory, sortOrder, searchText, dbData)
 		width := w.Content().Size().Width
-		dbRender = updateTable(sortCategory, selectedRow, dbData, selectedTheme, dbRender, width)
+		dbRender = updateTable(sortCategory, selectedRow, dbData, selectedTheme, dbRender, width, availableThemes)
 		forceRenderDB(sortCategory, sortOrder, searchText, dbData, selectedRow)
 		dbRender.Refresh()
 	}))
@@ -122,7 +117,7 @@ func createDBRender(
 	sortCategory.AddListener(binding.NewDataListener(func() {
 		updateDBData(sortCategory, sortOrder, searchText, dbData)
 		width := w.Content().Size().Width
-		dbRender = updateTable(sortCategory, selectedRow, dbData, selectedTheme, dbRender, width)
+		dbRender = updateTable(sortCategory, selectedRow, dbData, selectedTheme, dbRender, width, availableThemes)
 		forceRenderDB(sortCategory, sortOrder, searchText, dbData, selectedRow)
 		dbRender.Refresh()
 	}))
@@ -131,7 +126,7 @@ func createDBRender(
 	searchText.AddListener(binding.NewDataListener(func() {
 		updateDBData(sortCategory, sortOrder, searchText, dbData)
 		width := w.Content().Size().Width
-		dbRender = updateTable(sortCategory, selectedRow, dbData, selectedTheme, dbRender, width)
+		dbRender = updateTable(sortCategory, selectedRow, dbData, selectedTheme, dbRender, width, availableThemes)
 		forceRenderDB(sortCategory, sortOrder, searchText, dbData, selectedRow)
 		dbRender.Refresh()
 	}))
@@ -158,7 +153,7 @@ func createDBRender(
 				}
 			}
 		}
-		dbRender = updateTable(sortCategory, selectedRow, dbData, selectedTheme, dbRender, width)
+		dbRender = updateTable(sortCategory, selectedRow, dbData, selectedTheme, dbRender, width, availableThemes)
 
 		// scroll to the new location selected
 		var selCell widget.TableCellID
@@ -176,7 +171,6 @@ func createDBRender(
 		dbRender.Refresh()
 	}))
 
-	// goroutine to adjust col widths every 0.25 s
 	go fixTableSize(dbRender, w)
 
 	return
@@ -204,6 +198,7 @@ func updateTable(
 	selectedTheme binding.String,
 	dbRender *widget.Table,
 	width float32,
+	availableThemes map[string]ColorTheme,
 ) *widget.Table {
 	selRow, _ := selectedRow.Get()
 
@@ -214,14 +209,7 @@ func updateTable(
 		numRows = len(data)
 	}
 
-	// TODO: Binding for themesDir location
-	availableThemes, err := loadAllThemes("themes")
-	if err != nil {
-		log.Fatal("Error loading themes from themes folder:", err)
-	}
-
 	st, _ := selectedTheme.Get()
-
 	currTheme := availableThemes[st]
 
 	// set dims
@@ -263,7 +251,7 @@ func updateTable(
 	}
 
 	// setup headers
-	dbRender = headerSetup(sortCategory, selectedTheme, dbRender, width)
+	dbRender = headerSetup(sortCategory, selectedTheme, dbRender, width, availableThemes)
 	return dbRender
 }
 
@@ -272,13 +260,8 @@ func headerSetup(
 	selectedTheme binding.String,
 	dbTable *widget.Table,
 	width float32,
+	availableThemes map[string]ColorTheme,
 ) *widget.Table {
-	// TODO: Binding for themesDir location
-	availableThemes, err := loadAllThemes("themes")
-	if err != nil {
-		log.Fatal("Error loading themes from themes folder:", err)
-	}
-
 	st, _ := selectedTheme.Get()
 
 	currTheme := availableThemes[st]

@@ -33,6 +33,7 @@ func createMainWindowToolbar(
 	searchSource binding.String,
 	textSize binding.Float,
 	selectedTheme binding.String,
+	availableThemes map[string]ColorTheme,
 	a fyne.App,
 	w fyne.Window,
 ) (toolbar *fyne.Container) {
@@ -54,7 +55,7 @@ func createMainWindowToolbar(
 		layout.NewSpacer(),
 		createHelpButton(toolbarCanvas),
 		layout.NewSpacer(),
-		createSettingsButton(a, searchSource, sortCategory, sortOrder, searchText, selectedRow, dbData, textSize, selectedTheme),
+		createSettingsButton(a, searchSource, sortCategory, sortOrder, searchText, selectedRow, dbData, textSize, selectedTheme, availableThemes),
 	)
 
 	// PERF: change size of each button depending on the size of the given window
@@ -184,6 +185,7 @@ func createSettingsButton(
 	dbData *MyDataBinding,
 	textSize binding.Float,
 	selectedTheme binding.String,
+	availableThemes map[string]ColorTheme,
 ) (settingsButton *widget.Button) {
 	settingsButton = widget.NewButtonWithIcon("", theme.SettingsIcon(), func() {
 		settingsPopup(
@@ -196,6 +198,7 @@ func createSettingsButton(
 			dbData,
 			textSize,
 			selectedTheme,
+			availableThemes,
 		)
 	})
 
@@ -214,7 +217,6 @@ func createAddButton(
 	toolbarCanvas fyne.Canvas,
 	w fyne.Window,
 ) (addButton *widget.Button) {
-	// no function since we are making a dropdown menu
 	addButton = widget.NewButtonWithIcon("Add Game", theme.ContentAddIcon(), nil)
 	ss, _ := searchSource.Get()
 	menu := fyne.NewMenu("",
@@ -293,6 +295,7 @@ func createAddButton(
 			fileDialog.SetFilter(storage.NewExtensionFileFilter([]string{".txt"}))
 			fileDialog.Show()
 		}),
+		// INFO: These require user input to be completed
 		fyne.NewMenuItem("From GOG", func() {
 			integrationImport(searchSource, "gog", w)
 		}),
