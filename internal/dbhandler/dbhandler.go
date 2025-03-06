@@ -10,20 +10,9 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
-// INFO: STRUCTURE OF THE DB
-// games (table) {
-// 		name					string		(text)			PRIMARY KEY
-// 		hltburl					string		(text)
-// 		completionatorurl		string		(text)
-//		favorite				int			(integer)
-//		main					float		(real)
-//		mainPlus				float		(real)
-//		comp					float		(real)
-//		}
-
 // creates the DB with table
 func CreateDB() {
-	fmt.Println("Creating the DB")
+	log.Println("Creating the DB")
 
 	db, err := sql.Open("sqlite3", "games.db")
 	if err != nil {
@@ -58,6 +47,7 @@ func CheckDBExists() bool {
 
 	var name string
 	err = db.QueryRow("SELECT name FROM sqlite_master WHERE type='table' AND name = ?", "games").Scan(&name)
+	log.Println("Checking if table exists")
 	if err == sql.ErrNoRows {
 		return false
 	} else if err != nil {
@@ -141,34 +131,34 @@ func AddToDB(game scraper.Game) {
 		log.Fatal("Error inserting game: ", err)
 	}
 
-	log.Println("Finished adding the game data to the local DB for game", game.Name)
+	log.Println("Finished adding the game data to the local DB for game:", game.Name)
 }
 
-// given the name of a game, search from data sites, then add struct to DB
+// given the name of a game & search source(s), add struct to DB
 func SearchAddToDB(gameName string, searchSource string) {
 	// get the data from scraper using sources
 	var newgame scraper.Game
 
 	switch searchSource {
 	case "All":
-		log.Println("Searching from all sources for game data")
+		log.Println("Searching from all sources for game data for game:", gameName)
 
 		// search both and obtain game structs from each source
 		hltbSearch := scraper.SearchGameHLTB(gameName)
 		completionatorSearch := scraper.SearchGameCompletionator(gameName)
-
 		newgame = compareGetGameData(hltbSearch, completionatorSearch)
-
 		newgame.Name = gameName
 
 	case "HLTB":
+		log.Println("Searching HLTB for game data for game:", gameName)
 		newgame = scraper.SearchGameHLTB(gameName)
 
 	case "Completionator":
+		log.Println("Searching Completionator for game data for game:", gameName)
 		newgame = scraper.SearchGameCompletionator(gameName)
 
 	default:
-		log.Println("No such search style")
+		log.Println("No such search style. Aborting process")
 		return
 	}
 
@@ -199,11 +189,13 @@ func UpdateEntireDB() {
 		gameNames = append(gameNames, gameName)
 	}
 
-	log.Println("List of game names obtained. Now updating each game name found")
+	log.Println("List of game names obtained. Now updating each game found")
 	for _, gameName := range gameNames {
 		log.Println("Updating game:", gameName)
 		UpdateGame(gameName)
 	}
+
+	log.Println("All games updated")
 }
 
 // given a game name, will update its contents with newer information
@@ -221,25 +213,28 @@ func UpdateGame(gameName string) {
 		log.Fatal("Error obtaining URLs for given game")
 	}
 
-	// if no URL from source, then try to scrape data from beginning for the link.
+	// if no URL from source(s), then perform searches for game page link
 	// o/w directly scrape from the saved page
 	var hltbSearch, completionatorSearch scraper.Game
 	if hltbURL == "" {
-		log.Println("No URL found to obtain information from HLTB. Attempting to get link.")
+		log.Println("No URL found to obtain information from HLTB. Attempting to get link")
 		hltbSearch = scraper.SearchGameHLTB(gameName)
 	} else {
+		log.Println("Directly obtaining data from HLTB with saved link")
 		hltbSearch = scraper.FetchHLTB(hltbURL)
 	}
 	if completionatorURL == "" {
-		log.Println("No URL found to obtain information from Completionator. Attempting to get link.")
+		log.Println("No URL found to obtain information from Completionator. Attempting to get link")
 		completionatorSearch = scraper.SearchGameCompletionator(gameName)
 	} else {
+		log.Println("Directly obtaining data from Completionator with saved link")
 		completionatorSearch = scraper.FetchCompletionator(completionatorURL)
 	}
 
 	newgamedata := compareGetGameData(hltbSearch, completionatorSearch)
 
 	// overwrite the old data with the new Data
+	log.Println("Overwriting saved data for game:", gameName)
 	rows, err := db.Exec(
 		"UPDATE games SET hltburl = ?, completionatorurl = ?, main = ?, mainPlus = ?, comp = ? WHERE name = ?",
 		newgamedata.HLTBUrl,
@@ -255,7 +250,7 @@ func UpdateGame(gameName string) {
 		return
 	}
 	if rowsAffected(rows, gameName) {
-		log.Println("Successfully updated values for", gameName)
+		log.Println("Successfully updated values for game:", gameName)
 	}
 }
 
@@ -303,8 +298,11 @@ func SortDB(sortCategory string, sortOrder bool, queryName string) (dbOutput [][
 
 	// if queryName is empty, sort DB without searching for similar game names
 	var rows *sql.Rows
+	log.Println("Sorting DB with given inputs:", sortCategory, sortOrder, queryName)
 	if queryName == "" {
 		rows, err = db.Query(
+			// order values based on their value comparison
+			// eg. 1234 < 12345, abcd < abcde, etc.
 			fmt.Sprintf(`
 				SELECT name, main, mainPlus, comp 
 				FROM games 
@@ -350,6 +348,7 @@ func SortDB(sortCategory string, sortOrder bool, queryName string) (dbOutput [][
 			strconv.FormatFloat(comp, 'f', -1, 64),
 		})
 	}
+	log.Println("DB has been sorted with given options:", sortCategory, sortOrder, queryName)
 	return dbOutput
 }
 
@@ -373,20 +372,20 @@ func join(elements []string, sep string) string {
 }
 
 // if given rows were affected then returns true. o/w false
-func rowsAffected(res sql.Result, name string) (wereAffected bool) {
+func rowsAffected(res sql.Result, gameName string) (wereAffected bool) {
 	rowsAffected, err := res.RowsAffected()
 	if err != nil {
 		log.Fatal("Error checking affected rows: ", err)
 	}
 	if rowsAffected == 0 {
-		log.Printf("Game `%s` not found in local database\n", name)
+		log.Printf("Game `%s` not found in local database\n", gameName)
 		return false
 	}
 	return true
 }
 
-// WARN: if there is another source, consider making a single parameter of[]scraper.Game and
-// go by ref to that to do comparisons more effectively
+// WARN: if there is another source, consider making a single parameter of []scraper.Game and
+// go by ref to do comparisons more effectively
 func compareGetGameData(
 	firstGame scraper.Game,
 	secondGame scraper.Game,
@@ -400,7 +399,7 @@ func compareGetGameData(
 		secondGame.Main == 0 &&
 		secondGame.MainPlus == 0 &&
 		secondGame.Comp == 0 {
-		log.Println("No Game Data for game Found!")
+		log.Println("No Game Data for games Found!")
 		return
 	}
 
@@ -425,5 +424,6 @@ func compareGetGameData(
 		resultGame.Comp = firstGame.Comp
 	}
 
+	// INFO: the game that is returned has no name
 	return
 }

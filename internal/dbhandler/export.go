@@ -66,12 +66,12 @@ func exportCSV(filename string) {
 	defer writer.Flush()
 
 	// write col headers
-	log.Println("Writing to csv file")
 	if err := writer.Write(cols); err != nil {
 		log.Fatal("Error writing CSV headers")
 	}
 
 	// write rows of data
+	log.Println("Writing game data to csv file")
 	for rows.Next() {
 		values := make([]interface{}, len(cols))
 		valuePtrs := make([]interface{}, len(cols))

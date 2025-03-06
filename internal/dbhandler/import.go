@@ -86,6 +86,7 @@ func importCSV(filename string) {
 	if err != nil {
 		log.Fatal("Error starting transaction:", err)
 	}
+	log.Println("Inserting data from CSV")
 	// turns `INSERT OR REPLACE INTO GAMES [colname] VALUES ?`
 	// into `INSERT OR REPLACE INTO GAMES name, ... VALUE gamename,...`
 	// and executes transaction for each row
@@ -152,11 +153,13 @@ func importTXT(searchSource string, filename string) {
 	// scan file and add new obtain data and insert into gameNames []string
 	var gameNames []string
 	scanner := bufio.NewScanner(file)
+	log.Println("Reading file for game names")
 	for scanner.Scan() {
 		gameNames = append(gameNames, strings.TrimSpace(scanner.Text()))
 	}
 
 	// for each game in gameNames, perform search and add to DB
+	log.Println("List of game names obtained. Will now search then add each game to DB")
 	for _, game := range gameNames {
 		log.Println("Obtaining Data for game", game)
 		SearchAddToDB(game, searchSource)
