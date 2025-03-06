@@ -2,7 +2,6 @@ package integration
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"time"
 
@@ -12,11 +11,10 @@ import (
 )
 
 func GetAllGamesSteam(profile string, cookie string, searchSource string) {
-	fmt.Println("Getting products from Steam...")
-
-	url := "https://steamcommunity.com/id/" + profile + "/games/?tab-all=&tab=all"
+	log.Println("Getting products from Steam for given profile:", profile)
 
 	// define the cookie
+	log.Println("Setting up HTTP request")
 	cookieName := "steamLoginSecure"
 	cookieDomain := "steamcommunity.com"
 
@@ -32,7 +30,7 @@ func GetAllGamesSteam(profile string, cookie string, searchSource string) {
 	gameLinksSelector := `div[data-featuretarget="gameslist-root"] div.Panel div.Panel span > a`
 
 	var gameNames []string
-
+	log.Println("Making HTTP request")
 	err := chromedp.Run(ctx,
 		// enable network to set cookies
 		network.Enable(),
@@ -45,7 +43,7 @@ func GetAllGamesSteam(profile string, cookie string, searchSource string) {
 				Do(ctx)
 		}),
 
-		chromedp.Navigate(url),
+		chromedp.Navigate("https://steamcommunity.com/id/"+profile+"/games/?tab-all=&tab=all"),
 
 		// wait for js to load the games list (5 seconds)
 		chromedp.Sleep(5*time.Second),
@@ -58,10 +56,11 @@ func GetAllGamesSteam(profile string, cookie string, searchSource string) {
 	if err != nil {
 		log.Fatal("Failed to fetch game names:", err)
 	}
+	log.Println("HTTP Request processed successfully. List of games obtained")
 
-	fmt.Println("Owned Games:")
 	for _, name := range gameNames {
-		fmt.Println(name)
+		log.Println("Game found:", name)
 		dbhandler.SearchAddToDB(name, searchSource)
 	}
+	log.Println("Finished adding game data from Steam")
 }

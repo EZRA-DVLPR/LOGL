@@ -2,7 +2,6 @@ package integration
 
 import (
 	"encoding/json"
-	"fmt"
 	"log"
 
 	"github.com/EZRA-DVLPR/GameList/internal/dbhandler"
@@ -27,7 +26,7 @@ type EPICGame struct {
 }
 
 func GetAllGamesEpicString(input string, searchSource string) {
-	fmt.Println("Getting products from Epic Games string...")
+	log.Println("Getting products from Epic Games string")
 
 	var epicpage EPICPage
 	err := json.Unmarshal([]byte(input), &epicpage)
@@ -35,8 +34,10 @@ func GetAllGamesEpicString(input string, searchSource string) {
 		log.Fatal("Error decoding json", err)
 	}
 
+	log.Println("Reading json input from Epic Games")
 	for _, app := range epicpage.Data.Applications {
-		fmt.Println(app.ApplicationName)
+		log.Println("Game found:", app.ApplicationName)
 		dbhandler.SearchAddToDB(app.ApplicationName, searchSource)
 	}
+	log.Println("Finished adding game data from Epic Games")
 }

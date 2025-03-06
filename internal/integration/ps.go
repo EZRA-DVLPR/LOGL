@@ -14,24 +14,28 @@ import (
 )
 
 func GetAllGamesPS(profile string, searchSource string) {
-	fmt.Println("Getting games for PSN...")
+	log.Println("Getting games for PSN")
 
 	// final list holding all games from all pages
 	var gameList []string
 
 	// get games from first page, append them into gamelist, and continue grabbing until the last page
 	gamepartlist, nextpage := getAllGamesPS(profile, "1")
+	log.Println("Obtained all game titles from page 1")
 	for nextpage != "0" {
+		log.Println("Obtaining list of game titles from page: " + nextpage)
 		gameList = append(gameList, gamepartlist...)              // unpack and append each elt from part to gameList
 		gamepartlist, nextpage = getAllGamesPS(profile, nextpage) // get next page
+		log.Println("Obtained all game titles from page: ", nextpage)
 	}
 
 	// append the games retrieved from the last page retrieved
 	gameList = append(gameList, gamepartlist...)
+	log.Println("Obtained all game titles for profile:", profile)
 	for _, game := range gameList {
-		fmt.Println(game)
 		dbhandler.SearchAddToDB(game, searchSource)
 	}
+	log.Println("Finished adding game data from PSN for profile:", profile)
 }
 
 func getAllGamesPS(profile string, pagenum string) (gamelist []string, nextPageNum string) {
@@ -93,7 +97,7 @@ func getAnotherGame(pageHTML string) (gameName string, nextStartIndex int) {
 	// clean the unicode leftover
 	gameName, err := strconv.Unquote(`"` + pageHTML[indexGameNameStart:indexGameNameEnd] + `"`)
 	if err != nil {
-		fmt.Println("error cleaning unicode text:", err)
+		log.Println("error cleaning unicode text:", err)
 		return pageHTML[indexGameNameStart:indexGameNameEnd], indexGameNameEnd
 	}
 	// clean the & symbol that is leftover

@@ -52,18 +52,21 @@ type GOGProduct struct {
 }
 
 func GetAllGamesGOG(cookie string, searchSource string) {
-	fmt.Println("Getting products from GOG...")
+	log.Println("Getting products from GOG")
 
-	url := "https://embed.gog.com/account/getFilteredProducts?mediaType=1&page=1"
-
+	log.Println("Setting up HTTP request")
 	client := &http.Client{}
-	req, err := http.NewRequest("GET", url, nil)
+	req, err := http.NewRequest(
+		"GET",
+		"https://embed.gog.com/account/getFilteredProducts?mediaType=1&page=1",
+		nil,
+	)
 	if err != nil {
 		fmt.Println("Error creating request:", err)
 		return
 	}
 
-	// TEST: gog_us is the name of the cookie i have (US atm)
+	// TEST: gog_us is the name of the cookie i have (US)
 	// what about other nations/countries/regions? eg. EU? Oceania? Asia?
 	req.Header.Set("Cookie", fmt.Sprintf("gog_us=%s", cookie))
 	req.Header.Set("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36")
@@ -71,13 +74,15 @@ func GetAllGamesGOG(cookie string, searchSource string) {
 	req.Header.Set("Referer", "https://embed.gog.com/")
 	req.Header.Set("X-Requested-With", "XMLHttpRequest") // tells server it's an AJAX request
 
+	log.Println("Sending HTTP request")
 	resp, err := client.Do(req)
 	if err != nil {
-		fmt.Println("Error:", err)
+		log.Println("Error:", err)
 		return
 	}
 	defer resp.Body.Close()
 
+	log.Println("HTTP Request processed successfully. Reading Response")
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		fmt.Println("Error reading body:", err)
@@ -92,36 +97,43 @@ func GetAllGamesGOG(cookie string, searchSource string) {
 	}
 
 	// from the 1st page, get the list of game titles
+	log.Println("Obtaining list of game titles from page 1")
 	var gameList []string
 	for _, gogproduct := range gogpage.Products {
 		gameList = append(gameList, gogproduct.Title)
 	}
 
+	log.Println("Obtained all game titles from page 1")
 	// for each page in range [2:totalPages] inclusive, want to grab all games from each page
 	for i := 2; i <= gogpage.TotalPages; i++ {
 		// unpack the elts from the search from each page and append to gameList
+		log.Println(fmt.Sprintf("Obtaining list of game titles from page %d", i))
 		gameList = append(gameList, getGOGGames(i, cookie)...)
+		log.Println(fmt.Sprintf("Obtained list of game titles from page %d", i))
 	}
 
+	log.Println("All games from all pages obtained")
 	// we now have the entire list of games
 	for _, game := range gameList {
-		fmt.Println(game)
+		log.Println("Game found:", game)
 		dbhandler.SearchAddToDB(game, searchSource)
 	}
+	log.Println("Finished adding game data from GOG")
 }
 
 func getGOGGames(pagenumber int, cookie string) (gameList []string) {
-	url := fmt.Sprintf("https://embed.gog.com/account/getFilteredProducts?mediaType=1&page=%d", pagenumber)
-
+	log.Println("Setting up HTTP request")
 	client := &http.Client{}
-	req, err := http.NewRequest("GET", url, nil)
+	req, err := http.NewRequest("GET", fmt.Sprintf(
+		"https://embed.gog.com/account/getFilteredProducts?mediaType=1&page=%d",
+		pagenumber,
+	), nil)
 	if err != nil {
-		fmt.Println("Error creating request:", err)
+		log.Println("Error creating request:", err)
 		return
 	}
 
-	// TEST: gog_us is the name of the cookie i have (US atm)
-	// what about other nations/countries/regions? eg. EU? Oceania? Asia?
+	// TEST: See above test
 	req.Header.Set("Cookie", fmt.Sprintf("gog_us=%s", cookie))
 
 	req.Header.Set("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36")
@@ -129,6 +141,7 @@ func getGOGGames(pagenumber int, cookie string) (gameList []string) {
 	req.Header.Set("Referer", "https://embed.gog.com/")
 	req.Header.Set("X-Requested-With", "XMLHttpRequest")
 
+	log.Println("Sending HTTP request")
 	resp, err := client.Do(req)
 	if err != nil {
 		fmt.Println("Error:", err)
@@ -136,6 +149,7 @@ func getGOGGames(pagenumber int, cookie string) (gameList []string) {
 	}
 	defer resp.Body.Close()
 
+	log.Println("HTTP Request processed successfully. Reading Response")
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		fmt.Println("Error reading body:", err)
@@ -150,8 +164,10 @@ func getGOGGames(pagenumber int, cookie string) (gameList []string) {
 	}
 
 	// from the current page, get the list of game titles
+	log.Println("Obtaining list of game titles from page 1")
 	for _, gogproduct := range gogpage.Products {
 		gameList = append(gameList, gogproduct.Title)
 	}
+	log.Println("Obtained all game titles from page:", pagenumber)
 	return
 }
