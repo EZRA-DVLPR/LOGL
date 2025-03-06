@@ -22,13 +22,15 @@ func SearchGameHLTB(gameName string) Game {
 	searchRes := searchHLTB(gameName)
 	if searchRes == "" {
 		log.Println("Querying HLTB Failed. Retrying through Bing Search...")
-		// try via bing search
 		searchRes = searchBing(gameName)
 
-		// return empty game
+		// if still no link results, then return empty game
 		if searchRes == "" {
 			log.Println("No Link found. Process Aborted!")
 			var emptyGame Game
+			emptyGame.Main = -1
+			emptyGame.MainPlus = -1
+			emptyGame.Comp = -1
 			return emptyGame
 		}
 
@@ -118,7 +120,7 @@ func FetchHLTB(link string) (game Game) {
 		// make the game not favorited
 		game.Favorite = 0
 
-		log.Println("Data Obtained!", r.Request.URL)
+		log.Println("Data Obtained for game from HLTB link:", r.Request.URL)
 	})
 
 	c.Visit(link)
@@ -133,6 +135,9 @@ func SearchGameCompletionator(gameName string) Game {
 	if searchRes == "" {
 		log.Println("No Link found. Process Aborted!")
 		var emptyGame Game
+		emptyGame.Main = -1
+		emptyGame.MainPlus = -1
+		emptyGame.Comp = -1
 		return emptyGame
 	} else {
 		log.Println("Link obtained. Web Scraping process beginning...")
@@ -200,7 +205,7 @@ func FetchCompletionator(link string) (game Game) {
 		// make the game not favorited
 		game.Favorite = 0
 
-		log.Println("Data Obtained!", r.Request.URL)
+		log.Println("Data Obtained for game from Completionator link:", r.Request.URL)
 	})
 
 	c.Visit(link)
