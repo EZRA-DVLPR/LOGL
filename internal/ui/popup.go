@@ -128,7 +128,9 @@ func manualEntryPopup(
 				strings.TrimSpace(main.Text) == "" ||
 				strings.TrimSpace(mainplus.Text) == "" ||
 				strings.TrimSpace(comp.Text) == "" {
-				log.Println("Not enough game data given. Fill out top 4 fields")
+				log.Println("Not enough game data given for manual entry. Fill out top 4 fields")
+				w2.Close()
+				return
 			} else {
 				if hltbURL.Text == "" {
 					log.Println("No HLTB URL given for manual entry for game", strings.TrimSpace(gamename.Text))
@@ -140,19 +142,19 @@ func manualEntryPopup(
 				// check if main, mainplus, comp are valid floats
 				mainfl, err := strconv.ParseFloat(main.Text, 64)
 				if err != nil {
-					log.Println("Improper value for Main Story. Make sure its a valid decimal.")
+					log.Println("Improper value for Main Story. Make sure its a valid decimal")
 					w2.Close()
 					return
 				}
 				mainplusfl, err := strconv.ParseFloat(mainplus.Text, 64)
 				if err != nil {
-					log.Println("Improper value for Main + Sides. Make sure its a valid decimal.")
+					log.Println("Improper value for Main + Sides. Make sure its a valid decimal")
 					w2.Close()
 					return
 				}
 				compfl, err := strconv.ParseFloat(comp.Text, 64)
 				if err != nil {
-					log.Println("Improper value for Completionist. Make sure its a valid decimal.")
+					log.Println("Improper value for Completionist. Make sure its a valid decimal")
 					w2.Close()
 					return
 				}
@@ -237,6 +239,7 @@ func integrationImport(
 
 				if valid {
 					ss, _ := searchSource.Get()
+					log.Println("Sending all fields to integration:", name)
 					switch name {
 					case "gog":
 						integration.GetAllGamesGOG(mainWidget.Text, ss)
@@ -246,13 +249,15 @@ func integrationImport(
 						integration.GetAllGamesSteam(mainWidget.Text, cookieWidget.Text, ss)
 					case "epic":
 						integration.GetAllGamesEpicString(mainWidget.Text, ss)
+					default:
+						log.Println("Integration not found:", name)
 					}
 				} else {
-					log.Println("Please ensure all fields have proper input for:", name)
+					log.Println("Please ensure all fields have proper integration input for:", name)
 				}
 
 			} else {
-				log.Println("Canceled input for:", name)
+				log.Println("Canceled integration import for:", name)
 			}
 		},
 		w,
@@ -314,7 +319,10 @@ func searchSourceRadioWidget(searchSource binding.String) *fyne.Container {
 			"HLTB",
 			"Completionator",
 		},
-		func(value string) { searchSource.Set(value) },
+		func(value string) {
+			searchSource.Set(value)
+			log.Println("Search Source changed to:", value)
+		},
 	)
 
 	// set default to search source saved
@@ -338,7 +346,7 @@ func themeSelector(
 	st, _ := selectedTheme.Get()
 	newName := abbrevName(st)
 	label := widget.NewLabelWithStyle(
-		fmt.Sprintf("Current Theme: %v", newName),
+		fmt.Sprintf("Current Theme: %s", newName),
 		fyne.TextAlignCenter,
 		fyne.TextStyle{Bold: true},
 	)
@@ -351,8 +359,9 @@ func themeSelector(
 		button := widget.NewButton(newName, func(name string, colors ColorTheme) func() {
 			return func() {
 				newName = abbrevName(name)
-				label.SetText(fmt.Sprintf("Current Theme: %v", newName))
+				label.SetText(fmt.Sprintf("Current Theme: %s", newName))
 				selectedTheme.Set(themeName)
+				log.Println("Changed Theme to:", themeName)
 				ts, _ := textSize.Get()
 				a.Settings().SetTheme(
 					&CustomTheme{
@@ -399,21 +408,21 @@ func textSlider(
 		fyne.TextStyle{Bold: true},
 	)
 	ts, _ := textSize.Get()
-	currSize := widget.NewLabel(fmt.Sprintf("Current size is: %v", ts))
+	currSize := widget.NewLabel(fmt.Sprintf("Current size is: %f", ts))
 	moveSize := widget.NewLabel("")
 	moveSize.Hide()
 
 	slider := widget.NewSliderWithData(12, 24, textSize)
 	slider.OnChanged = func(res float64) {
 		moveSize.Show()
-		res32 := float32(res)
-		moveSize.SetText(fmt.Sprintf("New Size will be: %v", res32))
+		moveSize.SetText(fmt.Sprintf("New Size will be: %f", float32(res)))
 	}
 	slider.OnChangeEnded = func(res float64) {
 		moveSize.Hide()
 		res32 := float32(res)
+		currSize.SetText(fmt.Sprintf("Current size is: %f", res32))
+		log.Println("Text Size changed to:", res32)
 		st, _ := selectedTheme.Get()
-		currSize.SetText(fmt.Sprintf("Current size is: %v", res32))
 		a.Settings().SetTheme(
 			&CustomTheme{
 				Theme:    theme.DefaultTheme(),
@@ -450,6 +459,7 @@ func updateAllButton(
 			"Update All",
 			func(submitted bool) {
 				if submitted {
+					log.Println("Updating Entire DB")
 					dbhandler.UpdateEntireDB()
 					forceRenderDB(sortCategory, sortOrder, searchText, dbData, selectedRow)
 				}
@@ -483,6 +493,7 @@ func deleteAllButton(
 			"Delete All",
 			func(submitted bool) {
 				if submitted {
+					log.Println("Deleting data in DB")
 					dbhandler.DeleteAllDBData()
 					forceRenderDB(sortCategory, sortOrder, searchText, dbData, selectedRow)
 				}

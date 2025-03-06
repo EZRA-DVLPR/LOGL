@@ -76,12 +76,12 @@ func createMainWindowToolbar(
 }
 
 // toggles sort Order (ASC->DESC->ASC)
-// TODO: change the value of selected Row and re-render the dbrender
 func createSortButton(sortOrder binding.Bool) (sortButton *widget.Button) {
 	// create the button with empty label
 	sortButton = widget.NewButtonWithIcon("", theme.MenuDropUpIcon(), func() {
 		// whatever curr value of sortOrder is, we want opposite when clicked
 		val, _ := sortOrder.Get()
+		log.Println("Sort Order changed to:", !val)
 		sortOrder.Set(!val)
 	})
 
@@ -117,7 +117,7 @@ func createExportButton(
 					return
 				}
 				if uri == nil {
-					log.Println("No file Selected")
+					log.Println("No file Selected to export to CSV")
 					return
 				}
 				defer uri.Close() // close uri when dialog closes
@@ -136,7 +136,7 @@ func createExportButton(
 					return
 				}
 				if uri == nil {
-					log.Println("No file Selected")
+					log.Println("No file Selected to export to SQL")
 					return
 				}
 				defer uri.Close() // close uri when dialog closes
@@ -151,7 +151,7 @@ func createExportButton(
 					return
 				}
 				if uri == nil {
-					log.Println("No file Selected")
+					log.Println("No file Selected to export to MD")
 					return
 				}
 				defer uri.Close() // close uri when dialog closes
@@ -248,7 +248,7 @@ func createAddButton(
 					return
 				}
 				if uri == nil {
-					log.Println("No file Selected")
+					log.Println("No file Selected for importing from CSV")
 					return
 				}
 				defer uri.Close() // close uri when dialog closes
@@ -267,7 +267,7 @@ func createAddButton(
 					return
 				}
 				if uri == nil {
-					log.Println("No file Selected")
+					log.Println("No file Selected for importing from SQL")
 					return
 				}
 				defer uri.Close()
@@ -285,7 +285,7 @@ func createAddButton(
 					return
 				}
 				if uri == nil {
-					log.Println("No file Selected")
+					log.Println("No file Selected for importing from TXT")
 					return
 				}
 				defer uri.Close()
@@ -331,6 +331,7 @@ func createRemoveButton(
 		if selrow >= 0 {
 			// get the game name and send query for deletion
 			dbdata, _ := dbData.Get()
+			log.Println("Removing Game:", dbdata[selrow][0])
 			dbhandler.DeleteFromDB(dbdata[selrow][0])
 
 			forceRenderDB(sortCategory, sortOrder, searchText, dbData, selectedRow)
@@ -431,6 +432,5 @@ func forceRenderDB(
 ) {
 	// update dbData and selectedRow to render changes
 	updateDBData(sortCategory, sortOrder, searchText, dbData)
-	selectedRow.Set(-2)
 	selectedRow.Set(-1)
 }

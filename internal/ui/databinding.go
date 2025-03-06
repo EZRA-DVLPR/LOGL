@@ -8,6 +8,7 @@ import (
 )
 
 // create the struct for handling the data -> [][]string
+// PERF: Change name of MyDataBinding to something more descriptive like matrix/tablestring
 type MyDataBinding struct {
 	data     [][]string
 	listener []binding.DataListener

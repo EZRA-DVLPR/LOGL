@@ -35,7 +35,7 @@ func CreateDB() {
 		log.Fatal("Error creating games table:", err)
 	}
 
-	log.Println("Created the local DBs successfully")
+	log.Println("Created the local DB successfully")
 }
 
 func CheckDBExists() bool {

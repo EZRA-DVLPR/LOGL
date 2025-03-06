@@ -32,14 +32,13 @@ func createDBRender(
 	sortord, _ := sortOrder.Get()
 
 	// if db exists then get the data
-	// NOTE: notice there is no search text, because we initialize without any search text from the user
-	log.Println("Checking local DB")
+	log.Println("Checking existence of local DB")
 	if dbhandler.CheckDBExists() {
 		log.Println("DB exists. Obtaining data with stored defaults")
 		// no initial search query so use ""
 		dbData.Set(dbhandler.SortDB(sortcat, sortord, ""))
 	} else {
-		log.Println("No DB found! Creating one...")
+		log.Println("No DB found!")
 		dbhandler.CreateDB()
 	}
 	data, _ := dbData.Get()
@@ -111,30 +110,27 @@ func createDBRender(
 	// change contents of dbData binding when sort order changes
 	sortOrder.AddListener(binding.NewDataListener(func() {
 		log.Println("Sort Order changed. Adjusting Table")
-		updateDBData(sortCategory, sortOrder, searchText, dbData)
 		width := w.Content().Size().Width
-		dbRender = updateTable(sortCategory, selectedRow, dbData, selectedTheme, dbRender, width, availableThemes)
 		forceRenderDB(sortCategory, sortOrder, searchText, dbData, selectedRow)
+		dbRender = updateTable(sortCategory, selectedRow, dbData, selectedTheme, dbRender, width, availableThemes)
 		dbRender.Refresh()
 	}))
 
 	// change contents of dbData binding when sort category changes
 	sortCategory.AddListener(binding.NewDataListener(func() {
 		log.Println("Sort Category changed. Adjusting Table")
-		updateDBData(sortCategory, sortOrder, searchText, dbData)
 		width := w.Content().Size().Width
-		dbRender = updateTable(sortCategory, selectedRow, dbData, selectedTheme, dbRender, width, availableThemes)
 		forceRenderDB(sortCategory, sortOrder, searchText, dbData, selectedRow)
+		dbRender = updateTable(sortCategory, selectedRow, dbData, selectedTheme, dbRender, width, availableThemes)
 		dbRender.Refresh()
 	}))
 
 	// change contents of dbData binding when search text changes
 	searchText.AddListener(binding.NewDataListener(func() {
 		log.Println("Search Text changed. Adjusting Table")
-		updateDBData(sortCategory, sortOrder, searchText, dbData)
 		width := w.Content().Size().Width
-		dbRender = updateTable(sortCategory, selectedRow, dbData, selectedTheme, dbRender, width, availableThemes)
 		forceRenderDB(sortCategory, sortOrder, searchText, dbData, selectedRow)
+		dbRender = updateTable(sortCategory, selectedRow, dbData, selectedTheme, dbRender, width, availableThemes)
 		dbRender.Refresh()
 	}))
 
@@ -261,6 +257,9 @@ func updateTable(
 
 	// setup headers
 	dbRender = headerSetup(sortCategory, selectedTheme, dbRender, width, availableThemes)
+
+	// unselect all cells
+	dbRender.UnselectAll()
 	return dbRender
 }
 
@@ -353,7 +352,7 @@ func fixTableSize(
 		if prevWidth != width {
 			select {
 			case <-ticker.C:
-				log.Println("Window size changed! Adjusting Column widths of table.")
+				log.Println("Window size changed! Adjusting Column widths of table")
 				// update the table widths
 				prevWidth = width
 

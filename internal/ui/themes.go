@@ -91,7 +91,7 @@ func hexToColor(hex string) color.Color {
 
 // loads theme from YAML file
 func loadTheme(filename string) (ColorTheme, error) {
-	log.Println("loading theme from yaml file:", filename)
+	log.Println("Loading theme from yaml file:", filename)
 	var theme ColorTheme
 
 	// if error reading file, return empty colortheme + error
@@ -112,6 +112,7 @@ func createLDThemes(themesDir string) {
 	lightTheme := ColorTheme{
 		Name:                 "Light",
 		Background:           "#ffffff",
+		AltBackground:        "#ffffff",
 		Foreground:           "#9e9e9e",
 		Primary:              "#3f51b5",
 		ButtonColor:          "#2196f3",
@@ -124,6 +125,7 @@ func createLDThemes(themesDir string) {
 	darkTheme := ColorTheme{
 		Name:                 "Dark",
 		Background:           "#282828",
+		AltBackground:        "#282828",
 		Foreground:           "#ebdbb2",
 		Primary:              "#d79921",
 		ButtonColor:          "#98971a",
@@ -149,9 +151,10 @@ func createLDThemes(themesDir string) {
 func loadAllThemes(themesDir string) (map[string]ColorTheme, error) {
 	themes := make(map[string]ColorTheme)
 
-	log.Println("checking existence of themes dir")
+	log.Println("Checking existence of given directory:", themesDir)
 	// if dir doesnt exist then create it
 	if _, err := os.Stat(themesDir); os.IsNotExist(err) {
+		log.Println("Given directory DNE. Creating it")
 		err := os.MkdirAll(themesDir, 0755)
 		if err != nil {
 			// problem with creation so return empty map + err
@@ -160,7 +163,6 @@ func loadAllThemes(themesDir string) (map[string]ColorTheme, error) {
 		// create the standard L/D themes (as yaml files)
 		createLDThemes(themesDir)
 	}
-	log.Println("reading themes dir")
 
 	files, err := os.ReadDir(themesDir)
 	if err != nil {
@@ -169,15 +171,18 @@ func loadAllThemes(themesDir string) (map[string]ColorTheme, error) {
 	}
 
 	// check if the light/dark.yaml files exist and if not then create them
+	log.Println("Locating Default themes from directory:", themesDir)
 	_, errLight := os.Stat(themesDir + "/Light.yaml")
 	_, errDark := os.Stat(themesDir + "/Dark.yaml")
 	if (errors.Is(errLight, os.ErrNotExist)) || (errors.Is(errDark, os.ErrNotExist)) {
 		log.Println("Error finding Default themes: Light and Dark. Creating them inside of :", themesDir)
 		createLDThemes(themesDir)
+	} else {
+		log.Println("Default themes found")
 	}
 
 	log.Println("Extracting themes from themes dir")
-	// for all files in themesDir, extract the theme as ColorTheme struct and add to map
+	// for all files in themesDir, extract the theme as ColorTheme struct and add to map[string]ColorTheme
 	for _, file := range files {
 		if (!file.IsDir()) && (filepath.Ext(file.Name()) == ".yaml") {
 			theme, err := loadTheme(filepath.Join(themesDir, file.Name()))

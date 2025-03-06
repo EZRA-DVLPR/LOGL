@@ -37,14 +37,13 @@ func StartGUI() {
 	searchSource := binding.NewString()
 	textSize := binding.NewFloat()
 	selectedTheme := binding.NewString()
-	// INFO: The following bindings do not persist through sessions
 	searchText := binding.NewString()
 	selectedRow := binding.NewInt()
 
 	// dont highlight any row on app start
 	selectedRow.Set(-1)
 
-	// load sort category from pref storage. default to "name"  i.e. Game Name
+	// load sort category from pref storage. default to "name" i.e. Game Name
 	storedSortCategory := prefs.StringWithFallback("sort_category", "name")
 	sortCategory.Set(storedSortCategory)
 
@@ -56,12 +55,11 @@ func StartGUI() {
 	storedSearchSort := prefs.StringWithFallback("search_source", "All")
 	searchSource.Set(storedSearchSort)
 
-	// TODO: Handle default sizes of window when i finalize the length/size of the toolbar with icons
 	// default window size accommodates changing of "ASC"/"DESC" without changing size of window (1140, 400) (W,H)
-	storedWWidth := prefs.FloatWithFallback("w_width", 1140)
+	storedWWidth := prefs.FloatWithFallback("w_width", 1080)
 	wWidth.Set(storedWWidth)
 
-	storedWHeight := prefs.FloatWithFallback("w_height", 400)
+	storedWHeight := prefs.FloatWithFallback("w_height", 350)
 	wHeight.Set(storedWHeight)
 
 	wW, _ := wWidth.Get()
@@ -162,10 +160,18 @@ func StartGUI() {
 		prefs.SetFloat("text_size", ts)
 
 		// save theme selection
-		st, _ = selectedTheme.Get()
-		prefs.SetString("selected_theme", st)
+		sth, _ := selectedTheme.Get()
+		prefs.SetString("selected_theme", sth)
 
-		log.Println("Preferences saved. App closed")
+		log.Println("Preferences saved:")
+		log.Println("Sort Category:", st)
+		log.Println("Sort Order:", so)
+		log.Println("Sort Window Width:", wW)
+		log.Println("Sort Window Height:", wH)
+		log.Println("Search Source:", ss)
+		log.Println("Text Size:", ts)
+		log.Println("Selected Theme:", sth)
+		log.Println("App closed")
 	})
 
 	// runloop for the app
