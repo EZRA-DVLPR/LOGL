@@ -1,7 +1,10 @@
 package ui
 
 import (
+	"fmt"
 	"log"
+	"os"
+	"time"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
@@ -11,6 +14,14 @@ import (
 )
 
 func StartGUI() {
+	// set logging to open and write to a file
+	logFile, err := setLogFile()
+	if err != nil {
+		fmt.Println("Error initializing logging process", err)
+		os.Exit(1)
+	}
+	defer logFile.Close()
+
 	a := app.NewWithID(".EZRA-DVLPR.GameList")
 	w := a.NewWindow("Main window - GameList")
 
@@ -42,7 +53,7 @@ func StartGUI() {
 	sortOrder.Set(storedSortOrder)
 
 	// load search sort from preferences storage. default to "All"
-	storedSearchSort := prefs.StringWithFallback("search source", "All")
+	storedSearchSort := prefs.StringWithFallback("search_source", "All")
 	searchSource.Set(storedSearchSort)
 
 	// TODO: Handle default sizes of window when i finalize the length/size of the toolbar with icons
@@ -153,8 +164,36 @@ func StartGUI() {
 		// save theme selection
 		st, _ = selectedTheme.Get()
 		prefs.SetString("selected_theme", st)
+
+		log.Println("Preferences saved. App closed")
 	})
 
 	// runloop for the app
 	a.Run()
+}
+
+// creates logfile based on: Version # and current time
+func setLogFile() (*os.File, error) {
+	version := "1.0.0"
+
+	timestamp := time.Now().Format("2006-01-02_15-04-05")
+
+	logFileName := fmt.Sprintf("logs/GameList-%s-%s.log", version, timestamp)
+
+	// ensure logs dir exists
+	if err := os.MkdirAll("logs", os.ModePerm); err != nil {
+		log.Fatalf("Failed to create logs directory: %v", err)
+	}
+
+	// set logfile to be created in logs dir
+	logFile, err := os.OpenFile(logFileName, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
+	if err != nil {
+		log.Fatal("Failed to open log file:", err)
+	}
+
+	// Set the log output to the file
+	log.SetOutput(logFile)
+
+	log.Println("App start!")
+	return logFile, nil
 }

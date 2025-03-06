@@ -10,3 +10,6 @@ gamenames.txt
 
 # file for epic games export of games
 epicgames.txt
+
+# hide files within logs dir
+logs/
