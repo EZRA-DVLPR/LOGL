@@ -97,7 +97,6 @@ func StartGUI() {
 		// top is toolbar + searchbar
 		container.NewVBox(
 			createMainWindowToolbar(
-				w.Canvas(),
 				sortCategory,
 				sortOrder,
 				searchText,

@@ -24,7 +24,6 @@ var heartSVG []byte
 
 // creates the toolbar with the options that will be displayed to manage the rendered DB
 func createMainWindowToolbar(
-	toolbarCanvas fyne.Canvas,
 	sortCategory binding.String,
 	sortOrder binding.Bool,
 	searchText binding.String,
@@ -41,7 +40,7 @@ func createMainWindowToolbar(
 		layout.NewHBoxLayout(),
 		createSortButton(sortOrder),
 		layout.NewSpacer(),
-		createAddButton(a, sortCategory, sortOrder, searchText, dbData, selectedRow, searchSource, toolbarCanvas, w),
+		createAddButton(a, sortCategory, sortOrder, searchText, dbData, selectedRow, searchSource, selectedTheme, w),
 		layout.NewSpacer(),
 		createUpdateButton(sortCategory, sortOrder, searchText, selectedRow, dbData),
 		layout.NewSpacer(),
@@ -51,9 +50,9 @@ func createMainWindowToolbar(
 		layout.NewSpacer(),
 		createFaveButton(selectedRow, sortCategory, sortOrder, searchText, dbData),
 		layout.NewSpacer(),
-		createExportButton(toolbarCanvas, w),
+		createExportButton(selectedTheme, w),
 		layout.NewSpacer(),
-		createHelpButton(toolbarCanvas),
+		createHelpButton(selectedTheme, w),
 		layout.NewSpacer(),
 		createSettingsButton(a, searchSource, sortCategory, sortOrder, searchText, selectedRow, dbData, textSize, selectedTheme, availableThemes),
 	)
@@ -101,14 +100,10 @@ func createSortButton(sortOrder binding.Bool) (sortButton *widget.Button) {
 
 // export data from db
 func createExportButton(
-	toolbarCanvas fyne.Canvas,
+	selectedTheme binding.String,
 	w fyne.Window,
 ) (exportButton *widget.Button) {
-	// create a button without a function
-	exportButton = widget.NewButtonWithIcon("", theme.MailSendIcon(), nil)
-
-	// create the dropdown menu items for exporting
-	menu := fyne.NewMenu("",
+	menuItems := []*fyne.MenuItem{
 		fyne.NewMenuItem("Export to CSV", func() {
 			// idea is to have user pick folder, then entry for filename
 			dialog.ShowFileSave(func(uri fyne.URIWriteCloser, err error) {
@@ -159,15 +154,19 @@ func createExportButton(
 				dbhandler.Export(3, uri.URI().Path())
 			}, w)
 		}),
-	)
+	}
 
 	// define the popup
-	menuPopup := widget.NewPopUpMenu(menu, toolbarCanvas)
+	menuPopup := NewThemeAwareMenu(menuItems, w.Canvas())
 
-	// when button clicked, toggle menu
-	exportButton.OnTapped = func() {
-		menuPopup.ShowAtPosition(exportButton.Position().Add(fyne.NewPos(0, exportButton.Size().Height)))
-	}
+	exportButton = widget.NewButtonWithIcon("", theme.MailSendIcon(), func() {
+		menuPopup.Show(exportButton.Position().Add(fyne.NewPos(0, exportButton.Size().Height)))
+	})
+
+	// refresh menupopup when the theme changes
+	selectedTheme.AddListener(binding.NewDataListener(func() {
+		menuPopup.Refresh()
+	}))
 
 	return exportButton
 }
@@ -214,12 +213,11 @@ func createAddButton(
 	dbData *MyDataBinding,
 	selectedRow binding.Int,
 	searchSource binding.String,
-	toolbarCanvas fyne.Canvas,
+	selectedTheme binding.String,
 	w fyne.Window,
 ) (addButton *widget.Button) {
-	addButton = widget.NewButtonWithIcon("Add Game", theme.ContentAddIcon(), nil)
 	ss, _ := searchSource.Get()
-	menu := fyne.NewMenu("",
+	menuItems := []*fyne.MenuItem{
 		fyne.NewMenuItem("Single Game Search", func() {
 			singleGameNameSearchPopup(
 				a,
@@ -308,13 +306,20 @@ func createAddButton(
 		fyne.NewMenuItem("From Epic", func() {
 			integrationImport(searchSource, "epic", w)
 		}),
-	)
-
-	menuPopup := widget.NewPopUpMenu(menu, toolbarCanvas)
-
-	addButton.OnTapped = func() {
-		menuPopup.ShowAtPosition(addButton.Position().Add(fyne.NewPos(0, addButton.Size().Height)))
 	}
+
+	// define the popup
+	menuPopup := NewThemeAwareMenu(menuItems, w.Canvas())
+
+	addButton = widget.NewButtonWithIcon("Add Game", theme.ContentAddIcon(), func() {
+		menuPopup.Show(addButton.Position().Add(fyne.NewPos(0, addButton.Size().Height)))
+	})
+
+	// refresh menupopup when the theme changes
+	selectedTheme.AddListener(binding.NewDataListener(func() {
+		menuPopup.Refresh()
+	}))
+
 	return addButton
 }
 
@@ -342,9 +347,11 @@ func createRemoveButton(
 }
 
 // lists help options such as tutorial, manual, support, etc.
-func createHelpButton(toolbarCanvas fyne.Canvas) (helpButton *widget.Button) {
-	helpButton = widget.NewButtonWithIcon("", theme.QuestionIcon(), nil)
-	menu := fyne.NewMenu("",
+func createHelpButton(
+	selectedTheme binding.String,
+	w fyne.Window,
+) (helpButton *widget.Button) {
+	menuItems := []*fyne.MenuItem{
 		fyne.NewMenuItem("Show Tutorial", func() { println("Highlights and focuses what each thing does") }),
 		fyne.NewMenuItem("Open Manual", func() {
 			println("Opens a new window with booklet/document. Explicit with page numbers and how to do stuff")
@@ -354,13 +361,18 @@ func createHelpButton(toolbarCanvas fyne.Canvas) (helpButton *widget.Button) {
 		// Figure out what would go into Program Info and see if i can expand this menu to accommodate that data
 		fyne.NewMenuItem("Program Info", func() { println("Opens a new window with information about the Program") }),
 		fyne.NewMenuItem("Support Me <3", func() { println("Is a link such that, when clicked will take you to Ko-Fi, Paypal, etc.") }),
-	)
-
-	menuPopup := widget.NewPopUpMenu(menu, toolbarCanvas)
-
-	helpButton.OnTapped = func() {
-		menuPopup.ShowAtPosition(helpButton.Position().Add(fyne.NewPos(0, helpButton.Size().Height)))
 	}
+
+	menuPopup := NewThemeAwareMenu(menuItems, w.Canvas())
+
+	helpButton = widget.NewButtonWithIcon("", theme.QuestionIcon(), func() {
+		menuPopup.Show(helpButton.Position().Add(fyne.NewPos(0, helpButton.Size().Height)))
+	})
+
+	selectedTheme.AddListener(binding.NewDataListener(func() {
+		menuPopup.Refresh()
+	}))
+
 	return helpButton
 }
 
