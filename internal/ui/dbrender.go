@@ -107,6 +107,14 @@ func createDBRender(
 	width := w.Content().Size().Width
 	dbRender = headerSetup(sortCategory, selectedTheme, dbRender, width, availableThemes)
 
+	// refresh DBRender when the theme changes
+	selectedTheme.AddListener(binding.NewDataListener(func() {
+		log.Println("Selected Theme changed. Adjusting Table")
+		forceRenderDB(sortCategory, sortOrder, searchText, dbData, selectedRow)
+		updateTableColors(selectedRow, selectedTheme, dbRender, availableThemes)
+		dbRender.Refresh()
+	}))
+
 	// change contents of dbData binding when sort order changes
 	sortOrder.AddListener(binding.NewDataListener(func() {
 		log.Println("Sort Order changed. Adjusting Table")
@@ -166,13 +174,6 @@ func createDBRender(
 		dbRender.ScrollTo(selCell)
 		dbRender.ScrollToLeading()
 
-		dbRender.Refresh()
-	}))
-
-	// refresh DBRender when the theme changes
-	selectedTheme.AddListener(binding.NewDataListener(func() {
-		log.Println("Selected Theme changed. Adjusting Table")
-		forceRenderDB(sortCategory, sortOrder, searchText, dbData, selectedRow)
 		dbRender.Refresh()
 	}))
 
@@ -368,6 +369,32 @@ func fixTableSize(
 				dbRender.SetColumnWidth(3, spacing)
 
 				dbRender.Refresh()
+			}
+		}
+	}
+}
+
+func updateTableColors(
+	selectedRow binding.Int,
+	selectedTheme binding.String,
+	dbRender *widget.Table,
+	availableThemes map[string]ColorTheme,
+) {
+	selRow, _ := selectedRow.Get()
+	st, _ := selectedTheme.Get()
+	currTheme := availableThemes[st]
+	dbRender.UpdateCell = func(id widget.TableCellID, obj fyne.CanvasObject) {
+		// get the label from the stack
+		stack := obj.(*fyne.Container)
+		bg := stack.Objects[0].(*canvas.Rectangle)
+		// highlighting
+		if id.Row == selRow {
+			bg.FillColor = hexToColor(currTheme.HoverColor)
+		} else {
+			if id.Row%2 == 0 {
+				bg.FillColor = hexToColor(currTheme.Background)
+			} else {
+				bg.FillColor = hexToColor(currTheme.AltBackground)
 			}
 		}
 	}

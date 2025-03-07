@@ -14,17 +14,6 @@ import (
 )
 
 // YAML file contents must match this struct
-//
-// INFO: This struct affects the following fields of the theme which govern the look of the entire app:
-// background: background color of the window
-// altBackground: used for dbrender to show difference between odd/even rows
-// foreground: text colors used for all text and buttons
-// primary: settings -> highlighted (selected) src
-// buttoncolor: color for buttons
-// placeholderText: color of placeholder text in entry widget
-// hovercolor: color when mouse cursor hovers an interactive widget
-// inputbackgroundcolor: color for input fields background
-// scrollbarcolor: color of scroll bar
 type ColorTheme struct {
 	Name                 string `yaml:"name"`
 	Background           string `yaml:"background"`
@@ -78,7 +67,7 @@ func (t *CustomTheme) Size(name fyne.ThemeSizeName) float32 {
 }
 
 // convert string of hex color to color.Color
-// INFO: colors are in RGB format
+// INFO: colors are in RGB format. capitalization doesnt matter
 // eg. #RRGGBB -- #010101
 // which gets turned into color as RRGGBBA where A = 255
 // PERF: Allow diff colors and color styles to be used
@@ -106,7 +95,6 @@ func loadTheme(filename string) (ColorTheme, error) {
 }
 
 // makes default L/D themes as yaml files
-// TODO: Make sure the themes look good and are properly described
 func createLDThemes(themesDir string) {
 	log.Println("Creating Light/Dark themes")
 	lightTheme := ColorTheme{

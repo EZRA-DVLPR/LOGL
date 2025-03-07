@@ -290,7 +290,7 @@ func settingsPopup(
 				layout.NewVBoxLayout(),
 				searchSourceRadioWidget(searchSource),
 				widget.NewSeparator(),
-				themeSelector(selectedTheme, textSize, availableThemes, a),
+				themeSelector(sortCategory, sortOrder, searchText, selectedRow, dbData, selectedTheme, textSize, availableThemes, a),
 				widget.NewSeparator(),
 				textSlider(selectedTheme, textSize, availableThemes, a),
 				widget.NewSeparator(),
@@ -338,6 +338,11 @@ func searchSourceRadioWidget(searchSource binding.String) *fyne.Container {
 
 // selector for the theme of the application
 func themeSelector(
+	sortCategory binding.String,
+	sortOrder binding.Bool,
+	searchText binding.String,
+	selectedRow binding.Int,
+	dbData *MyDataBinding,
 	selectedTheme binding.String,
 	textSize binding.Float,
 	availableThemes map[string]ColorTheme,
@@ -370,6 +375,7 @@ func themeSelector(
 						colors:   availableThemes[themeName],
 					},
 				)
+				forceRenderDB(sortCategory, sortOrder, searchText, dbData, selectedRow)
 			}
 		}(themeName, themeColors))
 		themeList.Add(button)
