@@ -398,4 +398,21 @@ func updateTableColors(
 			}
 		}
 	}
+
+	dbRender.UpdateHeader = func(id widget.TableCellID, obj fyne.CanvasObject) {
+		containerObj := obj.(*fyne.Container)
+		labelBG := containerObj.Objects[0].(*canvas.Rectangle)
+		label := containerObj.Objects[1].(*widget.Label)
+		button := containerObj.Objects[2].(*widget.Button)
+
+		if id.Row != -1 {
+			// display row label index, from 1:rows
+			button.Hide()
+			label.Show()
+			labelBG.Show()
+			labelBG.FillColor = hexToColor(currTheme.InputBackgroundColor)
+			label.SetText(fmt.Sprintf("%d", id.Row+1))
+		}
+		labelBG.Refresh()
+	}
 }
