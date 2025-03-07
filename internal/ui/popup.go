@@ -408,20 +408,20 @@ func textSlider(
 		fyne.TextStyle{Bold: true},
 	)
 	ts, _ := textSize.Get()
-	currSize := widget.NewLabel(fmt.Sprintf("Current size is: %f", ts))
+	currSize := widget.NewLabel(fmt.Sprintf("Current size is: %v", ts))
 	moveSize := widget.NewLabel("")
 	moveSize.Hide()
 
 	slider := widget.NewSliderWithData(12, 24, textSize)
 	slider.OnChanged = func(res float64) {
 		moveSize.Show()
-		moveSize.SetText(fmt.Sprintf("New Size will be: %f", float32(res)))
+		moveSize.SetText(fmt.Sprintf("New Size will be: %v", float32(res)))
 	}
 	slider.OnChangeEnded = func(res float64) {
 		moveSize.Hide()
 		res32 := float32(res)
-		currSize.SetText(fmt.Sprintf("Current size is: %f", res32))
-		log.Println("Text Size changed to:", res32)
+		currSize.SetText(fmt.Sprintf("Current size is: %v", res32))
+		log.Println(fmt.Sprintf("Text Size changed to: %v", res32))
 		st, _ := selectedTheme.Get()
 		a.Settings().SetTheme(
 			&CustomTheme{
