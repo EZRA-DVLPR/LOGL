@@ -5,6 +5,8 @@ import (
 	"log"
 	"math/rand"
 	"os"
+	"os/exec"
+	"runtime"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
@@ -354,18 +356,23 @@ func createHelpButton(
 	menuItems := []*fyne.MenuItem{
 		fyne.NewMenuItem("Video Tutorial Series", func() {
 			println("Youtube video series on EZRA-DVLPR channel where I explain how to use the program")
+			goToWebsite("https://example.com")
 		}),
 		fyne.NewMenuItem("Online Manual", func() {
 			println("Link to my website which has a manual describing what each thing does in a pdf format")
+			goToWebsite("https://example.com")
 		}),
 		fyne.NewMenuItem("Bug/Feature Tracker", func() {
 			println("Link to github repo with pre-made tags for feature requests and bugs and stuff")
+			goToWebsite("https://example.com")
 		}),
 		fyne.NewMenuItem("Blog Post", func() {
 			println("Link to my website with a blogpost")
+			goToWebsite("https://example.com")
 		}),
 		fyne.NewMenuItem("Support Me <3", func() {
 			println("Is a link such that, when clicked will take you to Ko-Fi, Paypal, etc. on my website")
+			goToWebsite("https://example.com")
 		}),
 	}
 
@@ -451,4 +458,25 @@ func forceRenderDB(
 	// update dbData and selectedRow to render changes
 	updateDBData(sortCategory, sortOrder, searchText, dbData)
 	selectedRow.Set(-1)
+}
+
+func goToWebsite(link string) {
+	var cmd *exec.Cmd
+
+	// change cmd based on which OS is being used
+	switch runtime.GOOS {
+	case "darwin": // mac = darwin
+		cmd = exec.Command("open", link)
+	case "windows":
+		cmd = exec.Command("rundll32", "url.dll,FileProtocolHandler", link)
+	default: // linux, bsd, etc.
+		cmd = exec.Command("xdg-open", link)
+	}
+
+	err := cmd.Start()
+	if err != nil {
+		// Handle error
+		log.Println("Error opening link:", link)
+		log.Fatal(err)
+	}
 }
