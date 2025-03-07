@@ -111,28 +111,28 @@ func createLDThemes(themesDir string) {
 	log.Println("Creating Light/Dark themes")
 	lightTheme := ColorTheme{
 		Name:                 "Light",
-		Background:           "#ffffff",
-		AltBackground:        "#ffffff",
-		Foreground:           "#9e9e9e",
-		Primary:              "#3f51b5",
-		ButtonColor:          "#2196f3",
-		PlaceholderText:      "#700575",
-		HoverColor:           "#e0e000",
-		InputBackgroundColor: "#3c3836",
-		ScrollBarColor:       "#665c54",
+		Background:           "#d6eeff",
+		AltBackground:        "#f4faff",
+		Foreground:           "#13262f",
+		Primary:              "#729933",
+		ButtonColor:          "#6ac1ff",
+		PlaceholderText:      "#5876ae",
+		HoverColor:           "#c17e5f",
+		InputBackgroundColor: "#c2e4ff",
+		ScrollBarColor:       "#976148",
 	}
 
 	darkTheme := ColorTheme{
 		Name:                 "Dark",
-		Background:           "#282828",
-		AltBackground:        "#282828",
-		Foreground:           "#ebdbb2",
-		Primary:              "#d79921",
-		ButtonColor:          "#98971a",
-		PlaceholderText:      "#a89984",
-		HoverColor:           "#3c3836",
-		InputBackgroundColor: "#3c3836",
-		ScrollBarColor:       "#665c54",
+		Background:           "#202120",
+		AltBackground:        "#424342",
+		Foreground:           "#e6e8e6",
+		Primary:              "#a371a4",
+		ButtonColor:          "#5b5d5b",
+		PlaceholderText:      "#8db58c",
+		HoverColor:           "#b58c9a",
+		InputBackgroundColor: "#595959",
+		ScrollBarColor:       "#998cb5",
 	}
 
 	// add the above defined themes to themes array
