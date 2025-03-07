@@ -14,8 +14,9 @@ import (
 )
 
 func StartGUI() {
+	version := "1.0.0"
 	// set logging to open and write to a file
-	logFile, err := setLogFile()
+	logFile, err := setLogFile(version)
 	if err != nil {
 		fmt.Println("Error initializing logging process", err)
 		os.Exit(1)
@@ -23,7 +24,7 @@ func StartGUI() {
 	defer logFile.Close()
 
 	a := app.NewWithID(".EZRA-DVLPR.GameList")
-	w := a.NewWindow("Main window - GameList")
+	w := a.NewWindow(fmt.Sprintf("Main window - GameList v%v", version))
 
 	// set up prefs for app
 	prefs := a.Preferences()
@@ -178,9 +179,7 @@ func StartGUI() {
 }
 
 // creates logfile based on: Version # and current time
-func setLogFile() (*os.File, error) {
-	version := "1.0.0"
-
+func setLogFile(version string) (*os.File, error) {
 	timestamp := time.Now().Format("2006-01-02_15-04-05")
 
 	logFileName := fmt.Sprintf("logs/GameList-%s-%s.log", version, timestamp)

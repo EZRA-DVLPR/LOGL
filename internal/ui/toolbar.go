@@ -352,15 +352,21 @@ func createHelpButton(
 	w fyne.Window,
 ) (helpButton *widget.Button) {
 	menuItems := []*fyne.MenuItem{
-		fyne.NewMenuItem("Show Tutorial", func() { println("Highlights and focuses what each thing does") }),
-		fyne.NewMenuItem("Open Manual", func() {
-			println("Opens a new window with booklet/document. Explicit with page numbers and how to do stuff")
+		fyne.NewMenuItem("Video Tutorial Series", func() {
+			println("Youtube video series on EZRA-DVLPR channel where I explain how to use the program")
 		}),
-		// TODO: maybe want to have version number here?
-		// Update button?
-		// Figure out what would go into Program Info and see if i can expand this menu to accommodate that data
-		fyne.NewMenuItem("Program Info", func() { println("Opens a new window with information about the Program") }),
-		fyne.NewMenuItem("Support Me <3", func() { println("Is a link such that, when clicked will take you to Ko-Fi, Paypal, etc.") }),
+		fyne.NewMenuItem("Online Manual", func() {
+			println("Link to my website which has a manual describing what each thing does in a pdf format")
+		}),
+		fyne.NewMenuItem("Bug/Feature Tracker", func() {
+			println("Link to github repo with pre-made tags for feature requests and bugs and stuff")
+		}),
+		fyne.NewMenuItem("Blog Post", func() {
+			println("Link to my website with a blogpost")
+		}),
+		fyne.NewMenuItem("Support Me <3", func() {
+			println("Is a link such that, when clicked will take you to Ko-Fi, Paypal, etc. on my website")
+		}),
 	}
 
 	menuPopup := NewThemeAwareMenu(menuItems, w.Canvas())
