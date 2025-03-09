@@ -357,8 +357,8 @@ func createHelpButton(
 		fyne.NewMenuItem("Video Tutorial Series", func() {
 			goToWebsite("https://youtube.com/playlist?list=PL_gNvZlhoitBNANmcZFgoQpT1FjZiBs7I&si=GBWYIGHiUd0dP2-L")
 		}),
-		fyne.NewMenuItem("Online Manual", func() {
-			goToWebsite("https://example.com")
+		fyne.NewMenuItem("PDF Manual", func() {
+			goToWebsite("https://github.com/EZRA-DVLPR/GameList/blob/main/docs/PDF/Manual.pdf")
 		}),
 		fyne.NewMenuItem("Bug/Feature Tracker", func() {
 			goToWebsite("https://github.com/EZRA-DVLPR/GameList/issues")
