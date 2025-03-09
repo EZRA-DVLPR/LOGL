@@ -13,3 +13,6 @@ epicgames.txt
 
 # hide files within logs dir
 logs/
+
+# hide aux files from latex docs
+/docs/LaTeX/*.synctex.gz

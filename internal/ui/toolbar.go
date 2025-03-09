@@ -355,24 +355,19 @@ func createHelpButton(
 ) (helpButton *widget.Button) {
 	menuItems := []*fyne.MenuItem{
 		fyne.NewMenuItem("Video Tutorial Series", func() {
-			println("Youtube video series on EZRA-DVLPR channel where I explain how to use the program")
-			goToWebsite("https://example.com")
+			goToWebsite("https://youtube.com/playlist?list=PL_gNvZlhoitBNANmcZFgoQpT1FjZiBs7I&si=GBWYIGHiUd0dP2-L")
 		}),
 		fyne.NewMenuItem("Online Manual", func() {
-			println("Link to my website which has a manual describing what each thing does in a pdf format")
 			goToWebsite("https://example.com")
 		}),
 		fyne.NewMenuItem("Bug/Feature Tracker", func() {
-			println("Link to github repo with pre-made tags for feature requests and bugs and stuff")
-			goToWebsite("https://example.com")
+			goToWebsite("https://github.com/EZRA-DVLPR/GameList/issues")
 		}),
 		fyne.NewMenuItem("Blog Post", func() {
-			println("Link to my website with a blogpost")
-			goToWebsite("https://example.com")
+			goToWebsite("https://personal-website-ezra-dvlpr.vercel.app/blog/projects/GameList")
 		}),
 		fyne.NewMenuItem("Support Me <3", func() {
-			println("Is a link such that, when clicked will take you to Ko-Fi, Paypal, etc. on my website")
-			goToWebsite("https://example.com")
+			goToWebsite("https://personal-website-ezra-dvlpr.vercel.app/tips")
 		}),
 	}
 
