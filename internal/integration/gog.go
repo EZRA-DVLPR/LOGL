@@ -62,7 +62,7 @@ func GetAllGamesGOG(cookie string, searchSource string) {
 		nil,
 	)
 	if err != nil {
-		fmt.Println("Error creating request:", err)
+		log.Println("Error creating request:", err)
 		return
 	}
 
@@ -85,7 +85,7 @@ func GetAllGamesGOG(cookie string, searchSource string) {
 	log.Println("HTTP Request processed successfully. Reading Response")
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		fmt.Println("Error reading body:", err)
+		log.Println("Error reading body:", err)
 		return
 	}
 
@@ -144,7 +144,7 @@ func getGOGGames(pagenumber int, cookie string) (gameList []string) {
 	log.Println("Sending HTTP request")
 	resp, err := client.Do(req)
 	if err != nil {
-		fmt.Println("Error:", err)
+		log.Println("Error:", err)
 		return
 	}
 	defer resp.Body.Close()
@@ -152,7 +152,7 @@ func getGOGGames(pagenumber int, cookie string) (gameList []string) {
 	log.Println("HTTP Request processed successfully. Reading Response")
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		fmt.Println("Error reading body:", err)
+		log.Println("Error reading body:", err)
 		return
 	}
 
