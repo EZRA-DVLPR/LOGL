@@ -166,38 +166,6 @@ func SearchAddToDB(gameName string, searchSource string) {
 	AddToDB(newgame)
 }
 
-func UpdateEntireDB() {
-	db, err := sql.Open("sqlite3", "games.db")
-	if err != nil {
-		log.Fatal("Failed to access db")
-	}
-	defer db.Close()
-
-	rows, err := db.Query("SELECT name FROM games")
-	defer rows.Close()
-
-	// for each row, get game name and append to list of game names
-	log.Println("Obtaining list of game names to update")
-	var gameNames []string
-	for rows.Next() {
-		var gameName string
-		// if error occurs scanning row, then skip it and continue updating games
-		if err := rows.Scan(&gameName); err != nil {
-			log.Println("Error scanning row:", err)
-			continue
-		}
-		gameNames = append(gameNames, gameName)
-	}
-
-	log.Println("List of game names obtained. Now updating each game found")
-	for _, gameName := range gameNames {
-		log.Println("Updating game:", gameName)
-		UpdateGame(gameName)
-	}
-
-	log.Println("All games updated")
-}
-
 // given a game name, will update its contents with newer information
 func UpdateGame(gameName string) {
 	db, err := sql.Open("sqlite3", "games.db")
@@ -252,6 +220,38 @@ func UpdateGame(gameName string) {
 	if rowsAffected(rows, gameName) {
 		log.Println("Successfully updated values for game:", gameName)
 	}
+}
+
+func UpdateEntireDB() {
+	db, err := sql.Open("sqlite3", "games.db")
+	if err != nil {
+		log.Fatal("Failed to access db")
+	}
+	defer db.Close()
+
+	rows, err := db.Query("SELECT name FROM games")
+	defer rows.Close()
+
+	// for each row, get game name and append to list of game names
+	log.Println("Obtaining list of game names to update")
+	var gameNames []string
+	for rows.Next() {
+		var gameName string
+		// if error occurs scanning row, then skip it and continue updating games
+		if err := rows.Scan(&gameName); err != nil {
+			log.Println("Error scanning row:", err)
+			continue
+		}
+		gameNames = append(gameNames, gameName)
+	}
+
+	log.Println("List of game names obtained. Now updating each game found")
+	for _, gameName := range gameNames {
+		log.Println("Updating game:", gameName)
+		UpdateGame(gameName)
+	}
+
+	log.Println("All games updated")
 }
 
 // if the given game is not empty, then toggle favorite
