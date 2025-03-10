@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"path/filepath"
 	"time"
 
 	"fyne.io/fyne/v2"
@@ -15,6 +16,12 @@ import (
 
 func StartGUI() {
 	version := "1.0.0"
+
+	// set directories to match where the app is
+	execDir, _ := os.Executable()
+	execPath := filepath.Dir(execDir)
+	os.Chdir(execPath)
+
 	// set logging to open and write to a file
 	logFile, err := setLogFile(version)
 	if err != nil {
