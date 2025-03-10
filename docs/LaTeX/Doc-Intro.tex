@@ -1,0 +1,199 @@
+\section{Introduction}
+
+\subsection{Purpose of this document}
+This document serves as a resource for other developers to navigate
+and improve their understanding of the structure and inner workings
+of the software. This document gets technical about details such as API, Data
+Structures, Database Schema, and more.
+If you are instead looking for the User-Friendly Manual, then
+please refer to
+\href{https://github.com/EZRA-DVLPR/GameList/blob/main/docs/PDF/Manual.pdf}{this
+document}.
+
+This document was created to share the reasoning behind the design
+choices across the entire
+application from the various aspects including but not limited to:
+\begin{itemize}
+	\item Algorithms
+	\item APIs
+	\item Data Structures
+	\item Security
+	\item System Design
+	\item UI/UX
+\end{itemize}
+By reading this document, the goal is to familiarize the reader with
+the inner workings of the software.
+
+Often, I find that the software I see online has limited comments, no
+documentation, and no blog/location where the creator(s) have shared
+why they made the design choices they made.
+My goal is to not only show the project that I've made, but also to
+provide reasoning behind the design choices made
+when writing this software in particular. By providing this documentation, I
+believe it would be a great asset for
+developers who may be inspired by similar projects and be able to
+come up to speed much more quickly as opposed as to looking through
+outdated forums, libraries, and the like.
+Also, it can show other developers how helpful
+documentation is and why it is needed for larger projects.
+
+Despite this being a technical document, I try my best to be as
+transparent and somewhat funny/entertaining. If you enjoy my writing,
+then I implore you to check out
+\href{https://personal-website-ezra-dvlpr.vercel.app/blog}{my blog.}
+Without further ado, I will now explain probably the first questions
+one may have.
+Why did I choose to write the documentation (and manual) in \LaTeX?
+Also, why did I choose to switch entirely to use Go, after having
+initially started in Python?
+
+\subsection{\LaTeX? Go? What? Why?}
+
+\subsubsection{\LaTeX}
+
+In the world of Mathematics and Computer Science, \LaTeX (pronounced
+lah-teck) is one of
+the standard tools used for writing a variety of things including
+manuscripts, documentation, theses, dissertations, academic
+publications, and more.
+\LaTeX is a free software that is used by
+many professionals in industry and academia for making documents look
+clean, and have more control over the document's behavior.
+Prior to College/University, the primary form of writing papers is
+usually some form of Office Suite like Microsoft Word, or Works if
+you're old enough for that LOL, but more recently people use online
+tools such as Google Docs.
+These tools may be sufficient for the task at hand, but are often
+lacking in some form compared to more sophisticated pieces of software.
+Many of you have probably experienced the trouble of writing an
+assignment, then inserting an image and seeing all your hard work get
+changed into something completely different.
+If there are multiple collaborators on the piece, then having
+multiple people make edits is also a challenge.
+
+With \LaTeX you can fine-tune the pieces of the document and how they
+operate together.
+Separating a single document into several sub-files then compiling
+them together is way easier to manage and dictate who does which portion.
+Furthermore, \LaTeX is extensible with its numerous packages to
+import from that offer additional or even modify existing functionality.
+Of course, writing in \LaTeX means learning how to write in Markdown,
+and essentially learn a new ecosystem for writing things.
+
+In my experience, writing Math notes, as well as Computer Science
+documentation, has been much more simple and easier than before.
+By being able to insert functions, tables, charts, images, and more
+in a simpler, faster, and modular format, I have total control over how my
+document looks which can help when preparing for an exam, or looking
+towards presenting the software to stakeholders. It abstracts the
+difficulty of formatting, spacing, and more to allow me to do what I
+came to do, which is write something.
+
+If you are interested in trying \LaTeX for yourself,
+\href{https://www.latex-project.org/get/}{see here.}
+
+\subsubsection{Go vs Python}
+
+To explain why I switched to Go over Python is extremely simple.
+To put it briefly:
+\begin{enumerate}
+	\item Go was a new language I had wanted to try making something with.
+	\item Python proved unfun to debug and export the program from.
+\end{enumerate}
+
+Go is a language I had never worked in before. I had wanted to
+learn a new language that would be fun to try and make something
+in. The big two choices were Rust and Go. Between the two I chose Go because
+I felt it was a friendlier (easier) language to jump into. I also
+debated using C++ since it had a strong history of being used for
+software, but decided to not use it because I couldn't
+get simple \href{https://www.qt.io/product/framework}{QT}
+programs to compile nor run. Skill Issue on my end which I own up to.
+
+As an aside, I had always expected myself to be a Rustacean
+(developer who uses Rust) before a
+Gopher (developer who uses Rust). Alas, I am happy to say I had a
+lovely time writing in Go,
+even with its quirks. I love the mascot too, it's so cute and derpy.
+I love collecting and seeing the images of the
+\href{https://go.dev/blog/gopher}{Go gopher}
+because it just brings a smile to my face seeing the little fella.
+
+Python had served me well before when I initially started the
+project, but proved to be a hassle to work with when trying to
+export. Having completed the basic functionality (with many bugs) I
+attempted to make a release beforehand and couldn't figure it out.
+Skill Issue on my part (again), that I handled by taking an extended break
+from the project.
+Hopping back onto this project, I was curious as to what went
+wrong. I tried to compile and make an executable which proved more
+difficult than anticipated. My goal was to share this software with
+people, but if they couldn't even understand how to use it, then
+they wouldn't. Then I saw other ways to export, with the main one
+being Python's QT.
+Having had an extremely poor experience with QT, I decided to just
+abandon Python altogether and try it in a new language for me.
+
+\subsection{Why make this Program?}
+
+I often find myself wanting to knock another game off of the gaming
+backlog, but see the massive list and feel unsure as to which to play
+next. One key factor that weights into whether I will select a
+particular game will be the time it takes to complete it. For
+example, to complete a game in 10 hours would be more desirable for a
+single week experience vs an 80+ hour game which would probably last
+several weeks to months. This information would make selecting a game
+to remove from the backlog much easier.
+
+Furthermore, I don't want to always have to go to
+\href{https://howlongtobeat.com/}{howlongtobeat} (HLTB) and search for my game,
+then compare it to others that I then have to search as well. This
+process could take several minutes at a time, depending on how many
+games I want to compare. I want a single point of information of
+games and their times to complete, so that I can hold the information
+that caters to me as an individual based on my owned games.
+
+TLDR;
+I want an individualized set of data that contains relevant
+information to the games that I have/own with information on the
+relative time to complete the game. This would help me clear
+the backlog a lot easier.
+
+My solution was to create a piece of software that is platform
+independent that allows you to keep track of how long it takes to
+complete a game in your library. This should include any game from
+any library as well as user input games. The data should be retrieved
+from HLTB and other websites that may offer the same information.
+This program must have the following qualities:
+
+\begin{itemize}
+	\item Able to export to a variety of other programs should the user
+		wish to share, or view the data in their preferred program such as
+		excel, obsidian, etc.
+	\item Be updated with more recent data if user desires (online
+		lookup for information from sources)
+	\item Customizable with different colored themes with Light/Dark
+		themes as a base
+	\item Easy to use
+	\item Favorite games to be sorted towards the top always
+	\item GUI to see the changes and effects in real time (also more
+		user-friendly)
+	\item Have a guide on how to use the software application
+	\item Integrate into as many game services as I was able to do.
+		Currently, that is 4 with: GOG, Steam, Epic, and PSN.
+	\item Lightweight, efficient and fast data storage, modification, and retrieval
+	\item Platform agnostic for desktop (macOS, Linux, and Windows)
+\end{itemize}
+
+Fun fact: While researching for this project, other similar
+projects lacked the ability to extract information from Epic.
+Proving to do that was rather challenging. Mine remains one of the
+few to do so and if you are curious how it does it, then I suggest
+you read section \ref{subsubsec:EpicInt}.
+
+Another thing to compare this program to others similar to it, is
+that they lack a GUI. Most are CLI tools that do something somewhat similar.
+What I wanted was a GUI application that did what it was supposed to,
+and did it well. No bloated stuff or extra features that aren't
+directly enhancing the UX.
+
