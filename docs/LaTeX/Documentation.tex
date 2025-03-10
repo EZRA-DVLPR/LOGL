@@ -1,397 +1,409 @@
-%
-% LaTeX report template 
-%
 \documentclass[letterpaper,12pt]{article}
 \usepackage{graphicx}
 \usepackage[english]{babel}
 \usepackage[latin1]{inputenc}
 \usepackage{cite}
-\usepackage[table]{xcolor}
-%
+\usepackage{dirtree}
+\usepackage{hyperref}
+\usepackage{listings}
+
+\lstset{
+	language=Go,
+	basicstyle=\ttfamily,
+	keywordstyle=\color{blue},
+	commentstyle=\color{gray},
+	stringstyle=\color{red},
+}
+
 \begin{document}
-%
-   \title{GameList Documentation}
 
-   \author{EZRA-DVLPR}
-          
-	\date{} % leave empty to not override the custom dates
+\title{GameList Documentation}
 
-   \maketitle
+\author{EZRA-DVLPR}
+
+\date{} % leave empty to not override the custom dates
+
+\maketitle
 
 \begin{center}
 	\textbf{Initial Release:} 03/09/2025\\
 	\textbf{Last Edited:} 03/09/2025\\
 \end{center}
-   
-   \tableofcontents
- 
-  \newpage
-    
-% This is a comment: in LaTeX everything that in a line comes
-% after a "%" symbol is treated as comment
-%\section*{Foreword}
-% When adding * to \section, \subsection, etc... LaTeX will not assign
-% a number to the section
-%When writing a scientific report it is very important to think
-%carefully how to organize it.
-%Most reports and scientific papers follow the so called IMRAD structure,
-%that is they are subdivided in four sections: \textbf{I}ntroduction, 
-%\textbf{M}ethods, \textbf{R}esults \textbf{A}nd \textbf{D}iscussion.
-%This is a well-tried format and an efficient way of writing a report,
-%it is highly recommended that you stick to it: 
-%the goal of a report or a scientific paper is not to impress 
-%the readers by poetic language but to transfer facts and new insights 
-%as clearly as possible. 
-%More importantly structuring your paper   
-%helps you understand more about the topic you are examining.
 
-%\paragraph{Note:}
-%This document is not meant to be a tutorial for how to write
-%a good scientific report, although it contains some useful advices.
-%A more complete tutorial can be found on the web at the URL:
-%\begin{verbatim}
-
-%http://www.wisc.edu/writing/Handbook/ScienceReport.html
-
-%\end{verbatim}
-%You are highly encouraged to take a look at this web-site!
-
-\section{Introduction}
-[Background on the topic]
-
-\begin{enumerate}
-\item In the first section we will describe the process toward which the results of the project were obtained.
-\item The section presents the results we obtained with...
-\end{enumerate}
-
-The introduction should state clearly why the study was started
-and give a relatively short and essential overview of the topic
-you are exploring. References to previous works can be made here.
- 
-The introduction should not contain the conclusions. 
-At the end of the introduction the outline of the paper may be described.
- 
- 
-\section{Methods}
-Here you describe the strategy you adopted and the tools you
-used in your study.
-\subsection{Example of subsection}
-This is a subsection.
-\subsubsection{Example of subsubsection}
-This is a sub-subsection.
-
-\subsection{Example of mathematical formulas}
-\LaTeX is a very powerful tool when it comes to typesetting of
-mathematical equations. The quality of the output is extremely
-high and hardly matched by other word processors. It takes little
-time with {\LaTeX\,}  to learn how to handle 
-even complicated mathematical expressions.
-   \begin{eqnarray}
-    %  \sigma_0 & = & \frac{\pi}{\sqrt{8}}
-       %              \frac{1}{ \tau_{\mathrm{ff}}} \\
-       f(x)& = & \frac{x + 1}{2x-3}\\
-      K        & = & \frac{\sqrt{32}}{\pi} \frac{1}{\delta}
-                        \frac{ \tau_{\mathrm{ff}} }
-                             { \tau_{\mathrm{co}} } \nonumber \,;
-   \end{eqnarray}
-
-\begin{eqnarray} \label{eqn:demo5}
-{\mathrm a} x^2 + {\mathrm b} x + {\mathrm c} = 0 \nonumber \\
-{\mathrm d} x^2 + {\mathrm e} x + {\mathrm f} = 0 \nonumber 
-\end{eqnarray}
-
-
-\LaTeX\, uses a simple and convenient system for assigning numbered labels
-to equations and other objects (figures, tables, etc\ldots) and for referring
-to them. After having edited the source file and rearranged the position of
-the equations, \LaTeX\, will  change labels and references
-consistently throughout the text (if you did the things right of
-course\ldots) 
- 
-Examples of text containing mathematical expressions and equations: 
-   \[
-      \begin{array}{lp{0.8\linewidth}}
-         M_{r}  & mass internal to the radius $r$     \\
-         m               & mass of the zone                    \\
-         r_0             & unperturbed zone radius             \\
-         \rho_0          & unperturbed density in the zone     \\
-         T_0             & unperturbed temperature in the zone \\
-         L_{r0}          & unperturbed luminosity              \\
-         E_{\mathrm{th}} & thermal energy of the zone
-      \end{array}
-   \]
-
-\noindent
-    
-   \begin{equation}
-      \tau_{\mathrm{co}} = \frac{E_{\mathrm{th}}}{L_{r0}} \,,
-   \end{equation}
-
-
-   \begin{equation}
-      \tau_{\mathrm{ff}} =
-         \sqrt{ 
-	 	\frac{3 \pi}{32 G} \frac{4\pi r_0^3}{3 M_{\mathrm{r}}}
-	 }\,,
-   \end{equation}
-
-
-\begin{equation}
- \displaystyle \frac{dy}{dx} = \langle x^2 - y^2 \rangle
-\end{equation}
-
-\begin{equation}
-  \frac{dy}{dx} = \left ( x^2 - y^2 \right )
-\end{equation}
-
-\begin{equation}
- \displaystyle \frac{dy}{dx} = [ x^2 - y^2 ]
-\end{equation}
-
-\begin{equation}
- \displaystyle \frac{\mathcal R dy}{\mathbf E dx} = \langle x^2 - y^2 \rangle
-\end{equation}
-
-   \begin{displaymath}
-      \nabla_{\mathrm{ad}} = \left( \frac{ \partial \ln T}
-                             { \partial\ln P} \right)_{S} \, , \;
-      \chi^{}_T       = \left( \frac{ \partial \ln P}
-                             { \partial\ln T} \right)_{\rho} \, , \;
-      \kappa^{}_{T}   = \left( \frac{ \partial \ln \kappa}
-                             { \partial\ln T} \right)_{T}
-   \end{displaymath} 
-   \begin{eqnarray}
-      \frac{\pi^2}{8} \frac{1}{\tau_{\mathrm{ff}}^2}
-                ( 3 \Gamma_1 - 4 )
-         & > & 0 \label{ZSDynSta} \\
-      \frac{\pi^2}{\tau_{\mathrm{co}}
-                   \tau_{\mathrm{ff}}^2}
-                   \Gamma_1 \nabla_{\mathrm{ad}}
-                   \left[ \frac{ 1- 3/4 \chi^{}_\rho }{ \chi^{}_T }
-                          ( \kappa^{}_T - 4 )
-                        + \kappa^{}_P + 1
-                   \right]
-        & > & 0 \label{ZSSecSta} \\
-     \frac{\pi^2}{4} \frac{3}{\tau_{ \mathrm{co} }
-                              \tau_{ \mathrm{ff} }^2
-                             }
-         \Gamma_1^2 \, \nabla_{\mathrm{ad}} \left[
-                                   4 \nabla_{\mathrm{ad}}
-                                   - ( \nabla_{\mathrm{ad}} \kappa^{}_T
-                                     + \kappa^{}_P
-                                     )
-                                   - \frac{4}{3 \Gamma_1}
-                                \right]
-        & > & 0   \label{ZSVibSta}
-   \end{eqnarray}
-
-\subsection{Example of verbatim text}
-In \LaTeX\, You can enter text \texttt{verbatim}: that means that 
-\LaTeX\, will print it exactly as you enter it in the source file. The
-output resembles closely the one from old typewriters and it
-is usually good to print out portions of computer code:
-
-\begin{verbatim}
-        PROGRAM area
-        REAL base, height, area
-        PRINT *,'Enter the values for the base and height of a triangle.'
-        READ *, base, height
-        area = (1.0/2.0) * base * height
-        PRINT *,'The area of a triangle with base ', base
-        PRINT *,'and height ', height,' is ', area
-        STOP
-        END
-\end{verbatim}
-
-\paragraph{Note:}
-In \texttt{verbatim} mode you can easily end up outside the
-margins, as in the example above: pay attention to that!
-
-\subsection{Lists}
-Example of a list with numbered items:
-
-   \begin{enumerate}
-      \item  Planets, asteroids, moons \ldots
-      \item  Stars, galaxies, quasars
-  \end{enumerate}
-
-Example of a list with unnumbered items:
-
-   \begin{itemize}
-      \item  Planets, asteroids, moons \ldots
-      \item  Stars, galaxies, quasars
-          
-   \end{itemize}
-
-\section{Results}
-In this section you present your findings and results.
-
+\tableofcontents
 
 \newpage
-\section{Tables and figures}
-Figures demonstrate and prove conclusions. They should convince 
-the reader, preferably at first glance. Figures should be self-explanatory. 
-The legends should have a well-defined meaning. The lettering and the 
-thickness of lines and symbols should be large enough to remain recognizable 
-after printing.
 
-The figure captions should contain all the information needed to 
-understand the data presented and references to the text of the paper 
-should be minimized.
+\section{Introduction}
 
+\subsection{Purpose of this document}
+This document serves as a resource for other developers to navigate
+and improve their understanding of the structure and inner workings
+of the software. This document gets technical about details such as API, Data
+Structures, Database Schema, and more.
+If you are instead looking for the User-Friendly Manual, then
+please refer to
+\href{https://github.com/EZRA-DVLPR/GameList/blob/main/docs/PDF/Manual.pdf}{this
+document}.
 
-\begin{figure}[htb]
-  \centering
-  \includegraphics[width=10cm]{Images/cats_00001.jpg}
-     \caption{This figure includes a cos function}
-         \label{Fig:Fig1}
-\end{figure}
+This document was created to share the reasoning behind the design
+choices across the entire
+application from the various aspects including but not limited to:
+\begin{itemize}
+	\item Algorithms
+	\item APIs
+	\item Data Structures
+	\item Security
+	\item System Design
+	\item UI/UX
+\end{itemize}
+By reading this document, the goal is to familiarize the reader with
+the inner workings of the software.
 
-%%
-Figure \ref {Fig:Fig1} This is the graph containing the cos function.
-%%
+Often, I find that the software I see online has limited comments, no
+documentation, and no blog/location where the creator(s) have shared
+why they made the design choices they made.
+My goal is to not only show the project that I've made, but also to
+provide reasoning behind the design choices made
+when writing this software in particular. By providing this documentation, I
+believe it would be a great asset for
+developers who may be inspired by similar projects and be able to
+come up to speed much more quickly as opposed as to looking through
+outdated forums, libraries, and the like.
+Also, it can show other developers how helpful
+documentation is and why it is needed for larger projects.
 
-Tables should be self-explanatory. The table headings should contain 
-the essential information needed to understand the data presented. 
-Details should not clutter the header and are better added as explanatory 
-footnotes. \ref{tab:KapSou} We will see
+Despite this being a technical document, I try my best to be as
+transparent and somewhat funny/entertaining. If you enjoy my writing,
+then I implore you to check out
+\href{https://personal-website-ezra-dvlpr.vercel.app/blog}{my blog.}
+Without further ado, I will now explain probably the first questions
+one may have.
+Why did I choose to write the documentation (and manual) in \LaTeX?
+Also, why did I choose to switch entirely to use Go, after having
+initially started in Python?
 
-\begin{table}[htb]
-      
-     $$ 
-         \begin{array}{p{0.7\linewidth}l}
-            \hline
-            \noalign{\smallskip}
-            Source      &  T / {[\mathrm{K}]} \\
-            \noalign{\smallskip}
-            \hline
-            \noalign{\smallskip}
-            Yorke 1979, Yorke 1980a & \leq 1700           \\
-            Kr\"ugel 1971           & 1700 \leq T \leq 5000 \\
-            Cox \& Stewart 1969     & 5000 \leq             \\
-            Los Angeles & 3000\\
-            Paris & 2\\
-            \noalign{\smallskip}
-            \hline
-         \end{array}
-     $$ 
-     \caption[]{Example of table caption: opacity sources.}
-         \label{tab:KapSou}
-\end{table}
+\subsection{\LaTeX? Go? What? Why?}
 
-\section{Discussion}
-In this section you analyse and discuss your results.
-This section is paramount as it gives indication about the 
-hability of the author to interpret the results and 
-critically discuss his or her findings.
+\subsubsection{\LaTeX}
 
-\section{Conclusions}
-Here you summarize the essential aspects and findings 
-of your work and analysis.
+In the world of Mathematics and Computer Science, \LaTeX (pronounced
+lah-teck) is one of
+the standard tools used for writing a variety of things including
+manuscripts, documentation, theses, dissertations, academic
+publications, and more.
+\LaTeX is a free software that is used by
+many professionals in industry and academia for making documents look
+clean, and have more control over the document's behavior.
+Prior to College/University, the primary form of writing papers is
+usually some form of Office Suite like Microsoft Word, or Works if
+you're old enough for that LOL, but more recently people use online
+tools such as Google Docs.
+These tools may be sufficient for the task at hand, but are often
+lacking in some form compared to more sophisticated pieces of software.
+Many of you have probably experienced the trouble of writing an
+assignment, then inserting an image and seeing all your hard work get
+changed into something completely different.
+If there are multiple collaborators on the piece, then having
+multiple people make edits is also a challenge.
 
-Finally, remember to include a section with the bibliography.
-It is very important to cite the sources you used for your study and
-for writing the report.
+With \LaTeX you can fine-tune the pieces of the document and how they
+operate together.
+Separating a single document into several sub-files then compiling
+them together is way easier to manage and dictate who does which portion.
+Furthermore, \LaTeX is extensible with its numerous packages to
+import from that offer additional or even modify existing functionality.
+Of course, writing in \LaTeX means learning how to write in Markdown,
+and essentially learn a new ecosystem for writing things.
 
+In my experience, writing Math notes, as well as Computer Science
+documentation, has been much more simple and easier than before.
+By being able to insert functions, tables, charts, images, and more
+in a simpler, faster, and modular format, I have total control over how my
+document looks which can help when preparing for an exam, or looking
+towards presenting the software to stakeholders. It abstracts the
+difficulty of formatting, spacing, and more to allow me to do what I
+came to do, which is write something.
 
-% TABLES
+If you are interested in trying \LaTeX for yourself,
+\href{https://www.latex-project.org/get/}{see here.}
 
-\begin{table}[h!]
+\subsubsection{Go vs Python}
 
-\begin{center}
+To explain why I switched to Go over Python is extremely simple.
+To put it briefly:
+\begin{enumerate}
+	\item Go was a new language I had wanted to try making something with.
+	\item Python proved unfun to debug and export the program from.
+\end{enumerate}
 
-\begin{tabular}{l|c|c|r} % <-- Alignments: 1st column left, 2nd middle and 3rd right, with vertical lines in between
+Go is a language I had never worked in before. I had wanted to
+learn a new language that would be fun to try and make something
+in. The big two choices were Rust and Go. Between the two I chose Go because
+I felt it was a friendlier (easier) language to jump into. I also
+debated using C++ since it had a strong history of being used for
+software, but decided to not use it because I couldn't
+get simple \href{https://www.qt.io/product/framework}{QT}
+programs to compile nor run. Skill Issue on my end which I own up to.
 
-\hline
-\hline
+As an aside, I had always expected myself to be a Rustacean
+(developer who uses Rust) before a
+Gopher (developer who uses Rust). Alas, I am happy to say I had a
+lovely time writing in Go,
+even with its quirks. I love the mascot too, it's so cute and derpy.
+I love collecting and seeing the images of the
+\href{https://go.dev/blog/gopher}{Go gopher}
+because it just brings a smile to my face seeing the little fella.
 
-\textbf{Value 1} & \textbf{Value 2} & \textbf{Value 3}  & \textbf{Value 4}\\
+Python had served me well before when I initially started the
+project, but proved to be a hassle to work with when trying to
+export. Having completed the basic functionality (with many bugs) I
+attempted to make a release beforehand and couldn't figure it out.
+Skill Issue on my part (again), that I handled by taking an extended break
+from the project.
+Hopping back onto this project, I was curious as to what went
+wrong. I tried to compile and make an executable which proved more
+difficult than anticipated. My goal was to share this software with
+people, but if they couldn't even understand how to use it, then
+they wouldn't. Then I saw other ways to export, with the main one
+being Python's QT.
+Having had an extremely poor experience with QT, I decided to just
+abandon Python altogether and try it in a new language for me.
 
-$\alpha$ & $\beta$ & $\gamma$ & $\delta$\\
+\subsection{Why make this Program?}
 
-\hline
-\hline
+I often find myself wanting to knock another game off of the gaming
+backlog, but see the massive list and feel unsure as to which to play
+next. One key factor that weights into whether I will select a
+particular game will be the time it takes to complete it. For
+example, to complete a game in 10 hours would be more desirable for a
+single week experience vs an 80+ hour game which would probably last
+several weeks to months. This information would make selecting a game
+to remove from the backlog much easier.
 
-1 & 1110.1 & 100 & a \\
+Furthermore, I don't want to always have to go to
+\href{https://howlongtobeat.com/}{howlongtobeat} (HLTB) and search for my game,
+then compare it to others that I then have to search as well. This
+process could take several minutes at a time, depending on how many
+games I want to compare. I want a single point of information of
+games and their times to complete, so that I can hold the information
+that caters to me as an individual based on my owned games.
 
-2 & 10.1 & 50 & b \\
+TLDR;
+I want an individualized set of data that contains relevant
+information to the games that I have/own with information on the
+relative time to complete the game. This would help me clear
+the backlog a lot easier.
 
-3 & 23.113231 & 5 & c \\
+My solution was to create a piece of software that is platform
+independent that allows you to keep track of how long it takes to
+complete a game in your library. This should include any game from
+any library as well as user input games. The data should be retrieved
+from HLTB and other websites that may offer the same information.
+This program must have the following qualities:
 
-800 & 800 & 1 & dd \\
+\begin{itemize}
+	\item Able to export to a variety of other programs should the user
+		wish to share, or view the data in their preferred program such as
+		excel, obsidian, etc.
+	\item Be updated with more recent data if user desires (online
+		lookup for information from sources)
+	\item Customizable with different colored themes with Light/Dark
+		themes as a base
+	\item Easy to use
+	\item Favorite games to be sorted towards the top always
+	\item GUI to see the changes and effects in real time (also more
+		user-friendly)
+	\item Have a guide on how to use the software application
+	\item Integrate into as many game services as I was able to do.
+		Currently, that is 4 with: GOG, Steam, Epic, and PSN.
+	\item Lightweight, efficient and fast data storage, modification, and retrieval
+	\item Platform agnostic for desktop (macOS, Linux, and Windows)
+\end{itemize}
 
-900 & 850 & -10 & ddd \\
+Fun fact: While researching for this project, other similar
+projects lacked the ability to extract information from Epic.
+Proving to do that was rather challenging. Mine remains one of the
+few to do so and if you are curious how it does it, then I suggest
+you read section \ref{subsubsec:EpicInt}.
 
-\end{tabular}
+Another thing to compare this program to others similar to it, is
+that they lack a GUI. Most are CLI tools that do something somewhat similar.
+What I wanted was a GUI application that did what it was supposed to,
+and did it well. No bloated stuff or extra features that aren't
+directly enhancing the UX.
 
-\caption{Your first table.}
+\section{Installation}
 
-\label{tab:table1}
+\subsection{Requirements}
 
-\end{center}
+The goal was to make a software that was Cross-Platform for desktop.
+Having selected Go and \href{https://fyne.io/}{Fyne} as the language and UI
+framework, I was hoping to have an easier time to export the application.
+I didn't have any plans to port to mobile, but will consider if
+enough people want it. This is me, writing as of the v1.0.0 release
+and I don't have precognition, so this may change.
 
-\end{table}
+With that being said, the requirements were support for:
+\begin{itemize}
+	\item Windows 10
+	\item Windows 11
+	\item macOS (currently 15.02 on my Macbook Pro)
+	\item Linux (at the minimum Arch)
+\end{itemize}
 
-\begin{table}[ht]
+The program relies on the
+\href{https://www.google.com/chrome/}{Google Chrome browser} to be installed.
+I am not a fan of programs having lots of required programs and
+libraries to be installed from the end user.
+However, when making the web scrapers, doing it with the built-in
+libraries was proving extremely difficult, so I opted to use a
+different approach discussed in section \ref{subsec:Scraping}.
 
-\caption{Partial horizontal line}
+As such, the only requirement is to have Google Chrome installed.
+If a user wants to use the integrations then that requires more
+information, but isn't explicitly required for the program to function.
+The different integrations and what they require are discussed in
+more detail in section \ref{subsec:Integrations}.
 
-\begin{center}
+\subsection{Installation}
 
-\begin{tabular}{ || c || c || c || c ||}
+Installation is extremely simple, just download the executable for
+the desired OS.
+Each OS handles the file structure slightly different.
+The main idea behind building the program was to create a single
+icon, set of metadata about
+the program, and let the OS manage itself with the given instructions
+of how to build for the platform from the fyne build tool.
 
-\hline \hline
-% \multicolumn{2}{c}{Multi-column}&\\
+% TODO: Check to see the trees aren't cut off on new pages
+\subsubsection{Windows Executable}
 
-% \cline{1-4} 
+This is the most straightforward. The Windows file system works as
+intended in the code, which is that it creates a directory containing
+the themes to read/write to. It also has another directory for the
+log files. It also stores the database in the \textit{games.db} file.
 
-\rowcolor {red! 50} X&X&X&X\\
-\hline \hline
-\rowcolor {green! 70} X&X&X&X\\
-\hline \hline
-\rowcolor {blue! 10} X&X&X&X \\
-\hline \hline
+The structure looks like this:
 
-\end{tabular}
+\dirtree{%
+	.1 ./.
+	.2 games.db.
+	.2 logs/.
+	.3 \dots.
+	.2 themes/.
+	.3 Light.yaml.
+	.3 Dark.yaml.
+	.3 \dots.
+}
 
-\end{center}
+\subsubsection{macOS Application}
 
-\label{tab:multicol}
+This one confused me for a long time.
+Building with go vs fyne produced different results.
+By building with go, the files and the application location were
+connected but not always in the same file location, which is why I
+chose to use fyne instead.
+Fyne worked automatically and the files were still connected properly
+no matter where the application was moved.
+The problem was that I couldn't locate where the files were for fyne!
+Looking deeper into the created program itself, I opened the package contents.
+Then I saw that fyne had bundled the files into the app itself, and I
+learned more about how macOS works with applications.
 
-\end{table}
+To access the files the app uses, right-click the app, and click
+\textit{Show Package Contents}.
+From there I will describe the file structure for the macOS application:
+
+\dirtree{%
+	.1 Contents/.
+	.2 Info.plist.
+	.2 MacOS/.
+	.3 cmd.
+	.3 logs/.
+	.4 \dots.
+	.2 Resources/.
+	.3 games.db.
+	.3 icon.icns.
+	.3 themes/.
+	.4 Light.yaml.
+	.4 Dark.yaml.
+	.4 \dots.
+}
+
+\textit{icon.icns} is the file that holds the different icon sizes on
+macOS: 16x16, 32x32, 64x64, 128x128.
+
+\textit{Info.plist} is the file that holds the metadata for the
+application. It holds other information as well, but the main focus
+is that it holds the version number and list of supported versions of macOS.
+
+\subsubsection{Linux binaries}
+
+% TODO: run and test on linux
+
+\dirtree{%
+	.1 Contents/.
+	.2 Info.plist.
+	.2 MacOS/.
+	.3 cmd.
+	.3 logs/.
+	.4 \dots.
+	.2 Resources/.
+	.3 games.db.
+	.3 icon.icns.
+	.3 themes/.
+	.4 Light.yaml.
+	.4 Dark.yaml.
+	.4 \dots.
+}
+
+\section{Logical Design}
+\label{sec:LogicalDesign}
+\subsection{Scraping}
+\label{subsec:Scraping}
+\subsection{Integrations}
+\label{subsec:Integrations}
+\subsubsection{Epic Games Integration}
+\label{subsubsec:EpicInt}
+\section{Physical Design}
+\section{Conceptual Design}
+\section{Release Notes}
+\section{Legal}
+\subsection{License}
 
 \begin{thebibliography}{}
 
-  \bibitem{baker} Baker, N. 1966,
-      in Stellar Evolution,
-      ed.\ R. F. Stein \& A. G. W. Cameron
-      (Plenum, New York) 333
+	\bibitem{baker} Baker, N. 1966,
+	in Stellar Evolution,
+	ed.\ R. F. Stein \& A. G. W. Cameron
+	(Plenum, New York) 333
 
-   \bibitem{balluch} Balluch, M. 1988,
-      A\&A, 200, 58
+	\bibitem{balluch} Balluch, M. 1988,
+	A\&A, 200, 58
 
-   \bibitem{cox} Cox, J. P. 1980,
-      Theory of Stellar Pulsation
-      (Princeton University Press, Princeton) 165
+	\bibitem{cox} Cox, J. P. 1980,
+	Theory of Stellar Pulsation
+	(Princeton University Press, Princeton) 165
 
-   \bibitem{cox69} Cox, A. N.,\& Stewart, J. N. 1969,
-      Academia Nauk, Scientific Information 15, 1
+	\bibitem{cox69} Cox, A. N.,\& Stewart, J. N. 1969,
+	Academia Nauk, Scientific Information 15, 1
 
-   \bibitem{mizuno} Mizuno H. 1980,
-      Prog. Theor. Phys., 64, 544
-   
-   \bibitem{tscharnuter} Tscharnuter W. M. 1987,
-      A\&A, 188, 55
-  
-   \bibitem{terlevich} Terlevich, R. 1992, in ASP Conf. Ser. 31, 
-      Relationships between Active Galactic Nuclei and Starburst Galaxies, 
-      ed. A. V. Filippenko, 13
+	\bibitem{mizuno} Mizuno H. 1980,
+	Prog. Theor. Phys., 64, 544
 
-   \bibitem{yorke80a} Yorke, H. W. 1980a,
-      A\&A, 86, 286
+	\bibitem{tscharnuter} Tscharnuter W. M. 1987,
+	A\&A, 188, 55
 
-   \bibitem{zheng} Zheng, W., Davidsen, A. F., Tytler, D. \& Kriss, G. A.
-      1997, preprint
+	\bibitem{terlevich} Terlevich, R. 1992, in ASP Conf. Ser. 31,
+	Relationships between Active Galactic Nuclei and Starburst Galaxies,
+	ed. A. V. Filippenko, 13
+
+	\bibitem{yorke80a} Yorke, H. W. 1980a,
+	A\&A, 86, 286
+
+	\bibitem{zheng} Zheng, W., Davidsen, A. F., Tytler, D. \& Kriss, G. A.
+	1997, preprint
 \end{thebibliography}
 
 \end{document}

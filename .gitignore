@@ -16,3 +16,8 @@ logs/
 
 # hide aux files from latex docs
 /docs/LaTeX/*.synctex.gz
+/docs/LaTeX/*.aux
+/docs/LaTeX/*.log
+/docs/LaTeX/*.toc
+/docs/LaTeX/*.pdf
+/docs/LaTeX/*.out
