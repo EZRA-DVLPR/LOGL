@@ -24,6 +24,7 @@ import (
 // window for popup that will be modified for the following functions
 var w2 fyne.Window
 
+// PERF: Use a dialog instead of opening a new window
 func singleGameNameSearchPopup(
 	a fyne.App,
 	searchSource binding.String,
@@ -73,6 +74,7 @@ func singleGameNameSearchPopup(
 	w2.Show()
 }
 
+// PERF: Use a dialog instead of opening a new window
 func manualEntryPopup(
 	a fyne.App,
 	sortCategory binding.String,

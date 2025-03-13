@@ -59,21 +59,7 @@ func createMainWindowToolbar(
 		createSettingsButton(a, searchSource, sortCategory, sortOrder, searchText, selectedRow, dbData, textSize, selectedTheme, availableThemes),
 	)
 
-	// PERF: change size of each button depending on the size of the given window
-	// 1. make toolbar use gridwraplayout
-	// container.New(
-	// 	layout.NewGridWrapLayout(fyne.NewSize(200, 50)),
-	// 	createSortButton(sortOrder),
-	// 	createAddButton(a, sortCategory, sortOrder, searchText, dbData, selectedRow, searchSource, toolbarCanvas),
-	// 	createUpdateButton(sortCategory, sortOrder, searchText, selectedRow, dbData),
-	// 	createRemoveButton(selectedRow, sortCategory, sortOrder, searchText, dbData),
-	// 	createRandomButton(selectedRow, dbData),
-	// 	createFaveButton(selectedRow, sortCategory, sortOrder, searchText, dbData),
-	// 	createExportButton(toolbarCanvas),
-	// 	createHelpButton(toolbarCanvas),
-	// 	createSettingsButton(a, w, searchSource, sortCategory, sortOrder, searchText, selectedRow, dbData, textSize, selectedTheme),
-	// )
-	// 2. remove text next to buttons
+	// PERF: remove text next to buttons and leave as option in settings
 }
 
 // toggles sort Order (ASC->DESC->ASC)

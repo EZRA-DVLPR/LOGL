@@ -118,7 +118,6 @@ func searchCompletionator(query string) (gameLink string) {
 		}
 	}
 
-	// extract the link to the first game in the list
 	return extractLinkCompletionator(pageHTML)
 }
 
@@ -150,7 +149,7 @@ func searchBing(query string) (gameLink string) {
 	allocCtx, cancel := chromedp.NewExecAllocator(context.Background(), opts...)
 	defer cancel()
 
-	ctx, cancel := context.WithTimeout(allocCtx, 10*time.Second)
+	ctx, cancel := context.WithTimeout(allocCtx, 3*time.Second)
 	defer cancel()
 
 	ctx, cancel = chromedp.NewContext(ctx)
