@@ -38,7 +38,13 @@ Once this information is input, the data may be sorted
 # LEGAL
 
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------
-This is program is not associated with Google or Howlongtobeat in any way.
+
+## License  
+
+- The **code and documentation** in this repository are licensed under the **MIT License**. See [LICENSE](LICENSE) for details.  
+- The **project name and icon** are licensed under the **Creative Commons Attribution 4.0 International License**. See [LICENSE_ICON_NAME.md](LICENSE_ICON_NAME.md) for details.  
 
 This is an independent project done by me with no further collaborators.
+
+This project has no affiliation with Google, Bing, HowLongToBeat, nor Completionator.
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------
