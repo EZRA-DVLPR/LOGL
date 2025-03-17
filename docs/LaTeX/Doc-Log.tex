@@ -605,6 +605,20 @@ to be parsed as indicated by the struct. Should there be missing
 Light/Dark Themes, the createLDThemes function handles creating these
 default themes in the themes directory.
 
+The ColorTheme struct has the following structure and reasoning
+behind each part:
+\begin{itemize}
+	\item background: background color of the window
+	\item altBackground: used for dbrender to show difference between odd/even rows
+	\item foreground: text colors used for all text and buttons
+	\item primary: looking at the settings, the currently selected source
+	\item buttoncolor: color for buttons
+	\item placeholderText: color of placeholder text in entry widget
+	\item hovercolor: color when mouse cursor hovers an interactive widget
+	\item inputbackgroundcolor: color for input fields background
+	\item scrollbarcolor: color of scroll bar
+\end{itemize}
+
 \subsubsection{Toolbar \& Popup}
 \label{subsubsec:ToolPop}
 
