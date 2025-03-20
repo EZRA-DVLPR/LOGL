@@ -37,7 +37,7 @@ type CustomTheme struct {
 // override dflt theme colors
 func (t *CustomTheme) Color(name fyne.ThemeColorName, variant fyne.ThemeVariant) color.Color {
 	switch name {
-	case theme.ColorNameBackground, theme.ColorNameMenuBackground:
+	case theme.ColorNameBackground, theme.ColorNameMenuBackground, theme.ColorNameOverlayBackground:
 		return hexToColor(t.colors.Background)
 	case theme.ColorNameForeground:
 		return hexToColor(t.colors.Foreground)
