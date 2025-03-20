@@ -250,3 +250,70 @@ they have to make their own YAML file and insert it into the
 then they should have some level of computer literacy.
 The \href{https://pkg.go.dev/gopkg.in/yaml.v3}{yaml.v3} package is
 the one that deals with the YAML files. It just works.
+
+\subsection{RNG}
+
+There are parts where the program determines an action based on
+randomness. As well known in computer science, there is no easy way
+to generate truly random numbers,
+\href{https://www.freecodecamp.org/news/true-randomness-in-software-engineering/}{see
+here} for more information. For the purpose of this project,
+true randomness is not necessary to achieve the intended affect. As a
+result, there is no need to implement more entropy. Furthermore,
+there is no need to implement a seed for reproducing the randomly
+generated results.
+
+\subsection{Storing/Inputting User Information}
+
+There are pieces of this software that adjust to user preferences.
+These include functionality such as storing the previously used
+window size, search preferences, and more. These settings are stored
+locally within the application for an improved user experience (UX).
+
+There are other parts of the software, namely the integrations, which
+require further user input such as cookies. These are left as inputs
+are NOT STORED within the program. They are used and read only once,
+when the user is prompted. This is to assure the user that the
+program won't keep this information or use it maliciously. Basically,
+peace of mind.
+
+It's important as developers to keep in mind the stakeholders (users
+in this case) of the program. Considering their perspective drives
+development in the UI/UX department. Being able to cater to the needs
+and address potential issues before they arise remains a top priority
+of any program.
+
+\subsection{Ethical considerations for scraping}
+
+Web Scraping is the process of accessing a web page and retrieving
+the information from it. Usually this is done without an API and is
+the "improper" way to access the information. This is because this
+creates traffic, has questionable goals, and is otherwise a concern
+for ethical consideration. My intention is to explain the reasoning
+behind not using official APIs and resorting to scraping the
+information via websites.
+
+First, howlongtobeat has no official API.
+\href{https://howlongtobeat.com/forum/thread/807/1}{This has been a
+request for several (9+) years.} This has been brought up to the
+maintainer's attention but no official word as of writing this
+document. As a result, until the API is brought to the public so
+developers like myself (EZRA-DVLPR) can access it, I will continue to scrape
+the website for information to achieve my goals.
+The situation is similar for the other services and integrations.
+
+My goal was to create a program that allows users to access
+information for the games that they are interested in. The program
+would help by listing information that is specifically catered to the user.
+I believe that these intentions are pure. I have no intention to
+misuse this program to block or negatively influence the associated
+services. I also don't condone the usage of the program for malicious
+purposes. It isn't right nor fair to the hard workers of these
+services to abuse the systems they have created. My goal is to keep
+things as clean as possible. To that extent, I hope to update the way
+the program runs should there be an updated API with proper and
+legible documentation.
+
+Should you disagree and believe that this program is harmful and
+hurtful to the developers and providers to the services that this
+program uses, then feel free to not use it. I respect your decision :)
