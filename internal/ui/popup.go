@@ -24,73 +24,68 @@ import (
 // window for popup that will be modified for the following functions
 var w2 fyne.Window
 
-// PERF: Use a dialog instead of opening a new window
 func singleGameNameSearchPopup(
-	a fyne.App,
 	searchSource binding.String,
 	sortCategory binding.String,
 	sortOrder binding.Bool,
 	searchText binding.String,
 	dbData *MyDataBinding,
 	selectedRow binding.Int,
+	w fyne.Window,
 ) {
-	// if w2 already exists then focus it and complete task
-	if w2 != nil {
-		w2.RequestFocus()
-		return
-	}
+	var list []*widget.FormItem
 
-	// define w2 properties
-	w2 = a.NewWindow("Single Game Name Search")
-	w2.Resize(fyne.NewSize(400, 80))
+	// widget to enter game name for searching
+	mainWidget := widget.NewEntry()
+	list = append(list, widget.NewFormItem("Game Name to Search", mainWidget))
 
-	entry := widget.NewEntry()
-	entry.SetPlaceHolder("Game Name to Search")
-	w2.SetContent(
-		container.New(
-			layout.NewVBoxLayout(),
-			entry,
-			widget.NewButton("Begin Search", func() {
-				// if entry is non-empty then perform search
-				if strings.TrimSpace(entry.Text) != "" {
-					log.Println("Search for game data beginning!")
+	dialog.ShowForm(
+		"Enter Game Name for Searching Here",
+		"Search",
+		"Cancel",
+		list,
+		func(submitted bool) {
+			if submitted {
+				// check if the game name is nonempty
+				valid := true
+				for _, ent := range list {
+					if strings.TrimSpace(ent.Widget.(*widget.Entry).Text) == "" {
+						valid = false
+						break
+					}
+				}
+
+				if valid {
 					ss, _ := searchSource.Get()
 					// search game data then add to db
-					dbhandler.SearchAddToDB(entry.Text, ss)
+					dbhandler.SearchAddToDB(mainWidget.Text, ss)
 
 					// update dbData
 					updateDBData(sortCategory, sortOrder, searchText, dbData)
 					forceRenderDB(sortCategory, sortOrder, searchText, dbData, selectedRow)
+
 				} else {
-					log.Println("No game name given")
+					log.Println("No Game Name given for search")
 				}
-				w2.Close()
-			}),
-		),
+			} else {
+				log.Println("User Cancelled Search by Game Name")
+			}
+		},
+		w,
 	)
-	w2.SetOnClosed(func() {
-		w2 = nil
-	})
-	w2.Show()
 }
 
-// PERF: Use a dialog instead of opening a new window
 func manualEntryPopup(
-	a fyne.App,
 	sortCategory binding.String,
 	sortOrder binding.Bool,
 	searchText binding.String,
 	dbData *MyDataBinding,
 	selectedRow binding.Int,
+	w fyne.Window,
 ) {
-	if w2 != nil {
-		w2.RequestFocus()
-		return
-	}
+	var list []*widget.FormItem
 
-	w2 = a.NewWindow("Manual Game Data Entry")
-	w2.Resize(fyne.NewSize(400, 100))
-
+	// entry widgets to obtain the data from user
 	gamename := widget.NewEntry()
 	main := widget.NewEntry()
 	mainplus := widget.NewEntry()
@@ -98,95 +93,78 @@ func manualEntryPopup(
 	hltbURL := widget.NewEntry()
 	completionatorURL := widget.NewEntry()
 
-	form := &widget.Form{
-		Items: []*widget.FormItem{
-			{
-				Text:   "Game Name",
-				Widget: gamename,
-			},
-			{
-				Text:   "Main (Hours)",
-				Widget: main,
-			},
-			{
-				Text:   "Main Plus Sides (Hours)",
-				Widget: mainplus,
-			},
-			{
-				Text:   "Completionist (Hours)",
-				Widget: comp,
-			},
-			{
-				Text:   "URL for HowLongToBeat",
-				Widget: hltbURL,
-			},
-			{
-				Text:   "URL for Completionator",
-				Widget: completionatorURL,
-			},
-		},
-		OnSubmit: func() {
-			if strings.TrimSpace(gamename.Text) == "" ||
-				strings.TrimSpace(main.Text) == "" ||
-				strings.TrimSpace(mainplus.Text) == "" ||
-				strings.TrimSpace(comp.Text) == "" {
-				log.Println("Not enough game data given for manual entry. Fill out top 4 fields")
-				w2.Close()
-				return
+	list = append(list, widget.NewFormItem("Game Name", gamename))
+	list = append(list, widget.NewFormItem("Main (Hours)", main))
+	list = append(list, widget.NewFormItem("Main Plus Sides (Hours)", mainplus))
+	list = append(list, widget.NewFormItem("Completionist (Hours)", comp))
+	list = append(list, widget.NewFormItem("URL for HowLongToBeat", hltbURL))
+	list = append(list, widget.NewFormItem("URL for Completionator", completionatorURL))
+
+	dialog.ShowForm(
+		"Manually Enter the Game Data Here",
+		"Manual Add",
+		"Cancel",
+		list,
+		func(submitted bool) {
+			if submitted {
+				// check if entries for list are non-empty
+				valid := true
+				if strings.TrimSpace(gamename.Text) == "" ||
+					strings.TrimSpace(main.Text) == "" ||
+					strings.TrimSpace(mainplus.Text) == "" ||
+					strings.TrimSpace(comp.Text) == "" {
+					log.Println("Not enough game data given for manual entry. Fill out top 4 fields")
+					valid = false
+				}
+
+				if valid {
+					// check if main, mainplus, comp are valid floats
+					mainfl, err := strconv.ParseFloat(main.Text, 64)
+					if err != nil {
+						log.Println("Improper value for Main Story. Make sure its a valid decimal")
+						return
+					}
+					mainplusfl, err := strconv.ParseFloat(mainplus.Text, 64)
+					if err != nil {
+						log.Println("Improper value for Main + Sides. Make sure its a valid decimal")
+						return
+					}
+					compfl, err := strconv.ParseFloat(comp.Text, 64)
+					if err != nil {
+						log.Println("Improper value for Completionist. Make sure its a valid decimal")
+						return
+					}
+
+					// check if the URLs are given
+					// NOTE: this doesn't affect inputting into DB
+					if hltbURL.Text == "" {
+						log.Println("No HLTB URL given for manual entry for game", strings.TrimSpace(gamename.Text))
+					}
+					if completionatorURL.Text == "" {
+						log.Println("No Completionator URL given for manual entry for game", strings.TrimSpace(gamename.Text))
+					}
+
+					// make the Game struct then add it to the db
+					var newgame scraper.Game
+					newgame.Name = strings.TrimSpace(gamename.Text)
+					newgame.Main = float32(mainfl)
+					newgame.MainPlus = float32(mainplusfl)
+					newgame.Comp = float32(compfl)
+					newgame.HLTBUrl = strings.TrimSpace(hltbURL.Text)
+					newgame.CompletionatorUrl = strings.TrimSpace(completionatorURL.Text)
+					newgame.Favorite = 0
+
+					dbhandler.AddToDB(newgame)
+					forceRenderDB(sortCategory, sortOrder, searchText, dbData, selectedRow)
+				} else {
+					log.Println("No Game Name given for search")
+				}
 			} else {
-				if hltbURL.Text == "" {
-					log.Println("No HLTB URL given for manual entry for game", strings.TrimSpace(gamename.Text))
-				}
-				if completionatorURL.Text == "" {
-					log.Println("No Completionator URL given for manual entry for game", strings.TrimSpace(gamename.Text))
-				}
-
-				// check if main, mainplus, comp are valid floats
-				mainfl, err := strconv.ParseFloat(main.Text, 64)
-				if err != nil {
-					log.Println("Improper value for Main Story. Make sure its a valid decimal")
-					w2.Close()
-					return
-				}
-				mainplusfl, err := strconv.ParseFloat(mainplus.Text, 64)
-				if err != nil {
-					log.Println("Improper value for Main + Sides. Make sure its a valid decimal")
-					w2.Close()
-					return
-				}
-				compfl, err := strconv.ParseFloat(comp.Text, 64)
-				if err != nil {
-					log.Println("Improper value for Completionist. Make sure its a valid decimal")
-					w2.Close()
-					return
-				}
-
-				// insert the data into the db
-				var newgame scraper.Game
-				newgame.Name = strings.TrimSpace(gamename.Text)
-				newgame.Main = float32(mainfl)
-				newgame.MainPlus = float32(mainplusfl)
-				newgame.Comp = float32(compfl)
-				newgame.HLTBUrl = strings.TrimSpace(hltbURL.Text)
-				newgame.CompletionatorUrl = strings.TrimSpace(completionatorURL.Text)
-				newgame.Favorite = 0
-
-				dbhandler.AddToDB(newgame)
-				forceRenderDB(sortCategory, sortOrder, searchText, dbData, selectedRow)
+				log.Println("User Cancelled Search by Game Name")
 			}
-			w2.Close()
 		},
-		OnCancel: func() {
-			w2.Close()
-		},
-	}
-	w2.SetContent(
-		form,
+		w,
 	)
-	w2.SetOnClosed(func() {
-		w2 = nil
-	})
-	w2.Show()
 }
 
 func integrationImport(

@@ -42,7 +42,7 @@ func createMainWindowToolbar(
 		layout.NewHBoxLayout(),
 		createSortButton(sortOrder),
 		layout.NewSpacer(),
-		createAddButton(a, sortCategory, sortOrder, searchText, dbData, selectedRow, searchSource, selectedTheme, w),
+		createAddButton(sortCategory, sortOrder, searchText, dbData, selectedRow, searchSource, selectedTheme, w),
 		layout.NewSpacer(),
 		createUpdateButton(sortCategory, sortOrder, searchText, selectedRow, dbData),
 		layout.NewSpacer(),
@@ -194,7 +194,6 @@ func createSettingsButton(
 
 // get data and add it to the DB
 func createAddButton(
-	a fyne.App,
 	sortCategory binding.String,
 	sortOrder binding.Bool,
 	searchText binding.String,
@@ -215,17 +214,16 @@ func createAddButton(
 				dbData,
 				selectedRow,
 				w,
-				a,
 			)
 		}),
 		fyne.NewMenuItem("Manual Entry", func() {
 			manualEntryPopup(
-				a,
 				sortCategory,
 				sortOrder,
 				searchText,
 				dbData,
 				selectedRow,
+				w,
 			)
 		}),
 		fyne.NewMenuItem("From CSV", func() {
