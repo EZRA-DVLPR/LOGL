@@ -208,13 +208,14 @@ func createAddButton(
 	menuItems := []*fyne.MenuItem{
 		fyne.NewMenuItem("Single Game Search", func() {
 			singleGameNameSearchPopup(
-				a,
 				searchSource,
 				sortCategory,
 				sortOrder,
 				searchText,
 				dbData,
 				selectedRow,
+				w,
+				a,
 			)
 		}),
 		fyne.NewMenuItem("Manual Entry", func() {
@@ -438,7 +439,12 @@ func forceRenderDB(
 ) {
 	// update dbData and selectedRow to render changes
 	updateDBData(sortCategory, sortOrder, searchText, dbData)
-	selectedRow.Set(-1)
+	ss, _ := selectedRow.Get()
+	if ss == -1 {
+		selectedRow.Set(-2)
+	} else {
+		selectedRow.Set(-1)
+	}
 }
 
 func goToWebsite(link string) {
