@@ -2,29 +2,29 @@
 
 \subsection{Requirements}
 
-The goal was to make a software that was Cross-Platform for desktop.
+The main goal was to make a software that was Cross-Platform for desktop.
 Having selected Go and \href{https://fyne.io/}{Fyne} as the language and UI
 framework, I was hoping to have an easier time to export the application.
 I didn't have any plans to port to mobile, but will consider it if
 enough people want it. This is me, writing as of the v1.0.0 release
-and I don't have precognition, so this may change.
+and I (like many others) don't have precognition, so this may change.
+If so, Fyne works just as well for packaging for mobile too, thus there
+is no need to change to the tech stack. Fyne W.
 
 With that being said, the requirements were support for:
 \begin{itemize}
-	\item Windows 10
-	\item Windows 11
-	\item macOS (currently 15.02 on my Macbook Pro)
-	\item Linux (at the minimum Arch)
+	\item Windows 10/11
+	\item macOS
+	\item Linux
 \end{itemize}
 
 The program relies on the
 \href{https://www.google.com/chrome/}{Google Chrome browser} to be installed.
 I am not a fan of programs having lots of required programs and
-libraries to be installed from the end user.
+libraries to be installed from the end user in order to function.
 However, when making the web scrapers, doing it with the built-in
 libraries was proving extremely difficult, so I opted to use a
 different approach discussed in section \ref{subsec:Scraping}.
-
 As such, the only requirement is to have Google Chrome installed.
 If a user wants to use the integrations then that requires more
 information, but isn't explicitly required for the program to function.
@@ -71,14 +71,18 @@ Building with go vs fyne produced different results.
 By building with go, the files and the application location were
 connected but not always in the same file location, which is why I
 chose to use fyne instead.
-Fyne worked automatically and the files were still connected properly
+Fyne worked automatically, and the files were still connected properly
 no matter where the application was moved.
 The problem was that I couldn't locate where the files were for fyne!
-Looking deeper into the created program itself, I opened the package contents.
-Then I saw that fyne had bundled the files into the app itself, and I
-learned more about how macOS works with applications.
 
-To access the files the app uses, right-click the app, and click
+Looking deeper into the created application (with extension ".app") ,
+I opened the package contents.
+Then I saw that fyne had bundled the files into the app itself, and I
+learned more about how macOS works with applications. Basically, it
+makes inner data that both describes and is used by the application.
+This includes diagnostics, logs, and other information.
+
+To access this information, right-click the app, and click
 \textit{Show Package Contents}.
 From there I will describe the file structure for the macOS application:
 

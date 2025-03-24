@@ -8,21 +8,19 @@ Structures, Database Schema, and more.
 If you are instead looking for the User-Friendly Manual, then
 please refer to
 \href{https://github.com/EZRA-DVLPR/GameList/blob/main/docs/PDF/Manual.pdf}{this
-document}.
+document}. By reading this document, the goal is to familiarize the reader with
+the inner workings of the software.
 
 This document was created to share the reasoning behind the design
 choices across the entire
 application from the various aspects including but not limited to:
 \begin{itemize}
-	\item Algorithms
-	\item APIs
+	\item APIs (or lack thereof \dots)
 	\item Data Structures
 	\item Security
 	\item System Design
 	\item UI/UX
 \end{itemize}
-By reading this document, the goal is to familiarize the reader with
-the inner workings of the software.
 
 Often, I find that the software I see online has limited comments, no
 documentation, and no blog/location where the creator(s) have shared
@@ -59,7 +57,7 @@ publications, and more.
 \LaTeX is a free software that is used by
 many professionals in industry and academia for making documents look
 clean, and have more control over the document's behavior.
-Prior to College/University, the primary form of writing papers is
+Prior to college/university, the primary form of writing papers is
 usually some form of Office Suite like Microsoft Word, or Works if
 you're old enough for that LOL, but more recently people use online
 tools such as Google Docs.
@@ -67,12 +65,12 @@ These tools may be sufficient for the task at hand, but are often
 lacking in some form compared to more sophisticated pieces of software.
 Many of you have probably experienced the trouble of writing an
 assignment, then inserting an image and seeing all your hard work get
-changed into something completely different.
+botched or ruined.
 If there are multiple collaborators on the piece, then having
-multiple people make edits is also a challenge.
+multiple people make edits simultaneously is also a challenge.
 
-With \LaTeX you can fine-tune the pieces of the document and how they
-operate together.
+With \LaTeX you can fine-tune the options to handle pieces of the
+document and how they operate together.
 Separating a single document into several sub-files then compiling
 them together is way easier to manage and dictate who does which portion.
 Furthermore, \LaTeX is extensible with its numerous packages to
@@ -85,16 +83,27 @@ documentation, has been much more simple and easier than before.
 By being able to insert functions, tables, charts, images, and more
 in a simpler, faster, and modular format, I have total control over how my
 document looks which can help when preparing for an exam, or looking
-towards presenting the software to stakeholders. It abstracts the
+towards presenting the software to stakeholders
+(teachers/professors). It abstracts the
 difficulty of formatting, spacing, and more to allow me to do what I
 came to do, which is write something.
 
 If you are interested in trying \LaTeX for yourself,
 \href{https://www.latex-project.org/get/}{see here.}
+Another option is to use \href{}{Overleaf}, which is just an online
+\LaTeX compiler ran in a Docker container.
+Using Overleaf would probably be more similar to writing with Google
+Docs as opposed to just downloading some distribution to compile
+\LaTeX documents.
+
+My last word of advice if you are new to \LaTeX. Compile multiple times.
+The compiler will catch different things at each compilation and use
+them for subsequent compilations of the files. The big ones that are
+noticeable are references and spacing on pages.
 
 \subsubsection{Go vs Python}
 
-To explain why I switched to Go over Python is extremely simple.
+To explain why I switched to Go over Python is simple.
 To put it briefly:
 \begin{enumerate}
 	\item Go was a new language I had wanted to try making something with.
@@ -109,16 +118,18 @@ I felt it was a friendlier (easier) language to jump into. I also
 debated using C++ since it had a strong history of being used for
 software, but decided to not use it because I couldn't
 get simple \href{https://www.qt.io/product/framework}{QT}
-programs to compile nor run. Skill Issue on my end which I own up to.
+programs to compile. Skill Issue on my end which I own up to.
 
 As an aside, I had always expected myself to be a Rustacean
 (developer who uses Rust) before a
-Gopher (developer who uses Rust). Alas, I am happy to say I had a
+Gopher (developer who uses Go). Alas, I am happy to say I had a
 lovely time writing in Go,
 even with its quirks. I love the mascot too, it's so cute and derpy.
 I love collecting and seeing the images of the
 \href{https://go.dev/blog/gopher}{Go gopher}
 because it just brings a smile to my face seeing the little fella.
+This is a major contrast to the snakes that form the Python logo.
+They aren't bad, but they definitely aren't as cute.
 
 Python had served me well before when I initially started the
 project, but proved to be a hassle to work with when trying to
@@ -133,13 +144,13 @@ people, but if they couldn't even understand how to use it, then
 they wouldn't. Then I saw other ways to export, with the main one
 being Python's QT.
 Having had an extremely poor experience with QT, I decided to just
-abandon Python altogether and try it in a new language for me.
+abandon Python altogether and try it in a new language.
 
 \subsection{Why make this Program?}
 
 I often find myself wanting to knock another game off of the gaming
 backlog, but see the massive list and feel unsure as to which to play
-next. One key factor that weights into whether I will select a
+next. One key factor that weighs into whether I will select a
 particular game will be the time it takes to complete it. For
 example, to complete a game in 10 hours would be more desirable for a
 single week experience vs an 80+ hour game which would probably last
@@ -177,8 +188,7 @@ This program must have the following qualities:
 		themes as a base
 	\item Easy to use
 	\item Favorite games to be sorted towards the top always
-	\item GUI to see the changes and effects in real time (also more
-		user-friendly)
+	\item GUI (to see changes in real time. also user-friendly)
 	\item Have a guide on how to use the software application
 	\item Integrate into as many game services as I was able to do.
 		Currently, that is 4 with: GOG, Steam, Epic, and PSN.
@@ -196,19 +206,20 @@ Another thing to compare this program to others similar to it, is
 that they lack a GUI. Most are CLI tools that do something somewhat similar.
 What I wanted was a GUI application that did what it was supposed to,
 and did it well. No bloated stuff or extra features that aren't
-directly enhancing the UX.
+directly enhancing the user experience (UX).
 
 \subsection{Tech Stack}
 
 The program is written entirely in Go. I try to always use main
 libraries provided from the developers of the language as opposed to
-importing so much. Knowing when to leverage tasks to external
+importing so many libraries. Knowing when to leverage tasks to external
 libraries is difficult to determine, but I try to stick to this guideline:
 "If it isn't critical to the business/project/task at hand or would be
 too much effort/time to put into making yourself, then import it."
 Instead of trying to recreate a complex thing like chromedp, I would
-much rather just import it and use it since they probably got a
-better understanding of the problem.
+much rather just import it and use it since the developers behind it
+probably have a better understanding of the problem than me.
+I just need it to connect to the endpoint and then give me the information.
 
 For the UI, I chose to use Fyne because it is the first framework
 that I got to work with a minimal example for a program. It also had
@@ -239,17 +250,20 @@ Because of the import/export options, I also import the
 \href{https://pkg.go.dev/bufio}{bufio} packages.
 The bufio package is used to read the text file contents through the
 usage of a scanner which just goes line by obtaining the data,
-similar to the way Java reads files.
+similar to the way
+\href{https://docs.oracle.com/javase/8/docs/api/java/util/Scanner.html}{Java
+reads files.}
 
 To manage the color themes that users may want to use, create, or
-modify, I decided to use YAML to simplify the process of importing the data.
-I opted to choose YAML because it was easy to read and simple enough
-for users to modify should they want to. Of course this means that
+modify, I decided to use YAML. This is because YAML simplifies the
+process of importing, reading, and writing the data.
+It's also easy to read and simple enough
+for non-developer users to modify should they want to. Of course this means that
 they have to make their own YAML file and insert it into the
-\textit{themes} directory, but if they are willing to go that far
+\textit{themes} directory, but if they are willing to do that,
 then they should have some level of computer literacy.
 The \href{https://pkg.go.dev/gopkg.in/yaml.v3}{yaml.v3} package is
-the one that deals with the YAML files. It just works.
+the one that deals with the YAML files.
 
 \subsection{RNG}
 
@@ -268,11 +282,11 @@ generated results.
 There are pieces of this software that adjust to user preferences.
 These include functionality such as storing the previously used
 window size, search preferences, and more. These settings are stored
-locally within the application for an improved user experience (UX).
+locally within the application for an improved UX.
 
 There are other parts of the software, namely the integrations, which
 require further user input such as cookies. These are left as inputs
-are NOT STORED within the program. They are used and read only once,
+are NOT STORED within the program. They are used and read only once, namely
 when the user is prompted. This is to assure the user that the
 program won't keep this information or use it maliciously. Basically,
 peace of mind.
@@ -296,13 +310,14 @@ information via websites.
 First, howlongtobeat has no official API.
 \href{https://howlongtobeat.com/forum/thread/807/1}{This has been a
 request for several (9+) years.} This has been brought up to the
-maintainer's attention but no official word as of writing this
+maintainer's attention but no official public API has been released
+as of writing this
 document. As a result, until the API is brought to the public so
 developers like myself (EZRA-DVLPR) can access it, I will continue to scrape
 the website for information to achieve my goals.
 The situation is similar for the other services and integrations.
 
-My goal was to create a program that allows users to access
+My main goal was to create a program that allows users to access
 information for the games that they are interested in. The program
 would help by listing information that is specifically catered to the user.
 I believe that these intentions are pure. I have no intention to

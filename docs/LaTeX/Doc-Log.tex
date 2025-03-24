@@ -24,6 +24,8 @@ on this information.
 
 Each package (eg. \textit{ui}) is contained
 in its own directory, inside of the parent \textit{internal} directory.
+The \textit{internal} directory holds the different parts of the
+application to function: ui, database, scraper, and integrations.
 The main function is located within the \textit{cmd} directory as
 \textit{main.go}.
 The \textit{tests} directory stored tests based on each package that
@@ -178,7 +180,7 @@ There are 3 export options:
 All exports copy the contents of the entire database and insert it
 into the file at the specified location.
 
-\textit{import.go} has a similar idea where it is a runner function
+\textit{import.go} follows a similar idea where there is a runner function
 that calls the specified import with the file path.
 There are 3 import options:
 \begin{enumerate}
@@ -194,7 +196,7 @@ large factor. In my testing it downsized a 12 Kb file to
 a single Kb.
 
 The other import methods are not destructive and instead append only
-new data (games/rows) to the database.
+new data (games/rows depending on how you want to view it) to the database.
 
 \subsubsection{Create and Check}
 
@@ -211,8 +213,8 @@ the \textit{games} table:
 \end{itemize}
 
 \textit{name} is the Primary key since every game has a unique name. In the
-event two games happen to have the same name, the user can alter one
-of them to differentiate them.
+event two games happen to have the same name, the user should modify one
+of them to differentiate between the two.
 
 As of version 1.0.0 there are only 2 sources of game information:
 HLTB and \href{https://completionator.com/}{Completionator}.
@@ -229,12 +231,13 @@ categories of information that are stored in the database. They
 represent the 3 ideas used by HLTB and Completionator to categorize
 the time data:
 How long it takes to beat the game with just the main story and
-perhaps a little bit of side content, How long it takes to beat the
-main story with a sizable amount of side content, and How long
+perhaps a little bit of side content, how long it takes to beat the
+main story with a sizable amount of side content, and how long
 it takes to beat the game with all side content completed.
 
 CheckDB() checks if the DB exists by checking if there is a table
-called 'games'.
+called 'games'. Even an empty database file should have the table
+with its associated structure described previously.
 
 \subsubsection{Delete from and Delete all}
 
@@ -294,7 +297,7 @@ If there is a given query from the user, then it searches the
 database for any partial matches to the string.
 Otherwise, it returns the entire database sorted in the order given.
 It always sorts the data with the favorites towards the top.
-The output is a [][]string with all the data.
+The output is a [][]string with all the data matching the query.
 
 \subsubsection{Helper functions}
 
@@ -327,8 +330,9 @@ the source, given the required information, then scrape the page for the data.
 \subsubsection{Epic Games}
 \label{subsubsec:EpicInt}
 
-The epic integration requires the input JSON page (from the
-instructions that need to be followed from the user), as well as the
+The epic integration requires the user to input the JSON result
+(webpage) from the
+instructions that need to be followed from the user, as well as the
 search source.
 The function parses the JSON response and obtains the list of game
 names, then subsequently adds the game data to the database, given
@@ -363,6 +367,7 @@ program. Again, the point of the program was to make the job easier, not harder.
 As a result, I left it to the user to perform that task if they want
 to. They can also just write each game name as a line in a TXT file
 and then import it that way.
+
 In fact, this approach only obtains games that specifically requested
 permission from the user to obtain their information in the first place.
 Not all games do that, and so it isn't a complete list of the games
@@ -377,7 +382,8 @@ cookie, the function attempts to make a connection to the URL with
 the given cookie, and obtains the list of games. It parses the page (JSON)
 and then adds each game to the database given the search source.
 
-In essence, this is what I had hoped the Epic Games Integration would work like.
+This is what I had hoped the Epic Games Integration would work like,
+but alas Epic proves to be tricky to import from without API.
 
 \subsubsection{PSN}
 \label{subsubsec:PSNInt}
@@ -389,7 +395,8 @@ other user that they can find, but this information is already public
 anyways if the code succeeds in obtaining the information. This is
 because the profile of the user needs to be made public in order for
 PSNProfiles to obtain the data on their trophy information. I use
-PSNProfiles as a source for obtaining the list of games, but once
+\href{https://psnprofiles.com/}{PSNProfiles} as a source for
+obtaining the list of games, but once
 again, it is incomplete.
 It requires the user to have:
 \begin{itemize}
@@ -409,13 +416,21 @@ The Steam integration is the only one that requires 2 bits of
 information from the user: the profile and the cookie.
 In order to avoid using the Steam API, as that would cause lots of
 headache, I opted to scrape the data of public profiles again.
-There seems to be a pattern here of some kind.
+There seems to be a pattern here of some kind with me not liking API
+or something\dots I assure you, I am no stranger to API, but I
+couldn't justify
+\href{https://developer.valvesoftware.com/wiki/Steam_Web_API#GetOwnedGames_(v0001)}{making
+the user make a WebAPI Key with their associated steam id.}
+Unless I misunderstand the documentation, this seems like an
+extraneous amount of work to make the user do to make a probable 1 to
+3 time event.
 
 Besides the profile and cookie, the search source is required for
 adding the list of games obtained to the database.
 The general process is the same, the function makes a connection to
 the page with the given information, extracts the results, then
 parses the results and sends the data to the database.
+The user must have their list of games owned be public (as per usual).
 
 \subsection{Scraping}
 \label{subsec:Scraping}
@@ -427,7 +442,7 @@ HLTB, Completionator, and Bing to find the URL to the given link.
 
 Within the \textit{scraper.go} file, there is also the struct of the
 Game object.
-It has the same fields as those on the database:
+The structure is the same as the one in the database.
 \begin{itemize}
 	\item Name
 	\item HLTBUrl
@@ -505,11 +520,12 @@ This function checks the size of the window every 0.25 seconds and
 compares the previous value with the current value. If a change is
 detected, then the program resizes the columns within the window.
 
-The main function to create the table however, is handled by
+The main function to create the table is handled by
 createDBRender(binding.Int, binding.String, binding.Bool,
 	binding.String, binding.String, *MyDataBinding,
-map[string]ColorTheme, fyne.Window) and returns the *widget.Table
-which was created and is able to update whenever changes occur.
+map[string]ColorTheme, fyne.Window) and returns the *widget.Table.
+The created table also reflects changes made to the data via the
+bindings and the associated listeners.
 Each of the bindings is input so that the function can create
 listeners to change the values of the current view of the database,
 then render that view to the user. Any time the user selects to
@@ -548,7 +564,7 @@ be formatted. I cleverly used a container that contains a set of 3
 different types of objects inside: A rectangle, a label, and a button.
 The rectangle is the background of the header for the row numbers,
 while the row numbers themselves are displayed via the label. The
-buttons are used for the columns and are to change the sort Category
+buttons are used for the columns and are to change the sort category
 for the database.
 
 Whenever the binding for the selected theme changes, the colors of
@@ -577,8 +593,8 @@ container has 2 elements: the
 Label with icon and the Entry widget for allowing user input.
 I attach the Entry widget with the binding for the searchText, such
 that whenever the entry changes, searchText changes.
-This means that whenever the user writes or deletes any character to the widget,
-the change is rendered immediately.
+This means that whenever the user writes or deletes any character to
+the text box, the change is rendered immediately.
 This is the biggest hit to
 performance, but it gives the user the feedback to know the program
 is working in real time.
@@ -650,6 +666,8 @@ the first time, it will be Ascending.
 	\item Manual Entry - Prompts the user for
 		the manual entries to the fields required to make the Game Struct
 		and adds the given struct to the database if the given data is valid.
+		NOTE -- This menu may have truncated options if the window isn't
+		tall enough to display all available options
 	\item Import from CSV - Opens the file selector to choose a CSV file
 		for importing.
 	\item Import from SQL - Opens the file selector to choose a SQL file
@@ -667,7 +685,8 @@ the first time, it will be Ascending.
 		response to be parsed for game names.
 \end{enumerate}
 
-\textbf{Update} - If there is a non-negative row that is selected, then will
+\textbf{Update} - If there is a non-negative row that is selected,
+then the program will
 look at the sources for the given game and update the values by
 accessing these sources. If the sources are not stored, then it
 attempts to obtain them.
@@ -710,7 +729,7 @@ then executes the export depending on which is selected.
 	\item Theme Selector - When the app is first opened, it will read
 		the themes directory for all available themes as ".yaml" files.
 		These files are then displayed here with a button to select it and
-		update the current theme, as well as a row of boxes underneath to
+		update the current theme. Additionally, there is a row of boxes underneath to
 		showcase a preview of the colors from the theme.
 	\item Text/Icon Size Slider - Displays the size of the text and icons
 		of the app. When adjusting the slider, a new label will appear
