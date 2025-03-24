@@ -189,7 +189,7 @@ func StartGUI() {
 func setLogFile(version string) (*os.File, error) {
 	timestamp := time.Now().Format("2006-01-02_15-04-05")
 
-	logFileName := fmt.Sprintf("logs/GameList-%s-%s.log", version, timestamp)
+	logFileName := fmt.Sprintf("logs/GameList-V%s-%s.log", version, timestamp)
 
 	// ensure logs dir exists
 	if err := os.MkdirAll("logs", os.ModePerm); err != nil {

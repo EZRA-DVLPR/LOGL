@@ -64,8 +64,8 @@ program is about. I think it works great!
 \begin{figure}[htb]
 	\centering
 	\includegraphics[width=10cm]{./Images/cats_00001.jpg}
-	\caption{Photo of mascot}
-	\label{fig:AppLD}
+	\caption{The final design for the logo}
+	\label{fig:Mascot}
 \end{figure}
 
 \subsection{Layout}
@@ -75,11 +75,11 @@ user the top operations that would be used.
 Labels were put next to icons that would be ambiguous for clarity.
 
 For the rest of this section, I will assume that the user looks at
-either the Light or Dark theme for reference (seen below).
+either the Light or Dark theme for reference (seen in Figure \ref{fig:AppLD}).
 
-\begin{figure}[htb]
+\begin{figure}[htbp]
 	\centering
-	\includegraphics[width=10cm]{./Images/cats_00001.jpg}
+	\includegraphics[width=14cm]{./Images/AppLD}
 	\caption{View of App in Light and Dark Mode}
 	\label{fig:AppLD}
 \end{figure}
@@ -97,17 +97,22 @@ I will talk about them from top to bottom.
 Before that however, it is important to talk about what happens when
 the action causes an element to be created and be layered in front of
 the contents of the current window, but still within it. An example is when
-prompted with file selection. Instead of opening a new window, the
+prompted with a game name search. Instead of opening a new window, the
 window gets a new layer on top with the new content, thus making the
 contents of the lower layer unable to be interacted with. This is
 different from when a new window is opened, which still allows the
 user to interact with elements in the main window.
 
+The popup requires the user to choose a response, in this case Cancel
+or Search, in order to close the popup. This is not the same as the
+settings window. you can close the window, or move it around and
+resize as desired.
+
 \begin{figure}[htb]
 	\centering
-	\includegraphics[width=10cm]{./Images/cats_00001.jpg}
-	\caption{Comparison between popup vs new window}
-	\label{fig:DBOperations}
+	\includegraphics[width=14cm]{./Images/PopVSWind.png}
+	\caption{Popup vs Window}
+	\label{fig:PopupVSWindow}
 \end{figure}
 
 Referring back to the main app design in figure \ref{fig:AppLD}, I
@@ -152,14 +157,16 @@ probably be most used in, top to bottom.
 
 \begin{figure}[htb]
 	\centering
-	\includegraphics[width=10cm]{./Images/cats_00001.jpg}
+	\includegraphics[width=10cm]{./Images/SettingsLD}
 	\caption{Settings Menu Light/Dark}
-	\label{fig:DBOperations}
+	\label{fig:SettingsLD}
 \end{figure}
 
 The selector radio highlights where the user hovers their cursor over
 the option. This shows the app is responsive which is always a plus for UX.
 This idea is also seen on the slider for the Text and Icon size.
+See Figures \ref{fig:AppLD} and \ref{fig:PopupVSWindow} for the
+highlight in action.
 
 \subsection{Icons}
 
@@ -181,12 +188,3 @@ The list of icon shapes and their uses are listed below:
 	\item Question Mark (Help)
 	\item Gear (Settings)
 \end{itemize}
-
-The icons can be viewed in this graphic below without modification:
-
-\begin{figure}[htb]
-	\centering
-	\includegraphics[width=10cm]{./Images/cats_00001.jpg}
-	\caption{Show all icons together}
-	\label{fig:DBOperations}
-\end{figure}
