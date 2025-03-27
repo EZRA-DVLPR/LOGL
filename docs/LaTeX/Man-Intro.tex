@@ -1,2 +1,82 @@
 \section{Introduction}
-\subsection{What/Why}
+
+Hello! This document is intended to be a user-friendly guide to the
+software LoGL (Library of Game Lengths). This software is released as
+FOSS (Free and Open-Source).
+FOSS means that the code for the program is visible to
+the public and the resulting program is available for free!
+
+If you are interested in how this program was created, I have created
+Documentation that is
+\href{https://github.com/EZRA-DVLPR/GameList/blob/main/docs/PDF/Documentation.pdf}{visible
+here.}
+
+\subsection{About}
+
+LoGL is a program that allows users to maintain a library of games
+with associated length data from a couple of sources. This program
+displays the data in a legible format and allows user a degree of
+customization with themes.
+
+\subsection{Ethical Considerations}
+
+LoGL utilizes web scraping in order to obtain game data. This means
+that the program will try to connect to websites pretending to be a
+normal user, then obtain the data from the webpage, and extract the
+relevant information. This is a point for ethical consideration, as
+some may feel that this is negatively affecting the visited
+websites (e.g. \href{https://howlongtobeat.com/}{https://howlongtobeat.com/}).
+
+If you feel that this is unethical, then I highly encourage you to
+not use the program. This program is not illegal, nor was it created
+with bad intentions.
+
+\subsection{Why make this Program?}
+
+I often find myself wanting to knock another game off of the gaming
+backlog, but see the massive list and feel unsure as to which to play
+next. One key factor that weighs into whether I will select a
+particular game will be the time it takes to complete it. For
+example, to complete a game in 10 hours would be more desirable for a
+single week experience vs an 80+ hour game which would probably last
+several weeks to months. This information would make selecting a game
+to remove from the backlog much easier.
+
+Furthermore, I don't want to always have to go to
+\href{https://howlongtobeat.com/}{howlongtobeat} (HLTB) and search for my game,
+then compare it to others that I then have to search as well. This
+process could take several minutes at a time, depending on how many
+games I want to compare. I want a single point of information of
+games and their times to complete, so that I can hold the information
+that caters to me as an individual based on my owned games.
+
+TLDR;
+I want an individualized set of data that contains relevant
+information to the games that I have/own with information on the
+relative time to complete the game. This would help me clear
+the backlog a lot easier.
+
+My solution was to create a piece of software that is platform
+independent that allows you to keep track of how long it takes to
+complete a game in your library. This should include any game from
+any library as well as user input games. The data should be retrieved
+from HLTB and other websites that may offer the same information.
+This program must have the following qualities:
+
+\begin{itemize}
+	\item Able to export to a variety of other programs should the user
+		wish to share, or view the data in their preferred program such as
+		excel, obsidian, etc.
+	\item Be updated with more recent data if user desires (online
+		lookup for information from sources)
+	\item Customizable with different colored themes with Light/Dark
+		themes as a base
+	\item Easy to use
+	\item Favorite games to be sorted towards the top always
+	\item GUI (to see changes in real time. also user-friendly)
+	\item Have a guide on how to use the software application
+	\item Integrate into as many game services as I was able to do.
+		Currently, that is 4 with: GOG, Steam, Epic, and PSN.
+	\item Lightweight, efficient and fast data storage, modification, and retrieval
+	\item Platform agnostic for desktop (macOS, Linux, and Windows)
+\end{itemize}
