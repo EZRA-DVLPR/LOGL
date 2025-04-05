@@ -4,6 +4,17 @@
 \usepackage{dirtree} % used to show directory trees
 \usepackage{hyperref}
 \usepackage{amsmath} %used to insert text into eqns
+\usepackage{titlesec} % custom paragraph
+
+% displays custom paragraph to TOC and doc
+\setcounter{secnumdepth}{4}
+\setcounter{tocdepth}{4}
+
+% create the custom paragraph
+\titleformat{\paragraph}
+{\normalfont\normalsize\bfseries}{\theparagraph}{1em}{}
+\titlespacing*{\paragraph}
+{0pt}{3.25ex plus 1ex minus .2ex}{1.5ex plus .2ex}
 
 \begin{document}
 
@@ -29,4 +40,3 @@
 \include{Man-Adv}
 
 \end{document}
-

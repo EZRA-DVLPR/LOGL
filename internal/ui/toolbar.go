@@ -205,7 +205,7 @@ func createAddButton(
 ) (addButton *widget.Button) {
 	ss, _ := searchSource.Get()
 	menuItems := []*fyne.MenuItem{
-		fyne.NewMenuItem("Single Game Search", func() {
+		fyne.NewMenuItem("Game Search", func() {
 			singleGameNameSearchPopup(
 				searchSource,
 				sortCategory,
@@ -281,17 +281,17 @@ func createAddButton(
 			fileDialog.Show()
 		}),
 		// INFO: These require user input to be completed
+		fyne.NewMenuItem("From Epic", func() {
+			integrationImport(searchSource, "epic", w)
+		}),
 		fyne.NewMenuItem("From GOG", func() {
 			integrationImport(searchSource, "gog", w)
 		}),
-		fyne.NewMenuItem("From psn", func() {
+		fyne.NewMenuItem("From PSN", func() {
 			integrationImport(searchSource, "psn", w)
 		}),
-		fyne.NewMenuItem("From steam", func() {
+		fyne.NewMenuItem("From Steam", func() {
 			integrationImport(searchSource, "steam", w)
-		}),
-		fyne.NewMenuItem("From Epic", func() {
-			integrationImport(searchSource, "epic", w)
 		}),
 	}
 
