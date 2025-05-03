@@ -127,7 +127,7 @@ func createExportButton(
 				dbhandler.Export(2, uri.URI().Path())
 			}, w)
 		}),
-		fyne.NewMenuItem("Export to Markdown", func() {
+		fyne.NewMenuItem("Export to MD", func() {
 			dialog.ShowFileSave(func(uri fyne.URIWriteCloser, err error) {
 				if err != nil {
 					log.Println("Error writing to MD file:", err)
@@ -339,7 +339,7 @@ func createHelpButton(
 	w fyne.Window,
 ) (helpButton *widget.Button) {
 	menuItems := []*fyne.MenuItem{
-		fyne.NewMenuItem("Video Tutorial Series", func() {
+		fyne.NewMenuItem("Video Tutorials", func() {
 			goToWebsite("https://youtube.com/playlist?list=PL_gNvZlhoitBNANmcZFgoQpT1FjZiBs7I&si=GBWYIGHiUd0dP2-L")
 		}),
 		fyne.NewMenuItem("PDF Manual", func() {
