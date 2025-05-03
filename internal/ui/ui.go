@@ -17,9 +17,22 @@ import (
 func StartGUI() {
 	version := "1.0.0"
 
-	// set directories to match where the app is
-	execDir, _ := os.Executable()
-	execPath := filepath.Dir(execDir)
+	//	INFO:  set to default config location based on OS:
+	// MacOS: $HOME/Library/Application Support
+	// Windows: %AppData%
+	// Linux: $XDG_CONFIG_HOME if non-empty, else $HOME/.config
+	// Plan 9: $home/lib
+	ucd, err := os.UserConfigDir()
+	if err != nil {
+		log.Fatal("Error fetching user config directory!", err)
+	}
+	// whatever path was decided above, append "LoGL" to it for usage for the app
+	execPath := filepath.Join(ucd, "LoGL")
+
+	// ensure LoGL dir exists
+	if err := os.MkdirAll(execPath, os.ModePerm); err != nil {
+		log.Fatal("Failed to create LoGL directory: %v", err)
+	}
 	os.Chdir(execPath)
 
 	// set logging to open and write to a file
@@ -193,7 +206,7 @@ func setLogFile(version string) (*os.File, error) {
 
 	// ensure logs dir exists
 	if err := os.MkdirAll("logs", os.ModePerm); err != nil {
-		log.Fatalf("Failed to create logs directory: %v", err)
+		log.Fatal("Failed to create logs directory: %v", err)
 	}
 
 	// set logfile to be created in logs dir
