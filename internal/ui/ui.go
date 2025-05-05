@@ -27,7 +27,7 @@ func StartGUI() {
 		log.Fatal("Error fetching user config directory!", err)
 	}
 	// whatever path was decided above, append "LoGL" to it for usage for the app
-	execPath := filepath.Join(ucd, "LoGL")
+	execPath := filepath.Join(ucd, "LOGL")
 
 	// ensure LoGL dir exists
 	if err := os.MkdirAll(execPath, os.ModePerm); err != nil {
