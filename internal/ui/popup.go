@@ -6,6 +6,7 @@ import (
 	"log"
 	"strconv"
 	"strings"
+	"time"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
@@ -510,4 +511,50 @@ func fixedHeightRect(color color.Color) *canvas.Rectangle {
 	rect := canvas.NewRectangle(color)
 	rect.SetMinSize(fyne.NewSize(0, 40))
 	return rect
+}
+
+func PopProgressBar(
+	searchSource binding.String,
+	sortCategory binding.String,
+	sortOrder binding.Bool,
+	searchText binding.String,
+	dbData *MyDataBinding,
+	selectedRow binding.Int,
+	w fyne.Window,
+) {
+	//  TODO: Set max value based on the total number of things to do
+	// if importing a list of games, then it should be the total number of games to import
+	// if updating a list of games, then it should be the total number of games to update
+
+	// progress bar that will display what is happening at the moment
+	progBar := widget.NewProgressBar()
+
+	// create generic variable of the dialog
+	var customDialog dialog.Dialog
+
+	// create confirmation button that will close the dialog once the progress bar is done
+	actionButton := widget.NewButton("Confirm", func() {
+		customDialog.Hide()
+	})
+	actionButton.Disable()
+
+	// container with the things to be displayed in the dialog
+	content := container.NewVBox(
+		widget.NewLabel("Please wait 1 second..."),
+		widget.NewLabel("The button below will become active shortly."),
+		progBar,
+		actionButton,
+	)
+
+	// create and show the custom dialog
+	customDialog = dialog.NewCustomWithoutButtons("Waiting Dialog", content, w)
+	customDialog.Show()
+
+	// Create a goroutine to enable the button after 1 second
+	go func() {
+		time.Sleep(1 * time.Second)
+		actionButton.Enable()
+		actionButton.SetText("Confirm (available now)")
+		actionButton.Refresh()
+	}()
 }

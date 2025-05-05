@@ -57,6 +57,9 @@ func createMainWindowToolbar(
 		createHelpButton(selectedTheme, w),
 		layout.NewSpacer(),
 		createSettingsButton(a, searchSource, sortCategory, sortOrder, searchText, selectedRow, dbData, textSize, selectedTheme, availableThemes),
+		// HACK: just keep this for when I need to do some quick testing
+		layout.NewSpacer(),
+		createTestButton(a, searchSource, sortCategory, sortOrder, searchText, selectedRow, dbData, textSize, selectedTheme, availableThemes, w),
 	)
 
 	// PERF: remove text next to buttons and leave as option in settings
@@ -426,6 +429,35 @@ func createUpdateButton(
 	})
 
 	return updateButton
+}
+
+// HACK: just keep this for when I need to do some quick testing
+func createTestButton(
+	a fyne.App,
+	searchSource binding.String,
+	sortCategory binding.String,
+	sortOrder binding.Bool,
+	searchText binding.String,
+	selectedRow binding.Int,
+	dbData *MyDataBinding,
+	textSize binding.Float,
+	selectedTheme binding.String,
+	availableThemes map[string]ColorTheme,
+	w fyne.Window,
+) (TestButton *widget.Button) {
+	TestButton = widget.NewButtonWithIcon("", theme.SettingsIcon(), func() {
+		PopProgressBar(
+			searchSource,
+			sortCategory,
+			sortOrder,
+			searchText,
+			dbData,
+			selectedRow,
+			w,
+		)
+	})
+
+	return TestButton
 }
 
 func forceRenderDB(
