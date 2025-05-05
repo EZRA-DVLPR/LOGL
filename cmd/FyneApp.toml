@@ -1,0 +1,12 @@
+[Details]
+  Icon = "../LOGL13.png"
+  Name = "LOGLTest"
+  ID = ".EZRA-DVLPR.GameList"
+  Version = "1.0.0"
+  Build = 2
+
+[LinuxAndBSD]
+  GenericName = "Library of Game Lengths"
+  Comment = "Makes a list of time data to beat games"
+  Categories = ["Recreation", "Gaming", "Entertainment"]
+  Keywords = ["game", "games"]

@@ -31,7 +31,7 @@ func StartGUI() {
 
 	// ensure LoGL dir exists
 	if err := os.MkdirAll(execPath, os.ModePerm); err != nil {
-		log.Fatal("Failed to create LoGL directory: %v", err)
+		log.Fatal("Failed to create LoGL directory:", err)
 	}
 	os.Chdir(execPath)
 
@@ -206,7 +206,7 @@ func setLogFile(version string) (*os.File, error) {
 
 	// ensure logs dir exists
 	if err := os.MkdirAll("logs", os.ModePerm); err != nil {
-		log.Fatal("Failed to create logs directory: %v", err)
+		log.Fatal("Failed to create logs directory:", err)
 	}
 
 	// set logfile to be created in logs dir
