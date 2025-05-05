@@ -25,6 +25,7 @@ func SearchGameHLTB(gameName string) Game {
 		searchRes = searchBing(gameName)
 
 		// if still no link results, then return empty game
+		// all empty strings and numerical values as -1
 		if searchRes == "" {
 			log.Println("No Link found. Process Aborted!")
 			var emptyGame Game
@@ -135,6 +136,8 @@ func SearchGameCompletionator(gameName string) Game {
 	if searchRes == "" {
 		log.Println("No Link found. Process Aborted!")
 		var emptyGame Game
+		// if still no link results, then return empty game
+		// all empty strings and numerical values as -1
 		emptyGame.Main = -1
 		emptyGame.MainPlus = -1
 		emptyGame.Comp = -1

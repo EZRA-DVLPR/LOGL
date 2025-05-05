@@ -90,9 +90,8 @@ func DeleteFromDB(gameName string) {
 
 // if the given game is not empty and not already existent in DB, then add to the DB
 func AddToDB(game scraper.Game) {
-	if (game.HLTBUrl == "") &&
-		(game.CompletionatorUrl == "") &&
-		(game.Main == -1) &&
+	// disregard games that have no time data
+	if (game.Main == -1) &&
 		(game.MainPlus == -1) &&
 		(game.Comp == -1) {
 		log.Println("No game data received for associate game.")
@@ -183,6 +182,8 @@ func UpdateGame(gameName string) {
 
 	// if no URL from source(s), then perform searches for game page link
 	// o/w directly scrape from the saved page
+	// WARN: if there is another search source, consider making a single array of search sources
+	// and do: if for each search source url = "", searchgamesearchsource, else fetchsearchsource
 	var hltbSearch, completionatorSearch scraper.Game
 	if hltbURL == "" {
 		log.Println("No URL found to obtain information from HLTB. Attempting to get link")
@@ -384,18 +385,16 @@ func rowsAffected(res sql.Result, gameName string) (wereAffected bool) {
 	return true
 }
 
-// WARN: if there is another source, consider making a single parameter of []scraper.Game and
-// go by ref to do comparisons more effectively
+// WARN: if there is another search source, consider making a single parameter of
+// []scraper.Game and go by ref to do comparisons more effectively
 func compareGetGameData(
 	firstGame scraper.Game,
 	secondGame scraper.Game,
 ) (resultGame scraper.Game) {
 	// if both are empty, then dont update anything (as no new data was found)
-	if firstGame.Name == "" &&
-		firstGame.Main == 0 &&
+	if firstGame.Main == 0 &&
 		firstGame.MainPlus == 0 &&
 		firstGame.Comp == 0 &&
-		secondGame.Name == "" &&
 		secondGame.Main == 0 &&
 		secondGame.MainPlus == 0 &&
 		secondGame.Comp == 0 {
