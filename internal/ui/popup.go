@@ -6,7 +6,6 @@ import (
 	"log"
 	"strconv"
 	"strings"
-	"time"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
@@ -522,26 +521,55 @@ func PopProgressBar(
 	selectedRow binding.Int,
 	w fyne.Window,
 ) {
+	// binding to hold the value of the current numbered process being done
+	currProc := binding.NewFloat()
+	currProc.Set(0)
+
+	// progress bar to be displayed
+	progBar := widget.NewProgressBarWithData(currProc)
+
 	//  TODO: Set max value based on the total number of things to do
 	// if importing a list of games, then it should be the total number of games to import
 	// if updating a list of games, then it should be the total number of games to update
-
-	// progress bar that will display what is happening at the moment
-	progBar := widget.NewProgressBar()
+	// 	if (PARAMETER TO THIS FUNCTION) {
+	// 		progBar.Max = total number of games in db
+	//  } else {
+	// 		progBar.Max = 1
+	//  }
+	progBar.Max = 10
 
 	// create generic variable of the dialog
 	var customDialog dialog.Dialog
 
-	// create confirmation button that will close the dialog once the progress bar is done
-	actionButton := widget.NewButton("Confirm", func() {
+	// create confirmation button that will close the dialog once the
+	// progress bar is done. Disable the button
+	actionButton := widget.NewButton("Please Wait", func() {
 		customDialog.Hide()
 	})
 	actionButton.Disable()
 
 	// container with the things to be displayed in the dialog
 	content := container.NewVBox(
-		widget.NewLabel("Please wait 1 second..."),
-		widget.NewLabel("The button below will become active shortly."),
+		// TODO: Change the text in the text widget based on what thing is happening
+		// 	if (PARAMETER TO THIS FUNCTION) {
+		// 		widget.NewLabel("Getting the new games..."),
+		//  } else {
+		// 		widget.NewLabel("Updating..."),
+		//  }
+		widget.NewLabel("Processing"),
+		widget.NewButton("++", func() {
+			old, err := currProc.Get()
+			if err != nil {
+				log.Println("Error when getting curr max", err)
+			}
+			currProc.Set(old + 1)
+			// TODO: move the below conditional into the listener in the data binding
+			if old+1 == progBar.Max {
+				actionButton.Enable()
+				actionButton.SetText("Processing Completed!")
+				actionButton.Refresh()
+			}
+		}),
 		progBar,
 		actionButton,
 	)
@@ -549,12 +577,4 @@ func PopProgressBar(
 	// create and show the custom dialog
 	customDialog = dialog.NewCustomWithoutButtons("Waiting Dialog", content, w)
 	customDialog.Show()
-
-	// Create a goroutine to enable the button after 1 second
-	go func() {
-		time.Sleep(1 * time.Second)
-		actionButton.Enable()
-		actionButton.SetText("Confirm (available now)")
-		actionButton.Refresh()
-	}()
 }
