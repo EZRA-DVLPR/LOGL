@@ -7,6 +7,7 @@ import (
 	"strconv"
 
 	"github.com/EZRA-DVLPR/GameList/internal/scraper"
+	"github.com/EZRA-DVLPR/GameList/model"
 	_ "github.com/mattn/go-sqlite3"
 )
 
@@ -131,6 +132,7 @@ func AddToDB(game scraper.Game) {
 	}
 
 	log.Println("Finished adding the game data to the local DB for game:", game.Name)
+	model.IncrementProgress()
 }
 
 // given the name of a game & search source(s), add struct to DB
@@ -221,6 +223,7 @@ func UpdateGame(gameName string) {
 	if rowsAffected(rows, gameName) {
 		log.Println("Successfully updated values for game:", gameName)
 	}
+	model.IncrementProgress()
 }
 
 func UpdateEntireDB() {

@@ -16,7 +16,9 @@ import (
 	"fyne.io/fyne/v2/storage"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
+
 	"github.com/EZRA-DVLPR/GameList/internal/dbhandler"
+	"github.com/EZRA-DVLPR/GameList/model"
 )
 
 // used to grab the custom SVG for the heart
@@ -44,7 +46,7 @@ func createMainWindowToolbar(
 		layout.NewSpacer(),
 		createAddButton(sortCategory, sortOrder, searchText, dbData, selectedRow, searchSource, selectedTheme, w),
 		layout.NewSpacer(),
-		createUpdateButton(sortCategory, sortOrder, searchText, selectedRow, dbData),
+		createUpdateButton(sortCategory, sortOrder, searchText, selectedRow, dbData, w),
 		layout.NewSpacer(),
 		createRemoveButton(selectedRow, sortCategory, sortOrder, searchText, dbData),
 		layout.NewSpacer(),
@@ -58,8 +60,8 @@ func createMainWindowToolbar(
 		layout.NewSpacer(),
 		createSettingsButton(a, searchSource, sortCategory, sortOrder, searchText, selectedRow, dbData, textSize, selectedTheme, availableThemes),
 		// HACK: just keep this for when I need to do some quick testing
-		layout.NewSpacer(),
-		createTestButton(a, searchSource, sortCategory, sortOrder, searchText, selectedRow, dbData, textSize, selectedTheme, availableThemes, w),
+		// layout.NewSpacer(),
+		// createTestButton(a, searchSource, sortCategory, sortOrder, searchText, selectedRow, dbData, textSize, selectedTheme, availableThemes, w),
 	)
 
 	// PERF: remove text next to buttons and leave as option in settings
@@ -415,11 +417,16 @@ func createUpdateButton(
 	searchText binding.String,
 	selectedRow binding.Int,
 	dbData *MyDataBinding,
+	w fyne.Window,
 ) (updateButton *widget.Button) {
 	updateButton = widget.NewButtonWithIcon("Update", theme.MediaReplayIcon(), func() {
 		selrow, _ := selectedRow.Get()
 		if selrow >= 0 {
 			log.Println("Updating highlighted entry")
+
+			// bring up progress menu
+			model.SetMaxProcesses(1)
+			PopProgressBar(w)
 
 			dbdata, _ := dbData.Get()
 			dbhandler.UpdateGame(dbdata[selrow][0])
@@ -445,16 +452,8 @@ func createTestButton(
 	availableThemes map[string]ColorTheme,
 	w fyne.Window,
 ) (TestButton *widget.Button) {
-	TestButton = widget.NewButtonWithIcon("", theme.SettingsIcon(), func() {
-		PopProgressBar(
-			searchSource,
-			sortCategory,
-			sortOrder,
-			searchText,
-			dbData,
-			selectedRow,
-			w,
-		)
+	TestButton = widget.NewButtonWithIcon("", theme.HomeIcon(), func() {
+		// anything for testing goes here
 	})
 
 	return TestButton

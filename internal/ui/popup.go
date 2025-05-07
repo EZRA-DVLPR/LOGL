@@ -19,9 +19,10 @@ import (
 	"github.com/EZRA-DVLPR/GameList/internal/dbhandler"
 	"github.com/EZRA-DVLPR/GameList/internal/integration"
 	"github.com/EZRA-DVLPR/GameList/internal/scraper"
+	"github.com/EZRA-DVLPR/GameList/model"
 )
 
-// window for popup that will be modified for the following functions
+// window for popup settings menu
 var w2 fyne.Window
 
 func singleGameNameSearchPopup(
@@ -56,6 +57,10 @@ func singleGameNameSearchPopup(
 				}
 
 				if valid {
+					// bring up progress menu
+					model.SetMaxProcesses(1)
+					PopProgressBar(w)
+
 					ss, _ := searchSource.Get()
 					// search game data then add to db
 					dbhandler.SearchAddToDB(mainWidget.Text, ss)
@@ -513,20 +518,11 @@ func fixedHeightRect(color color.Color) *canvas.Rectangle {
 }
 
 func PopProgressBar(
-	searchSource binding.String,
-	sortCategory binding.String,
-	sortOrder binding.Bool,
-	searchText binding.String,
-	dbData *MyDataBinding,
-	selectedRow binding.Int,
 	w fyne.Window,
 ) {
-	// binding to hold the value of the current numbered process being done
-	currProc := binding.NewFloat()
-	currProc.Set(0)
-
 	// progress bar to be displayed
-	progBar := widget.NewProgressBarWithData(currProc)
+	progBar := widget.NewProgressBarWithData(model.GlobalModel.Progress)
+	model.ResetProgress()
 
 	//  TODO: Set max value based on the total number of things to do
 	// if importing a list of games, then it should be the total number of games to import
@@ -536,17 +532,38 @@ func PopProgressBar(
 	//  } else {
 	// 		progBar.Max = 1
 	//  }
-	progBar.Max = 10
+	procmax, err := model.GetMaxProcesses()
+	if err != nil {
+		log.Fatal("Error getting max processes for display", err)
+	}
+	progBar.Max = float64(procmax)
 
 	// create generic variable of the dialog
 	var customDialog dialog.Dialog
 
 	// create confirmation button that will close the dialog once the
 	// progress bar is done. Disable the button
-	actionButton := widget.NewButton("Please Wait", func() {
+	actionButton := widget.NewButton("Please Wait...", func() {
 		customDialog.Hide()
 	})
 	actionButton.Disable()
+
+	// listener that waits for updates and increments progress
+	var listener binding.DataListener
+
+	// function for the listener to use
+	listenerFunc := func(val float64) {
+		// allow closing dialog and remove listener if new value is max # processes
+		if val == float64(procmax) {
+			actionButton.Enable()
+			actionButton.SetText("Processing Completed!")
+			actionButton.Refresh()
+			model.RemoveProgressListener(listener)
+		}
+	}
+
+	// attach progress listener
+	model.AddProgressListener(listenerFunc)
 
 	// container with the things to be displayed in the dialog
 	content := container.NewVBox(
@@ -556,25 +573,12 @@ func PopProgressBar(
 		//  } else {
 		// 		widget.NewLabel("Updating..."),
 		//  }
-		widget.NewLabel("Processing"),
-		widget.NewButton("++", func() {
-			old, err := currProc.Get()
-			if err != nil {
-				log.Println("Error when getting curr max", err)
-			}
-			currProc.Set(old + 1)
-			// TODO: move the below conditional into the listener in the data binding
-			if old+1 == progBar.Max {
-				actionButton.Enable()
-				actionButton.SetText("Processing Completed!")
-				actionButton.Refresh()
-			}
-		}),
+		widget.NewLabel("Processing..."),
 		progBar,
 		actionButton,
 	)
 
 	// create and show the custom dialog
-	customDialog = dialog.NewCustomWithoutButtons("Waiting Dialog", content, w)
+	customDialog = dialog.NewCustomWithoutButtons("Processing Dialog", content, w)
 	customDialog.Show()
 }

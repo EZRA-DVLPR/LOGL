@@ -12,6 +12,7 @@ import (
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/data/binding"
 	"fyne.io/fyne/v2/theme"
+	// "github.com/EZRA-DVLPR/GameList/model"
 )
 
 func StartGUI() {
