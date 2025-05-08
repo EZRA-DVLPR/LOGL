@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/EZRA-DVLPR/GameList/internal/dbhandler"
+	"github.com/EZRA-DVLPR/GameList/model"
 	"github.com/chromedp/cdproto/network"
 	"github.com/chromedp/chromedp"
 )
@@ -58,6 +59,7 @@ func GetAllGamesSteam(profile string, cookie string, searchSource string) {
 	}
 	log.Println("HTTP Request processed successfully. List of games obtained")
 
+	model.SetMaxProcesses(len(gameNames))
 	for _, name := range gameNames {
 		log.Println("Game found:", name)
 		dbhandler.SearchAddToDB(name, searchSource)

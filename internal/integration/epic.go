@@ -5,6 +5,7 @@ import (
 	"log"
 
 	"github.com/EZRA-DVLPR/GameList/internal/dbhandler"
+	"github.com/EZRA-DVLPR/GameList/model"
 )
 
 type EPICPage struct {
@@ -35,6 +36,7 @@ func GetAllGamesEpicString(input string, searchSource string) {
 	}
 
 	log.Println("Reading json input from Epic Games")
+	model.SetMaxProcesses(len(epicpage.Data.Applications))
 	for _, app := range epicpage.Data.Applications {
 		log.Println("Game found:", app.ApplicationName)
 		dbhandler.SearchAddToDB(app.ApplicationName, searchSource)

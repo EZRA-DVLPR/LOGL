@@ -9,6 +9,7 @@ import (
 	"os"
 	"strings"
 
+	"github.com/EZRA-DVLPR/GameList/model"
 	_ "github.com/mattn/go-sqlite3"
 )
 
@@ -50,6 +51,7 @@ func importCSV(filename string) {
 		log.Fatal("CSV file is empty or improperly formatted")
 	}
 
+	model.SetMaxProcesses(len(rows))
 	// create the table if it does not exist
 	var exists int
 	err = db.QueryRow("SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name='games'").Scan(&exists)
@@ -96,6 +98,7 @@ func importCSV(filename string) {
 			tx.Rollback()
 			log.Fatal("Error inserting data:", err)
 		}
+		model.IncrementProgress()
 	}
 
 	// commit transaction
@@ -113,6 +116,7 @@ func importSQL(filename string) {
 		log.Fatal(err)
 	}
 	defer db.Close()
+	model.SetMaxProcesses(1)
 
 	// drop the existing tables
 	log.Println("Deleting previous data")
@@ -132,6 +136,7 @@ func importSQL(filename string) {
 	if err != nil {
 		log.Fatal("Error importing sql database:", err)
 	}
+	model.IncrementProgress()
 
 	log.Println("SQL database imported successfully")
 }
@@ -160,6 +165,7 @@ func importTXT(searchSource string, filename string) {
 
 	// for each game in gameNames, perform search and add to DB
 	log.Println("List of game names obtained. Will now search then add each game to DB")
+	model.SetMaxProcesses(len(gameNames))
 	for _, game := range gameNames {
 		log.Println("Obtaining Data for game", game)
 		SearchAddToDB(game, searchSource)

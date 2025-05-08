@@ -8,6 +8,7 @@ import (
 	"net/http"
 
 	"github.com/EZRA-DVLPR/GameList/internal/dbhandler"
+	"github.com/EZRA-DVLPR/GameList/model"
 )
 
 type GOGPage struct {
@@ -114,6 +115,7 @@ func GetAllGamesGOG(cookie string, searchSource string) {
 
 	log.Println("All games from all pages obtained")
 	// we now have the entire list of games
+	model.SetMaxProcesses(len(gameList))
 	for _, game := range gameList {
 		log.Println("Game found:", game)
 		dbhandler.SearchAddToDB(game, searchSource)

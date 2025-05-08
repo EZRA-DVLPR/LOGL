@@ -58,7 +58,7 @@ func createMainWindowToolbar(
 		layout.NewSpacer(),
 		createHelpButton(selectedTheme, w),
 		layout.NewSpacer(),
-		createSettingsButton(a, searchSource, sortCategory, sortOrder, searchText, selectedRow, dbData, textSize, selectedTheme, availableThemes),
+		createSettingsButton(a, searchSource, sortCategory, sortOrder, searchText, selectedRow, dbData, textSize, selectedTheme, availableThemes, w),
 		// HACK: just keep this for when I need to do some quick testing
 		// layout.NewSpacer(),
 		// createTestButton(a, searchSource, sortCategory, sortOrder, searchText, selectedRow, dbData, textSize, selectedTheme, availableThemes, w),
@@ -178,6 +178,7 @@ func createSettingsButton(
 	textSize binding.Float,
 	selectedTheme binding.String,
 	availableThemes map[string]ColorTheme,
+	w fyne.Window,
 ) (settingsButton *widget.Button) {
 	settingsButton = widget.NewButtonWithIcon("", theme.SettingsIcon(), func() {
 		settingsPopup(
@@ -191,6 +192,7 @@ func createSettingsButton(
 			textSize,
 			selectedTheme,
 			availableThemes,
+			w,
 		)
 	})
 
@@ -242,6 +244,7 @@ func createAddButton(
 					return
 				}
 				defer uri.Close() // close uri when dialog closes
+				PopProgressBar(w, 0)
 				dbhandler.Import(1, ss, uri.URI().Path())
 				forceRenderDB(sortCategory, sortOrder, searchText, dbData, selectedRow)
 			}, w)
@@ -261,6 +264,7 @@ func createAddButton(
 					return
 				}
 				defer uri.Close()
+				PopProgressBar(w, 2)
 				dbhandler.Import(2, ss, uri.URI().Path())
 				forceRenderDB(sortCategory, sortOrder, searchText, dbData, selectedRow)
 			}, w)
@@ -279,6 +283,7 @@ func createAddButton(
 					return
 				}
 				defer uri.Close()
+				PopProgressBar(w, 0)
 				dbhandler.Import(3, ss, uri.URI().Path())
 				forceRenderDB(sortCategory, sortOrder, searchText, dbData, selectedRow)
 			}, w)
@@ -426,7 +431,7 @@ func createUpdateButton(
 
 			// bring up progress menu
 			model.SetMaxProcesses(1)
-			PopProgressBar(w)
+			PopProgressBar(w, 1)
 
 			dbdata, _ := dbData.Get()
 			dbhandler.UpdateGame(dbdata[selrow][0])

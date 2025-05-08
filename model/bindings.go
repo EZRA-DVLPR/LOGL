@@ -34,6 +34,22 @@ func SetMaxProcesses(val int) error {
 	return GlobalModel.MaxProcesses.Set(val)
 }
 
+func AddMaxProcessesListener(listener func(int)) binding.DataListener {
+	// create the listener
+	dataListener := binding.NewDataListener(func() {
+		val, _ := GlobalModel.MaxProcesses.Get()
+		listener(val)
+	})
+	// attach the listener to the binding
+	GlobalModel.MaxProcesses.AddListener(dataListener)
+
+	return dataListener
+}
+
+func RemoveMaxProcessesListener(listener binding.DataListener) {
+	GlobalModel.MaxProcesses.RemoveListener(listener)
+}
+
 func GetProgress() (float64, error) {
 	return GlobalModel.Progress.Get()
 }

@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"github.com/EZRA-DVLPR/GameList/internal/dbhandler"
+	"github.com/EZRA-DVLPR/GameList/model"
 	"github.com/chromedp/chromedp"
 )
 
@@ -31,6 +32,7 @@ func GetAllGamesPS(profile string, searchSource string) {
 	// append the games retrieved from the last page retrieved
 	gameList = append(gameList, gamepartlist...)
 	log.Println("Obtained all game titles for profile:", profile)
+	model.SetMaxProcesses(len(gameList))
 	for _, game := range gameList {
 		dbhandler.SearchAddToDB(game, searchSource)
 	}

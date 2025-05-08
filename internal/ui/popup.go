@@ -59,13 +59,13 @@ func singleGameNameSearchPopup(
 				if valid {
 					// bring up progress menu
 					model.SetMaxProcesses(1)
-					PopProgressBar(w)
+					PopProgressBar(w, 0)
 
 					ss, _ := searchSource.Get()
 					// search game data then add to db
 					dbhandler.SearchAddToDB(mainWidget.Text, ss)
 
-					// update dbData
+					// len(gameNamlen(gameNames)s)update dbData
 					updateDBData(sortCategory, sortOrder, searchText, dbData)
 					forceRenderDB(sortCategory, sortOrder, searchText, dbData, selectedRow)
 
@@ -187,7 +187,7 @@ func integrationImport(
 		main = "Enter PSN profile name"
 	case "steam":
 		main = "Enter Steam profile name"
-		cookie = "Enter `sessionid` cookie"
+		cookie = "Enter `steamLoginSecure` cookie"
 	case "epic":
 		main = "Enter Epic JSON data"
 	}
@@ -224,6 +224,7 @@ func integrationImport(
 
 				if valid {
 					ss, _ := searchSource.Get()
+					PopProgressBar(w, 0)
 					log.Println("Sending all fields to integration:", name)
 					switch name {
 					case "gog":
@@ -260,6 +261,7 @@ func settingsPopup(
 	textSize binding.Float,
 	selectedTheme binding.String,
 	availableThemes map[string]ColorTheme,
+	w fyne.Window,
 ) {
 	if w2 != nil {
 		w2.RequestFocus()
@@ -279,7 +281,7 @@ func settingsPopup(
 				widget.NewSeparator(),
 				textSlider(selectedTheme, textSize, availableThemes, a),
 				widget.NewSeparator(),
-				updateAllButton(sortCategory, sortOrder, searchText, dbData, selectedRow),
+				updateAllButton(sortCategory, sortOrder, searchText, dbData, selectedRow, w),
 				widget.NewSeparator(),
 				deleteAllButton(sortCategory, sortOrder, searchText, dbData, selectedRow),
 			),
@@ -437,6 +439,7 @@ func updateAllButton(
 	searchText binding.String,
 	dbData *MyDataBinding,
 	selectedRow binding.Int,
+	w fyne.Window,
 ) *fyne.Container {
 	label := widget.NewLabelWithStyle(
 		"Update All Games",
@@ -450,9 +453,17 @@ func updateAllButton(
 			"Update All",
 			func(submitted bool) {
 				if submitted {
-					log.Println("Updating Entire DB")
-					dbhandler.UpdateEntireDB()
-					forceRenderDB(sortCategory, sortOrder, searchText, dbData, selectedRow)
+					w2.Close()
+					// bring up progress menu
+					dbdata, _ := dbData.Get()
+					if len(dbdata) != 0 {
+						model.SetMaxProcesses(len(dbdata))
+						PopProgressBar(w, 1)
+
+						log.Println("Updating Entire DB")
+						dbhandler.UpdateEntireDB()
+						forceRenderDB(sortCategory, sortOrder, searchText, dbData, selectedRow)
+					}
 				}
 			},
 			w2,
@@ -487,6 +498,7 @@ func deleteAllButton(
 					log.Println("Deleting data in DB")
 					dbhandler.DeleteAllDBData()
 					forceRenderDB(sortCategory, sortOrder, searchText, dbData, selectedRow)
+					w2.Close()
 				}
 			},
 			w2,
@@ -519,61 +531,73 @@ func fixedHeightRect(color color.Color) *canvas.Rectangle {
 
 func PopProgressBar(
 	w fyne.Window,
+	option int,
 ) {
-	// progress bar to be displayed
-	progBar := widget.NewProgressBarWithData(model.GlobalModel.Progress)
+	// reset progress for bar and display it
 	model.ResetProgress()
+	progBar := widget.NewProgressBarWithData(model.GlobalModel.Progress)
 
-	//  TODO: Set max value based on the total number of things to do
-	// if importing a list of games, then it should be the total number of games to import
-	// if updating a list of games, then it should be the total number of games to update
-	// 	if (PARAMETER TO THIS FUNCTION) {
-	// 		progBar.Max = total number of games in db
-	//  } else {
-	// 		progBar.Max = 1
-	//  }
+	// widget to display text regarding what processes are occurring to user
+	textWidget := widget.NewLabel("")
+
+	// set max processes for progress bar based on initial value of MaxProcesses
 	procmax, err := model.GetMaxProcesses()
 	if err != nil {
 		log.Fatal("Error getting max processes for display", err)
 	}
 	progBar.Max = float64(procmax)
 
+	// should there be a change to MaxProcesses, update the progress bar max
+	var MaxProcListener binding.DataListener
+	MaxProcListenerFunc := func(newMax int) {
+		progBar.Max = float64(newMax)
+		// set text depending on what processes are occurring (Updating/Adding)
+		if option == 1 {
+			textWidget.SetText("Updating " + strconv.Itoa(newMax) + " game(s)")
+		} else if option == 0 {
+			textWidget.SetText("Adding " + strconv.Itoa(newMax) + " game(s)")
+		} else {
+			textWidget.SetText("Overwriting the old database...")
+		}
+	}
+	model.AddMaxProcessesListener(MaxProcListenerFunc)
+
 	// create generic variable of the dialog
 	var customDialog dialog.Dialog
 
 	// create confirmation button that will close the dialog once the
-	// progress bar is done. Disable the button
+	// progress bar is done and disable it
 	actionButton := widget.NewButton("Please Wait...", func() {
 		customDialog.Hide()
 	})
 	actionButton.Disable()
 
-	// listener that waits for updates and increments progress
-	var listener binding.DataListener
+	// listener that increments progress bar %
+	var ProgListener binding.DataListener
 
 	// function for the listener to use
-	listenerFunc := func(val float64) {
-		// allow closing dialog and remove listener if new value is max # processes
-		if val == float64(procmax) {
+	ProgListenerFunc := func(progUpdate float64) {
+		// compare update value and max # processes
+		procmax, err = model.GetMaxProcesses()
+		if err != nil {
+			log.Fatal("Error getting max processes for display", err)
+		}
+		if progUpdate == float64(procmax) {
+			// allow button to be pressed, change text, and remove listeners
 			actionButton.Enable()
 			actionButton.SetText("Processing Completed!")
 			actionButton.Refresh()
-			model.RemoveProgressListener(listener)
+			model.RemoveProgressListener(ProgListener)
+			model.RemoveMaxProcessesListener(MaxProcListener)
 		}
 	}
 
 	// attach progress listener
-	model.AddProgressListener(listenerFunc)
+	model.AddProgressListener(ProgListenerFunc)
 
 	// container with the things to be displayed in the dialog
 	content := container.NewVBox(
-		// TODO: Change the text in the text widget based on what thing is happening
-		// 	if (PARAMETER TO THIS FUNCTION) {
-		// 		widget.NewLabel("Getting the new games..."),
-		//  } else {
-		// 		widget.NewLabel("Updating..."),
-		//  }
-		widget.NewLabel("Processing..."),
+		textWidget,
 		progBar,
 		actionButton,
 	)
