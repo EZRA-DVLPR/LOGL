@@ -52,8 +52,6 @@ func StartGUI() {
 	prefs := a.Preferences()
 
 	// create all bindings here
-	sortCategory := binding.NewString()
-	sortOrder := binding.NewBool()
 	dbData := NewMyDataBindingEmpty()
 	searchSource := binding.NewString()
 	selectedTheme := binding.NewString()
@@ -63,11 +61,11 @@ func StartGUI() {
 
 	// load sort category from pref storage. default to "name" i.e. Game Name
 	storedSortCategory := prefs.StringWithFallback("sort_category", "name")
-	sortCategory.Set(storedSortCategory)
+	model.SetSortCategory(storedSortCategory)
 
 	// load sort order from preferences storage. default to true (ASC)
 	storedSortOrder := prefs.BoolWithFallback("sort_order", true)
-	sortOrder.Set(storedSortOrder)
+	model.SetSortOrder(storedSortOrder)
 
 	// load search sort from preferences storage. default to "All"
 	storedSearchSort := prefs.StringWithFallback("search_source", "All")
@@ -113,8 +111,6 @@ func StartGUI() {
 		// top is toolbar + searchbar
 		container.NewVBox(
 			createMainWindowToolbar(
-				sortCategory,
-				sortOrder,
 				dbData,
 				searchSource,
 				selectedTheme,
@@ -127,8 +123,6 @@ func StartGUI() {
 		// dont render anything else in space besides DB
 		nil, nil, nil,
 		createDBRender(
-			sortCategory,
-			sortOrder,
 			selectedTheme,
 			dbData,
 			availableThemes,
@@ -142,11 +136,11 @@ func StartGUI() {
 	// when main window closes, save preferences for future sessions
 	w.SetOnClosed(func() {
 		// save sort type
-		st, _ := sortCategory.Get()
+		st, _ := model.GetSortCategory()
 		prefs.SetString("sort_category", st)
 
 		// save sort order
-		so, _ := sortOrder.Get()
+		so, _ := model.GetSortOrder()
 		prefs.SetBool("sort_order", so)
 
 		// save screen size

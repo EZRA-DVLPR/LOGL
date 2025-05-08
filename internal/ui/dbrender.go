@@ -20,16 +20,14 @@ var prevWidth float32
 
 // makes the table and reflects changes based on values of bindings
 func createDBRender(
-	sortCategory binding.String,
-	sortOrder binding.Bool,
 	selectedTheme binding.String,
 	dbData *MyDataBinding,
 	availableThemes map[string]ColorTheme,
 	w fyne.Window,
 ) (dbRender *widget.Table) {
 	// given the bindings create the table with the new set of data
-	sortcat, _ := sortCategory.Get()
-	sortord, _ := sortOrder.Get()
+	sortcat, _ := model.GetSortCategory()
+	sortord, _ := model.GetSortOrder()
 
 	// if db exists then get the data
 	log.Println("Checking existence of local DB")
@@ -105,40 +103,40 @@ func createDBRender(
 	// set up the headers
 	log.Println("Setting up table headers")
 	width := w.Content().Size().Width
-	dbRender = headerSetup(sortCategory, selectedTheme, dbRender, width, availableThemes)
+	dbRender = headerSetup(selectedTheme, dbRender, width, availableThemes)
 
 	// refresh DBRender when the theme changes
 	selectedTheme.AddListener(binding.NewDataListener(func() {
 		log.Println("Selected Theme changed. Adjusting Table")
-		forceRenderDB(sortCategory, sortOrder, dbData)
+		forceRenderDB(dbData)
 		updateTableColors(selectedTheme, dbRender, availableThemes)
 		dbRender.Refresh()
 	}))
 
 	// change contents of dbData binding when sort order changes
-	sortOrder.AddListener(binding.NewDataListener(func() {
+	model.AddSortOrderListener(func(val bool) {
 		log.Println("Sort Order changed. Adjusting Table")
 		width := w.Content().Size().Width
-		forceRenderDB(sortCategory, sortOrder, dbData)
-		dbRender = updateTable(sortCategory, dbData, selectedTheme, dbRender, width, availableThemes)
+		forceRenderDB(dbData)
+		dbRender = updateTable(dbData, selectedTheme, dbRender, width, availableThemes)
 		dbRender.Refresh()
-	}))
+	})
 
 	// change contents of dbData binding when sort category changes
-	sortCategory.AddListener(binding.NewDataListener(func() {
+	model.AddSortCategoryListener(func(val string) {
 		log.Println("Sort Category changed. Adjusting Table")
 		width := w.Content().Size().Width
-		forceRenderDB(sortCategory, sortOrder, dbData)
-		dbRender = updateTable(sortCategory, dbData, selectedTheme, dbRender, width, availableThemes)
+		forceRenderDB(dbData)
+		dbRender = updateTable(dbData, selectedTheme, dbRender, width, availableThemes)
 		dbRender.Refresh()
-	}))
+	})
 
 	// change contents of dbData binding when search text changes
 	model.AddSearchTextListener(func(val string) {
 		log.Println("Search Text changed. Adjusting Table")
 		width := w.Content().Size().Width
-		forceRenderDB(sortCategory, sortOrder, dbData)
-		dbRender = updateTable(sortCategory, dbData, selectedTheme, dbRender, width, availableThemes)
+		forceRenderDB(dbData)
+		dbRender = updateTable(dbData, selectedTheme, dbRender, width, availableThemes)
 		dbRender.Refresh()
 	})
 
@@ -165,7 +163,7 @@ func createDBRender(
 				}
 			}
 		}
-		dbRender = updateTable(sortCategory, dbData, selectedTheme, dbRender, width, availableThemes)
+		dbRender = updateTable(dbData, selectedTheme, dbRender, width, availableThemes)
 
 		// scroll to the new location selected
 		var selCell widget.TableCellID
@@ -184,12 +182,10 @@ func createDBRender(
 
 // sets dbData with given opts
 func updateDBData(
-	sortCategory binding.String,
-	sortOrder binding.Bool,
 	dbData *MyDataBinding,
 ) {
-	sortcat, _ := sortCategory.Get()
-	sortord, _ := sortOrder.Get()
+	sortcat, _ := model.GetSortCategory()
+	sortord, _ := model.GetSortOrder()
 	searchtxt, _ := model.GetSearchText()
 
 	dbData.Set(dbhandler.SortDB(sortcat, sortord, strings.TrimSpace(searchtxt)))
@@ -197,7 +193,6 @@ func updateDBData(
 
 // update the contents of the given table
 func updateTable(
-	sortCategory binding.String,
 	dbData *MyDataBinding,
 	selectedTheme binding.String,
 	dbRender *widget.Table,
@@ -255,7 +250,7 @@ func updateTable(
 	}
 
 	// setup headers
-	dbRender = headerSetup(sortCategory, selectedTheme, dbRender, width, availableThemes)
+	dbRender = headerSetup(selectedTheme, dbRender, width, availableThemes)
 
 	// unselect all cells
 	dbRender.UnselectAll()
@@ -263,7 +258,6 @@ func updateTable(
 }
 
 func headerSetup(
-	sortCategory binding.String,
 	selectedTheme binding.String,
 	dbTable *widget.Table,
 	width float32,
@@ -305,13 +299,13 @@ func headerSetup(
 			button.OnTapped = func() {
 				// sortCategory gets set to whichever header was clicked
 				if id.Col == 0 {
-					sortCategory.Set("name")
+					model.SetSortCategory("name")
 				} else if id.Col == 1 {
-					sortCategory.Set("main")
+					model.SetSortCategory("main")
 				} else if id.Col == 2 {
-					sortCategory.Set("mainPlus")
+					model.SetSortCategory("mainPlus")
 				} else {
-					sortCategory.Set("comp")
+					model.SetSortCategory("comp")
 				}
 			}
 		} else {

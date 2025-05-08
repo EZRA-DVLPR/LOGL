@@ -8,6 +8,8 @@ import (
 
 // define struct that will contain the bindings
 type AppModel struct {
+	SortCategory binding.String
+	SortOrder    binding.Bool
 	TextSize     binding.Float
 	SearchText   binding.String
 	SelectedRow  binding.Int
@@ -17,6 +19,8 @@ type AppModel struct {
 
 // create global instance of struct for binding
 var GlobalModel = &AppModel{
+	SortCategory: binding.NewString(),
+	SortOrder:    binding.NewBool(),
 	TextSize:     binding.NewFloat(),
 	SearchText:   binding.NewString(),
 	SelectedRow:  binding.NewInt(),
@@ -33,6 +37,40 @@ func init() {
 }
 
 // INFO: All below functions are just for convenience on managing the bindings
+
+func GetSortOrder() (bool, error) {
+	return GlobalModel.SortOrder.Get()
+}
+
+func SetSortOrder(val bool) error {
+	return GlobalModel.SortOrder.Set(val)
+}
+
+func AddSortOrderListener(listener func(bool)) binding.DataListener {
+	dataListener := binding.NewDataListener(func() {
+		val, _ := GlobalModel.SortOrder.Get()
+		listener(val)
+	})
+	GlobalModel.SortOrder.AddListener(dataListener)
+	return dataListener
+}
+
+func GetSortCategory() (string, error) {
+	return GlobalModel.SortCategory.Get()
+}
+
+func SetSortCategory(val string) error {
+	return GlobalModel.SortCategory.Set(val)
+}
+
+func AddSortCategoryListener(listener func(string)) binding.DataListener {
+	dataListener := binding.NewDataListener(func() {
+		val, _ := GlobalModel.SortCategory.Get()
+		listener(val)
+	})
+	GlobalModel.SortCategory.AddListener(dataListener)
+	return dataListener
+}
 
 func GetTextSize() (float64, error) {
 	return GlobalModel.TextSize.Get()

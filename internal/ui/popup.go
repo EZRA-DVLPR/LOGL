@@ -27,8 +27,6 @@ var w2 fyne.Window
 
 func singleGameNameSearchPopup(
 	searchSource binding.String,
-	sortCategory binding.String,
-	sortOrder binding.Bool,
 	dbData *MyDataBinding,
 	w fyne.Window,
 ) {
@@ -64,8 +62,8 @@ func singleGameNameSearchPopup(
 					dbhandler.SearchAddToDB(mainWidget.Text, ss)
 
 					// len(gameNamlen(gameNames)s)update dbData
-					updateDBData(sortCategory, sortOrder, dbData)
-					forceRenderDB(sortCategory, sortOrder, dbData)
+					updateDBData(dbData)
+					forceRenderDB(dbData)
 
 				} else {
 					log.Println("No Game Name given for search")
@@ -79,8 +77,6 @@ func singleGameNameSearchPopup(
 }
 
 func manualEntryPopup(
-	sortCategory binding.String,
-	sortOrder binding.Bool,
 	dbData *MyDataBinding,
 	w fyne.Window,
 ) {
@@ -156,7 +152,7 @@ func manualEntryPopup(
 					newgame.Favorite = 0
 
 					dbhandler.AddToDB(newgame)
-					forceRenderDB(sortCategory, sortOrder, dbData)
+					forceRenderDB(dbData)
 				} else {
 					log.Println("No Game Name given for search")
 				}
@@ -249,8 +245,6 @@ func integrationImport(
 func settingsPopup(
 	a fyne.App,
 	searchSource binding.String,
-	sortCategory binding.String,
-	sortOrder binding.Bool,
 	dbData *MyDataBinding,
 	selectedTheme binding.String,
 	availableThemes map[string]ColorTheme,
@@ -270,13 +264,13 @@ func settingsPopup(
 				layout.NewVBoxLayout(),
 				searchSourceRadioWidget(searchSource),
 				widget.NewSeparator(),
-				themeSelector(sortCategory, sortOrder, dbData, selectedTheme, availableThemes, a),
+				themeSelector(dbData, selectedTheme, availableThemes, a),
 				widget.NewSeparator(),
 				textSlider(selectedTheme, availableThemes, a),
 				widget.NewSeparator(),
-				updateAllButton(sortCategory, sortOrder, dbData, w),
+				updateAllButton(dbData, w),
 				widget.NewSeparator(),
-				deleteAllButton(sortCategory, sortOrder, dbData),
+				deleteAllButton(dbData),
 			),
 		),
 	)
@@ -318,8 +312,6 @@ func searchSourceRadioWidget(searchSource binding.String) *fyne.Container {
 
 // selector for the theme of the application
 func themeSelector(
-	sortCategory binding.String,
-	sortOrder binding.Bool,
 	dbData *MyDataBinding,
 	selectedTheme binding.String,
 	availableThemes map[string]ColorTheme,
@@ -352,7 +344,7 @@ func themeSelector(
 						colors:   availableThemes[themeName],
 					},
 				)
-				forceRenderDB(sortCategory, sortOrder, dbData)
+				forceRenderDB(dbData)
 			}
 		}(themeName, themeColors))
 		themeList.Add(button)
@@ -424,8 +416,6 @@ func textSlider(
 }
 
 func updateAllButton(
-	sortCategory binding.String,
-	sortOrder binding.Bool,
 	dbData *MyDataBinding,
 	w fyne.Window,
 ) *fyne.Container {
@@ -450,7 +440,7 @@ func updateAllButton(
 
 						log.Println("Updating Entire DB")
 						dbhandler.UpdateEntireDB()
-						forceRenderDB(sortCategory, sortOrder, dbData)
+						forceRenderDB(dbData)
 					}
 				}
 			},
@@ -465,8 +455,6 @@ func updateAllButton(
 }
 
 func deleteAllButton(
-	sortCategory binding.String,
-	sortOrder binding.Bool,
 	dbData *MyDataBinding,
 ) *fyne.Container {
 	label := widget.NewLabelWithStyle(
@@ -483,7 +471,7 @@ func deleteAllButton(
 				if submitted {
 					log.Println("Deleting data in DB")
 					dbhandler.DeleteAllDBData()
-					forceRenderDB(sortCategory, sortOrder, dbData)
+					forceRenderDB(dbData)
 					w2.Close()
 				}
 			},

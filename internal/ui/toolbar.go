@@ -28,8 +28,6 @@ var heartSVG []byte
 
 // creates the toolbar with the options that will be displayed to manage the rendered DB
 func createMainWindowToolbar(
-	sortCategory binding.String,
-	sortOrder binding.Bool,
 	dbData *MyDataBinding,
 	searchSource binding.String,
 	selectedTheme binding.String,
@@ -39,44 +37,43 @@ func createMainWindowToolbar(
 ) (toolbar *fyne.Container) {
 	return container.New(
 		layout.NewHBoxLayout(),
-		createSortButton(sortOrder),
+		createSortButton(),
 		layout.NewSpacer(),
-		createAddButton(sortCategory, sortOrder, dbData, searchSource, selectedTheme, w),
+		createAddButton(dbData, searchSource, selectedTheme, w),
 		layout.NewSpacer(),
-		createUpdateButton(sortCategory, sortOrder, dbData, w),
+		createUpdateButton(dbData, w),
 		layout.NewSpacer(),
-		createRemoveButton(sortCategory, sortOrder, dbData),
+		createRemoveButton(dbData),
 		layout.NewSpacer(),
 		createRandomButton(dbData),
 		layout.NewSpacer(),
-		createFaveButton(sortCategory, sortOrder, dbData),
+		createFaveButton(dbData),
 		layout.NewSpacer(),
 		createExportButton(selectedTheme, w),
 		layout.NewSpacer(),
 		createHelpButton(selectedTheme, w),
 		layout.NewSpacer(),
-		createSettingsButton(a, searchSource, sortCategory, sortOrder, dbData, selectedTheme, availableThemes, w),
+		createSettingsButton(a, searchSource, dbData, selectedTheme, availableThemes, w),
 		// HACK: just keep this for when I need to do some quick testing
 		// layout.NewSpacer(),
-		// createTestButton(a, searchSource, sortCategory, sortOrder, dbData, selectedTheme, availableThemes, w),
+		// createTestButton(a, searchSource, dbData, selectedTheme, availableThemes, w),
 	)
 
 	// PERF: remove text next to buttons and leave as option in settings
 }
 
 // toggles sort Order (ASC->DESC->ASC)
-func createSortButton(sortOrder binding.Bool) (sortButton *widget.Button) {
+func createSortButton() (sortButton *widget.Button) {
 	// create the button with empty label
 	sortButton = widget.NewButtonWithIcon("", theme.MenuDropUpIcon(), func() {
 		// whatever curr value of sortOrder is, we want opposite when clicked
-		val, _ := sortOrder.Get()
+		val, _ := model.GetSortOrder()
 		log.Println("Sort Order changed to:", !val)
-		sortOrder.Set(!val)
+		model.SetSortOrder(!val)
 	})
 
 	// listen for changes, and update text+icon
-	sortOrder.AddListener(binding.NewDataListener(func() {
-		val, _ := sortOrder.Get()
+	model.AddSortOrderListener(func(val bool) {
 		if val {
 			sortButton.SetText("Sort ASC")
 			sortButton.SetIcon(theme.MenuDropUpIcon())
@@ -84,7 +81,7 @@ func createSortButton(sortOrder binding.Bool) (sortButton *widget.Button) {
 			sortButton.SetText("Sort DESC")
 			sortButton.SetIcon(theme.MenuDropDownIcon())
 		}
-	}))
+	})
 	return sortButton
 }
 
@@ -167,8 +164,6 @@ func createExportButton(
 func createSettingsButton(
 	a fyne.App,
 	searchSource binding.String,
-	sortCategory binding.String,
-	sortOrder binding.Bool,
 	dbData *MyDataBinding,
 	selectedTheme binding.String,
 	availableThemes map[string]ColorTheme,
@@ -178,8 +173,6 @@ func createSettingsButton(
 		settingsPopup(
 			a,
 			searchSource,
-			sortCategory,
-			sortOrder,
 			dbData,
 			selectedTheme,
 			availableThemes,
@@ -192,8 +185,6 @@ func createSettingsButton(
 
 // get data and add it to the DB
 func createAddButton(
-	sortCategory binding.String,
-	sortOrder binding.Bool,
 	dbData *MyDataBinding,
 	searchSource binding.String,
 	selectedTheme binding.String,
@@ -204,16 +195,12 @@ func createAddButton(
 		fyne.NewMenuItem("Game Search", func() {
 			singleGameNameSearchPopup(
 				searchSource,
-				sortCategory,
-				sortOrder,
 				dbData,
 				w,
 			)
 		}),
 		fyne.NewMenuItem("Manual Entry", func() {
 			manualEntryPopup(
-				sortCategory,
-				sortOrder,
 				dbData,
 				w,
 			)
@@ -231,7 +218,7 @@ func createAddButton(
 				defer uri.Close() // close uri when dialog closes
 				PopProgressBar(w, 0)
 				dbhandler.Import(1, ss, uri.URI().Path())
-				forceRenderDB(sortCategory, sortOrder, dbData)
+				forceRenderDB(dbData)
 			}, w)
 			// set file extension to only allow csv files
 			fileDialog.SetFilter(storage.NewExtensionFileFilter([]string{".csv"}))
@@ -251,7 +238,7 @@ func createAddButton(
 				defer uri.Close()
 				PopProgressBar(w, 2)
 				dbhandler.Import(2, ss, uri.URI().Path())
-				forceRenderDB(sortCategory, sortOrder, dbData)
+				forceRenderDB(dbData)
 			}, w)
 			fileDialog.SetFilter(storage.NewExtensionFileFilter([]string{".sql"}))
 			fileDialog.Show()
@@ -270,7 +257,7 @@ func createAddButton(
 				defer uri.Close()
 				PopProgressBar(w, 0)
 				dbhandler.Import(3, ss, uri.URI().Path())
-				forceRenderDB(sortCategory, sortOrder, dbData)
+				forceRenderDB(dbData)
 			}, w)
 			fileDialog.SetFilter(storage.NewExtensionFileFilter([]string{".txt"}))
 			fileDialog.Show()
@@ -307,8 +294,6 @@ func createAddButton(
 
 // finds selected row game name, and deletes it from DB
 func createRemoveButton(
-	sortCategory binding.String,
-	sortOrder binding.Bool,
 	dbData *MyDataBinding,
 ) (removeButton *widget.Button) {
 	removeButton = widget.NewButtonWithIcon("Remove Game", theme.ContentRemoveIcon(), func() {
@@ -319,7 +304,7 @@ func createRemoveButton(
 			log.Println("Removing Game:", dbdata[selrow][0])
 			dbhandler.DeleteFromDB(dbdata[selrow][0])
 
-			forceRenderDB(sortCategory, sortOrder, dbData)
+			forceRenderDB(dbData)
 		}
 	})
 
@@ -376,8 +361,6 @@ func createRandomButton(
 
 // toggle favorite for game defined by selectedRow
 func createFaveButton(
-	sortCategory binding.String,
-	sortOrder binding.Bool,
 	dbData *MyDataBinding,
 ) (faveButton *widget.Button) {
 	heartIcon := fyne.NewStaticResource("heart.svg", heartSVG)
@@ -388,7 +371,7 @@ func createFaveButton(
 			dbdata, _ := dbData.Get()
 			dbhandler.ToggleFavorite(dbdata[selrow][0])
 
-			forceRenderDB(sortCategory, sortOrder, dbData)
+			forceRenderDB(dbData)
 		}
 	})
 
@@ -397,8 +380,6 @@ func createFaveButton(
 
 // update the selected game defined by selectedRow
 func createUpdateButton(
-	sortCategory binding.String,
-	sortOrder binding.Bool,
 	dbData *MyDataBinding,
 	w fyne.Window,
 ) (updateButton *widget.Button) {
@@ -414,7 +395,7 @@ func createUpdateButton(
 			dbdata, _ := dbData.Get()
 			dbhandler.UpdateGame(dbdata[selrow][0])
 
-			forceRenderDB(sortCategory, sortOrder, dbData)
+			forceRenderDB(dbData)
 		}
 	})
 
@@ -425,8 +406,6 @@ func createUpdateButton(
 func createTestButton(
 	a fyne.App,
 	searchSource binding.String,
-	sortCategory binding.String,
-	sortOrder binding.Bool,
 	dbData *MyDataBinding,
 	selectedTheme binding.String,
 	availableThemes map[string]ColorTheme,
@@ -441,12 +420,10 @@ func createTestButton(
 
 // TODO: Try refreshing the widget
 func forceRenderDB(
-	sortCategory binding.String,
-	sortOrder binding.Bool,
 	dbData *MyDataBinding,
 ) {
 	// update dbData and selectedRow to render changes
-	updateDBData(sortCategory, sortOrder, dbData)
+	updateDBData(dbData)
 	ss, _ := model.GetSelectedRow()
 	if ss == -1 {
 		model.SetSelectedRow(-2)
