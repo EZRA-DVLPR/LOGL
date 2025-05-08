@@ -12,7 +12,8 @@ import (
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/data/binding"
 	"fyne.io/fyne/v2/theme"
-	// "github.com/EZRA-DVLPR/GameList/model"
+
+	"github.com/EZRA-DVLPR/GameList/model"
 )
 
 func StartGUI() {
@@ -54,11 +55,11 @@ func StartGUI() {
 	sortCategory := binding.NewString()
 	sortOrder := binding.NewBool()
 	dbData := NewMyDataBindingEmpty()
+	searchSource := binding.NewString()
+	selectedTheme := binding.NewString()
+
 	wWidth := binding.NewFloat()
 	wHeight := binding.NewFloat()
-	searchSource := binding.NewString()
-	textSize := binding.NewFloat()
-	selectedTheme := binding.NewString()
 
 	// load sort category from pref storage. default to "name" i.e. Game Name
 	storedSortCategory := prefs.StringWithFallback("sort_category", "name")
@@ -94,10 +95,9 @@ func StartGUI() {
 
 	// load saved text size from prefs
 	ts := prefs.FloatWithFallback("text_size", 18)
-	textSize.Set(ts)
+	model.SetTextSize(ts)
 
 	// load saved theme from prefs
-	// PERF: Base light/dark as default based on system settings
 	st := prefs.StringWithFallback("selected_theme", "Light")
 	selectedTheme.Set(st)
 	a.Settings().SetTheme(
@@ -117,7 +117,6 @@ func StartGUI() {
 				sortOrder,
 				dbData,
 				searchSource,
-				textSize,
 				selectedTheme,
 				availableThemes,
 				a,
@@ -167,7 +166,7 @@ func StartGUI() {
 		prefs.SetString("search_source", ss)
 
 		// save text size
-		ts, _ := textSize.Get()
+		ts, _ := model.GetTextSize()
 		prefs.SetFloat("text_size", ts)
 
 		// save theme selection

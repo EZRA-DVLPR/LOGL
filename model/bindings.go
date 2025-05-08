@@ -8,6 +8,7 @@ import (
 
 // define struct that will contain the bindings
 type AppModel struct {
+	TextSize     binding.Float
 	SearchText   binding.String
 	SelectedRow  binding.Int
 	MaxProcesses binding.Int
@@ -16,6 +17,7 @@ type AppModel struct {
 
 // create global instance of struct for binding
 var GlobalModel = &AppModel{
+	TextSize:     binding.NewFloat(),
 	SearchText:   binding.NewString(),
 	SelectedRow:  binding.NewInt(),
 	MaxProcesses: binding.NewInt(),
@@ -31,6 +33,14 @@ func init() {
 }
 
 // INFO: All below functions are just for convenience on managing the bindings
+
+func GetTextSize() (float64, error) {
+	return GlobalModel.TextSize.Get()
+}
+
+func SetTextSize(val float64) error {
+	return GlobalModel.TextSize.Set(val)
+}
 
 func GetSearchText() (string, error) {
 	return GlobalModel.SearchText.Get()

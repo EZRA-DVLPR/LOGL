@@ -252,7 +252,6 @@ func settingsPopup(
 	sortCategory binding.String,
 	sortOrder binding.Bool,
 	dbData *MyDataBinding,
-	textSize binding.Float,
 	selectedTheme binding.String,
 	availableThemes map[string]ColorTheme,
 	w fyne.Window,
@@ -271,9 +270,9 @@ func settingsPopup(
 				layout.NewVBoxLayout(),
 				searchSourceRadioWidget(searchSource),
 				widget.NewSeparator(),
-				themeSelector(sortCategory, sortOrder, dbData, selectedTheme, textSize, availableThemes, a),
+				themeSelector(sortCategory, sortOrder, dbData, selectedTheme, availableThemes, a),
 				widget.NewSeparator(),
-				textSlider(selectedTheme, textSize, availableThemes, a),
+				textSlider(selectedTheme, availableThemes, a),
 				widget.NewSeparator(),
 				updateAllButton(sortCategory, sortOrder, dbData, w),
 				widget.NewSeparator(),
@@ -323,7 +322,6 @@ func themeSelector(
 	sortOrder binding.Bool,
 	dbData *MyDataBinding,
 	selectedTheme binding.String,
-	textSize binding.Float,
 	availableThemes map[string]ColorTheme,
 	a fyne.App,
 ) *fyne.Container {
@@ -346,7 +344,7 @@ func themeSelector(
 				label.SetText(fmt.Sprintf("Current Theme: %s", newName))
 				selectedTheme.Set(themeName)
 				log.Println("Changed Theme to:", themeName)
-				ts, _ := textSize.Get()
+				ts, _ := model.GetTextSize()
 				a.Settings().SetTheme(
 					&CustomTheme{
 						Theme:    theme.DefaultTheme(),
@@ -383,7 +381,6 @@ func themeSelector(
 
 func textSlider(
 	selectedTheme binding.String,
-	textSize binding.Float,
 	availableThemes map[string]ColorTheme,
 	a fyne.App,
 ) *fyne.Container {
@@ -392,12 +389,12 @@ func textSlider(
 		fyne.TextAlignCenter,
 		fyne.TextStyle{Bold: true},
 	)
-	ts, _ := textSize.Get()
+	ts, _ := model.GetTextSize()
 	currSize := widget.NewLabel(fmt.Sprintf("Current size is: %v", ts))
 	moveSize := widget.NewLabel("")
 	moveSize.Hide()
 
-	slider := widget.NewSliderWithData(12, 24, textSize)
+	slider := widget.NewSliderWithData(12, 24, model.GlobalModel.TextSize)
 	slider.OnChanged = func(res float64) {
 		moveSize.Show()
 		moveSize.SetText(fmt.Sprintf("New Size will be: %v", float32(res)))
@@ -415,6 +412,7 @@ func textSlider(
 				colors:   availableThemes[st],
 			},
 		)
+		model.SetTextSize(res)
 	}
 	return container.New(
 		layout.NewVBoxLayout(),

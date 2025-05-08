@@ -32,7 +32,6 @@ func createMainWindowToolbar(
 	sortOrder binding.Bool,
 	dbData *MyDataBinding,
 	searchSource binding.String,
-	textSize binding.Float,
 	selectedTheme binding.String,
 	availableThemes map[string]ColorTheme,
 	a fyne.App,
@@ -56,10 +55,10 @@ func createMainWindowToolbar(
 		layout.NewSpacer(),
 		createHelpButton(selectedTheme, w),
 		layout.NewSpacer(),
-		createSettingsButton(a, searchSource, sortCategory, sortOrder, dbData, textSize, selectedTheme, availableThemes, w),
+		createSettingsButton(a, searchSource, sortCategory, sortOrder, dbData, selectedTheme, availableThemes, w),
 		// HACK: just keep this for when I need to do some quick testing
 		// layout.NewSpacer(),
-		// createTestButton(a, searchSource, sortCategory, sortOrder, dbData, textSize, selectedTheme, availableThemes, w),
+		// createTestButton(a, searchSource, sortCategory, sortOrder, dbData, selectedTheme, availableThemes, w),
 	)
 
 	// PERF: remove text next to buttons and leave as option in settings
@@ -171,7 +170,6 @@ func createSettingsButton(
 	sortCategory binding.String,
 	sortOrder binding.Bool,
 	dbData *MyDataBinding,
-	textSize binding.Float,
 	selectedTheme binding.String,
 	availableThemes map[string]ColorTheme,
 	w fyne.Window,
@@ -183,7 +181,6 @@ func createSettingsButton(
 			sortCategory,
 			sortOrder,
 			dbData,
-			textSize,
 			selectedTheme,
 			availableThemes,
 			w,
@@ -431,7 +428,6 @@ func createTestButton(
 	sortCategory binding.String,
 	sortOrder binding.Bool,
 	dbData *MyDataBinding,
-	textSize binding.Float,
 	selectedTheme binding.String,
 	availableThemes map[string]ColorTheme,
 	w fyne.Window,
