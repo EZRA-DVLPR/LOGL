@@ -11,14 +11,15 @@ import (
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/data/binding"
 	"fyne.io/fyne/v2/widget"
+
 	"github.com/EZRA-DVLPR/GameList/internal/dbhandler"
+	"github.com/EZRA-DVLPR/GameList/model"
 )
 
 var prevWidth float32
 
 // makes the table and reflects changes based on values of bindings
 func createDBRender(
-	selectedRow binding.Int,
 	sortCategory binding.String,
 	sortOrder binding.Bool,
 	searchText binding.String,
@@ -98,7 +99,7 @@ func createDBRender(
 	// highlight the row of the cell clicked if its not a divider -> dividers have negative position values
 	dbRender.OnSelected = func(id widget.TableCellID) {
 		if id.Row >= 0 && id.Col >= 0 {
-			selectedRow.Set(id.Row)
+			model.SetSelectedRow(id.Row)
 		}
 	}
 
@@ -110,8 +111,8 @@ func createDBRender(
 	// refresh DBRender when the theme changes
 	selectedTheme.AddListener(binding.NewDataListener(func() {
 		log.Println("Selected Theme changed. Adjusting Table")
-		forceRenderDB(sortCategory, sortOrder, searchText, dbData, selectedRow)
-		updateTableColors(selectedRow, selectedTheme, dbRender, availableThemes)
+		forceRenderDB(sortCategory, sortOrder, searchText, dbData)
+		updateTableColors(selectedTheme, dbRender, availableThemes)
 		dbRender.Refresh()
 	}))
 
@@ -119,8 +120,8 @@ func createDBRender(
 	sortOrder.AddListener(binding.NewDataListener(func() {
 		log.Println("Sort Order changed. Adjusting Table")
 		width := w.Content().Size().Width
-		forceRenderDB(sortCategory, sortOrder, searchText, dbData, selectedRow)
-		dbRender = updateTable(sortCategory, selectedRow, dbData, selectedTheme, dbRender, width, availableThemes)
+		forceRenderDB(sortCategory, sortOrder, searchText, dbData)
+		dbRender = updateTable(sortCategory, dbData, selectedTheme, dbRender, width, availableThemes)
 		dbRender.Refresh()
 	}))
 
@@ -128,8 +129,8 @@ func createDBRender(
 	sortCategory.AddListener(binding.NewDataListener(func() {
 		log.Println("Sort Category changed. Adjusting Table")
 		width := w.Content().Size().Width
-		forceRenderDB(sortCategory, sortOrder, searchText, dbData, selectedRow)
-		dbRender = updateTable(sortCategory, selectedRow, dbData, selectedTheme, dbRender, width, availableThemes)
+		forceRenderDB(sortCategory, sortOrder, searchText, dbData)
+		dbRender = updateTable(sortCategory, dbData, selectedTheme, dbRender, width, availableThemes)
 		dbRender.Refresh()
 	}))
 
@@ -137,15 +138,15 @@ func createDBRender(
 	searchText.AddListener(binding.NewDataListener(func() {
 		log.Println("Search Text changed. Adjusting Table")
 		width := w.Content().Size().Width
-		forceRenderDB(sortCategory, sortOrder, searchText, dbData, selectedRow)
-		dbRender = updateTable(sortCategory, selectedRow, dbData, selectedTheme, dbRender, width, availableThemes)
+		forceRenderDB(sortCategory, sortOrder, searchText, dbData)
+		dbRender = updateTable(sortCategory, dbData, selectedTheme, dbRender, width, availableThemes)
 		dbRender.Refresh()
 	}))
 
 	// selectedRow changes
-	selectedRow.AddListener(binding.NewDataListener(func() {
+	model.AddSelectedRowListener(func(int) {
 		log.Println("Selected Row changed. Adjusting Table")
-		selRow, _ := selectedRow.Get()
+		selRow, _ := model.GetSelectedRow()
 		width := w.Content().Size().Width
 		dbRender.UpdateCell = func(id widget.TableCellID, obj fyne.CanvasObject) {
 			// get the label from the stack
@@ -165,7 +166,7 @@ func createDBRender(
 				}
 			}
 		}
-		dbRender = updateTable(sortCategory, selectedRow, dbData, selectedTheme, dbRender, width, availableThemes)
+		dbRender = updateTable(sortCategory, dbData, selectedTheme, dbRender, width, availableThemes)
 
 		// scroll to the new location selected
 		var selCell widget.TableCellID
@@ -175,7 +176,7 @@ func createDBRender(
 		dbRender.ScrollToLeading()
 
 		dbRender.Refresh()
-	}))
+	})
 
 	go fixTableSize(dbRender, w)
 
@@ -199,14 +200,13 @@ func updateDBData(
 // update the contents of the given table
 func updateTable(
 	sortCategory binding.String,
-	selectedRow binding.Int,
 	dbData *MyDataBinding,
 	selectedTheme binding.String,
 	dbRender *widget.Table,
 	width float32,
 	availableThemes map[string]ColorTheme,
 ) *widget.Table {
-	selRow, _ := selectedRow.Get()
+	selRow, _ := model.GetSelectedRow()
 
 	// check rows for finding dims
 	data, _ := dbData.Get()
@@ -375,12 +375,11 @@ func fixTableSize(
 }
 
 func updateTableColors(
-	selectedRow binding.Int,
 	selectedTheme binding.String,
 	dbRender *widget.Table,
 	availableThemes map[string]ColorTheme,
 ) {
-	selRow, _ := selectedRow.Get()
+	selRow, _ := model.GetSelectedRow()
 	st, _ := selectedTheme.Get()
 	currTheme := availableThemes[st]
 	dbRender.UpdateCell = func(id widget.TableCellID, obj fyne.CanvasObject) {

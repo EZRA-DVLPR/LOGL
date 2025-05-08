@@ -31,7 +31,6 @@ func singleGameNameSearchPopup(
 	sortOrder binding.Bool,
 	searchText binding.String,
 	dbData *MyDataBinding,
-	selectedRow binding.Int,
 	w fyne.Window,
 ) {
 	var list []*widget.FormItem
@@ -67,7 +66,7 @@ func singleGameNameSearchPopup(
 
 					// len(gameNamlen(gameNames)s)update dbData
 					updateDBData(sortCategory, sortOrder, searchText, dbData)
-					forceRenderDB(sortCategory, sortOrder, searchText, dbData, selectedRow)
+					forceRenderDB(sortCategory, sortOrder, searchText, dbData)
 
 				} else {
 					log.Println("No Game Name given for search")
@@ -85,7 +84,6 @@ func manualEntryPopup(
 	sortOrder binding.Bool,
 	searchText binding.String,
 	dbData *MyDataBinding,
-	selectedRow binding.Int,
 	w fyne.Window,
 ) {
 	var list []*widget.FormItem
@@ -160,7 +158,7 @@ func manualEntryPopup(
 					newgame.Favorite = 0
 
 					dbhandler.AddToDB(newgame)
-					forceRenderDB(sortCategory, sortOrder, searchText, dbData, selectedRow)
+					forceRenderDB(sortCategory, sortOrder, searchText, dbData)
 				} else {
 					log.Println("No Game Name given for search")
 				}
@@ -256,7 +254,6 @@ func settingsPopup(
 	sortCategory binding.String,
 	sortOrder binding.Bool,
 	searchText binding.String,
-	selectedRow binding.Int,
 	dbData *MyDataBinding,
 	textSize binding.Float,
 	selectedTheme binding.String,
@@ -277,13 +274,13 @@ func settingsPopup(
 				layout.NewVBoxLayout(),
 				searchSourceRadioWidget(searchSource),
 				widget.NewSeparator(),
-				themeSelector(sortCategory, sortOrder, searchText, selectedRow, dbData, selectedTheme, textSize, availableThemes, a),
+				themeSelector(sortCategory, sortOrder, searchText, dbData, selectedTheme, textSize, availableThemes, a),
 				widget.NewSeparator(),
 				textSlider(selectedTheme, textSize, availableThemes, a),
 				widget.NewSeparator(),
-				updateAllButton(sortCategory, sortOrder, searchText, dbData, selectedRow, w),
+				updateAllButton(sortCategory, sortOrder, searchText, dbData, w),
 				widget.NewSeparator(),
-				deleteAllButton(sortCategory, sortOrder, searchText, dbData, selectedRow),
+				deleteAllButton(sortCategory, sortOrder, searchText, dbData),
 			),
 		),
 	)
@@ -328,7 +325,6 @@ func themeSelector(
 	sortCategory binding.String,
 	sortOrder binding.Bool,
 	searchText binding.String,
-	selectedRow binding.Int,
 	dbData *MyDataBinding,
 	selectedTheme binding.String,
 	textSize binding.Float,
@@ -362,7 +358,7 @@ func themeSelector(
 						colors:   availableThemes[themeName],
 					},
 				)
-				forceRenderDB(sortCategory, sortOrder, searchText, dbData, selectedRow)
+				forceRenderDB(sortCategory, sortOrder, searchText, dbData)
 			}
 		}(themeName, themeColors))
 		themeList.Add(button)
@@ -438,7 +434,6 @@ func updateAllButton(
 	sortOrder binding.Bool,
 	searchText binding.String,
 	dbData *MyDataBinding,
-	selectedRow binding.Int,
 	w fyne.Window,
 ) *fyne.Container {
 	label := widget.NewLabelWithStyle(
@@ -462,7 +457,7 @@ func updateAllButton(
 
 						log.Println("Updating Entire DB")
 						dbhandler.UpdateEntireDB()
-						forceRenderDB(sortCategory, sortOrder, searchText, dbData, selectedRow)
+						forceRenderDB(sortCategory, sortOrder, searchText, dbData)
 					}
 				}
 			},
@@ -481,7 +476,6 @@ func deleteAllButton(
 	sortOrder binding.Bool,
 	searchText binding.String,
 	dbData *MyDataBinding,
-	selectedRow binding.Int,
 ) *fyne.Container {
 	label := widget.NewLabelWithStyle(
 		"Delete All Data",
@@ -497,7 +491,7 @@ func deleteAllButton(
 				if submitted {
 					log.Println("Deleting data in DB")
 					dbhandler.DeleteAllDBData()
-					forceRenderDB(sortCategory, sortOrder, searchText, dbData, selectedRow)
+					forceRenderDB(sortCategory, sortOrder, searchText, dbData)
 					w2.Close()
 				}
 			},

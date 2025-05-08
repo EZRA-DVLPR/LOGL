@@ -60,10 +60,6 @@ func StartGUI() {
 	textSize := binding.NewFloat()
 	selectedTheme := binding.NewString()
 	searchText := binding.NewString()
-	selectedRow := binding.NewInt()
-
-	// dont highlight any row on app start
-	selectedRow.Set(-1)
 
 	// load sort category from pref storage. default to "name" i.e. Game Name
 	storedSortCategory := prefs.StringWithFallback("sort_category", "name")
@@ -122,7 +118,6 @@ func StartGUI() {
 				sortCategory,
 				sortOrder,
 				searchText,
-				selectedRow,
 				dbData,
 				searchSource,
 				textSize,
@@ -136,7 +131,6 @@ func StartGUI() {
 		// dont render anything else in space besides DB
 		nil, nil, nil,
 		createDBRender(
-			selectedRow,
 			sortCategory,
 			sortOrder,
 			searchText,

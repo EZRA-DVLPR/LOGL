@@ -8,23 +8,43 @@ import (
 
 // define struct that will contain the bindings
 type AppModel struct {
+	SelectedRow  binding.Int
 	MaxProcesses binding.Int
 	Progress     binding.Float
 }
 
 // create global instance of struct for binding
 var GlobalModel = &AppModel{
+	SelectedRow:  binding.NewInt(),
 	MaxProcesses: binding.NewInt(),
 	Progress:     binding.NewFloat(),
 }
 
 // set initial values
 func init() {
+	GlobalModel.SelectedRow.Set(1)
 	GlobalModel.MaxProcesses.Set(1)
 	GlobalModel.Progress.Set(0)
 }
 
 // INFO: All below functions are just for convenience on managing the bindings
+
+func GetSelectedRow() (int, error) {
+	return GlobalModel.SelectedRow.Get()
+}
+
+func SetSelectedRow(val int) error {
+	return GlobalModel.SelectedRow.Set(val)
+}
+
+func AddSelectedRowListener(listener func(int)) binding.DataListener {
+	dataListener := binding.NewDataListener(func() {
+		val, _ := GlobalModel.SelectedRow.Get()
+		listener(val)
+	})
+	GlobalModel.SelectedRow.AddListener(dataListener)
+	return dataListener
+}
 
 func GetMaxProcesses() (int, error) {
 	return GlobalModel.MaxProcesses.Get()

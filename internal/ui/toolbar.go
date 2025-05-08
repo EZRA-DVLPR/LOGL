@@ -31,7 +31,6 @@ func createMainWindowToolbar(
 	sortCategory binding.String,
 	sortOrder binding.Bool,
 	searchText binding.String,
-	selectedRow binding.Int,
 	dbData *MyDataBinding,
 	searchSource binding.String,
 	textSize binding.Float,
@@ -44,24 +43,24 @@ func createMainWindowToolbar(
 		layout.NewHBoxLayout(),
 		createSortButton(sortOrder),
 		layout.NewSpacer(),
-		createAddButton(sortCategory, sortOrder, searchText, dbData, selectedRow, searchSource, selectedTheme, w),
+		createAddButton(sortCategory, sortOrder, searchText, dbData, searchSource, selectedTheme, w),
 		layout.NewSpacer(),
-		createUpdateButton(sortCategory, sortOrder, searchText, selectedRow, dbData, w),
+		createUpdateButton(sortCategory, sortOrder, searchText, dbData, w),
 		layout.NewSpacer(),
-		createRemoveButton(selectedRow, sortCategory, sortOrder, searchText, dbData),
+		createRemoveButton(sortCategory, sortOrder, searchText, dbData),
 		layout.NewSpacer(),
-		createRandomButton(selectedRow, dbData),
+		createRandomButton(dbData),
 		layout.NewSpacer(),
-		createFaveButton(selectedRow, sortCategory, sortOrder, searchText, dbData),
+		createFaveButton(sortCategory, sortOrder, searchText, dbData),
 		layout.NewSpacer(),
 		createExportButton(selectedTheme, w),
 		layout.NewSpacer(),
 		createHelpButton(selectedTheme, w),
 		layout.NewSpacer(),
-		createSettingsButton(a, searchSource, sortCategory, sortOrder, searchText, selectedRow, dbData, textSize, selectedTheme, availableThemes, w),
+		createSettingsButton(a, searchSource, sortCategory, sortOrder, searchText, dbData, textSize, selectedTheme, availableThemes, w),
 		// HACK: just keep this for when I need to do some quick testing
 		// layout.NewSpacer(),
-		// createTestButton(a, searchSource, sortCategory, sortOrder, searchText, selectedRow, dbData, textSize, selectedTheme, availableThemes, w),
+		// createTestButton(a, searchSource, sortCategory, sortOrder, searchText, dbData, textSize, selectedTheme, availableThemes, w),
 	)
 
 	// PERF: remove text next to buttons and leave as option in settings
@@ -173,7 +172,6 @@ func createSettingsButton(
 	sortCategory binding.String,
 	sortOrder binding.Bool,
 	searchText binding.String,
-	selectedRow binding.Int,
 	dbData *MyDataBinding,
 	textSize binding.Float,
 	selectedTheme binding.String,
@@ -187,7 +185,6 @@ func createSettingsButton(
 			sortCategory,
 			sortOrder,
 			searchText,
-			selectedRow,
 			dbData,
 			textSize,
 			selectedTheme,
@@ -205,7 +202,6 @@ func createAddButton(
 	sortOrder binding.Bool,
 	searchText binding.String,
 	dbData *MyDataBinding,
-	selectedRow binding.Int,
 	searchSource binding.String,
 	selectedTheme binding.String,
 	w fyne.Window,
@@ -219,7 +215,6 @@ func createAddButton(
 				sortOrder,
 				searchText,
 				dbData,
-				selectedRow,
 				w,
 			)
 		}),
@@ -229,7 +224,6 @@ func createAddButton(
 				sortOrder,
 				searchText,
 				dbData,
-				selectedRow,
 				w,
 			)
 		}),
@@ -246,7 +240,7 @@ func createAddButton(
 				defer uri.Close() // close uri when dialog closes
 				PopProgressBar(w, 0)
 				dbhandler.Import(1, ss, uri.URI().Path())
-				forceRenderDB(sortCategory, sortOrder, searchText, dbData, selectedRow)
+				forceRenderDB(sortCategory, sortOrder, searchText, dbData)
 			}, w)
 			// set file extension to only allow csv files
 			fileDialog.SetFilter(storage.NewExtensionFileFilter([]string{".csv"}))
@@ -266,7 +260,7 @@ func createAddButton(
 				defer uri.Close()
 				PopProgressBar(w, 2)
 				dbhandler.Import(2, ss, uri.URI().Path())
-				forceRenderDB(sortCategory, sortOrder, searchText, dbData, selectedRow)
+				forceRenderDB(sortCategory, sortOrder, searchText, dbData)
 			}, w)
 			fileDialog.SetFilter(storage.NewExtensionFileFilter([]string{".sql"}))
 			fileDialog.Show()
@@ -285,7 +279,7 @@ func createAddButton(
 				defer uri.Close()
 				PopProgressBar(w, 0)
 				dbhandler.Import(3, ss, uri.URI().Path())
-				forceRenderDB(sortCategory, sortOrder, searchText, dbData, selectedRow)
+				forceRenderDB(sortCategory, sortOrder, searchText, dbData)
 			}, w)
 			fileDialog.SetFilter(storage.NewExtensionFileFilter([]string{".txt"}))
 			fileDialog.Show()
@@ -322,21 +316,20 @@ func createAddButton(
 
 // finds selected row game name, and deletes it from DB
 func createRemoveButton(
-	selectedRow binding.Int,
 	sortCategory binding.String,
 	sortOrder binding.Bool,
 	searchText binding.String,
 	dbData *MyDataBinding,
 ) (removeButton *widget.Button) {
 	removeButton = widget.NewButtonWithIcon("Remove Game", theme.ContentRemoveIcon(), func() {
-		selrow, _ := selectedRow.Get()
+		selrow, _ := model.GetSelectedRow()
 		if selrow >= 0 {
 			// get the game name and send query for deletion
 			dbdata, _ := dbData.Get()
 			log.Println("Removing Game:", dbdata[selrow][0])
 			dbhandler.DeleteFromDB(dbdata[selrow][0])
 
-			forceRenderDB(sortCategory, sortOrder, searchText, dbData, selectedRow)
+			forceRenderDB(sortCategory, sortOrder, searchText, dbData)
 		}
 	})
 
@@ -381,12 +374,11 @@ func createHelpButton(
 
 // randomly selects a row to highlight
 func createRandomButton(
-	selectedRow binding.Int,
 	dbData *MyDataBinding,
 ) (removeButton *widget.Button) {
 	removeButton = widget.NewButtonWithIcon("Random Row", theme.SearchReplaceIcon(), func() {
 		dbdata, _ := dbData.Get()
-		selectedRow.Set(rand.Intn(len(dbdata)))
+		model.SetSelectedRow(rand.Intn(len(dbdata)))
 	})
 
 	return removeButton
@@ -394,7 +386,6 @@ func createRandomButton(
 
 // toggle favorite for game defined by selectedRow
 func createFaveButton(
-	selectedRow binding.Int,
 	sortCategory binding.String,
 	sortOrder binding.Bool,
 	searchText binding.String,
@@ -402,13 +393,13 @@ func createFaveButton(
 ) (faveButton *widget.Button) {
 	heartIcon := fyne.NewStaticResource("heart.svg", heartSVG)
 	faveButton = widget.NewButtonWithIcon("(Un)Favorite", theme.NewThemedResource(heartIcon), func() {
-		selrow, _ := selectedRow.Get()
+		selrow, _ := model.GetSelectedRow()
 		if selrow >= 0 {
 			// get the game name and send query for toggling favorite
 			dbdata, _ := dbData.Get()
 			dbhandler.ToggleFavorite(dbdata[selrow][0])
 
-			forceRenderDB(sortCategory, sortOrder, searchText, dbData, selectedRow)
+			forceRenderDB(sortCategory, sortOrder, searchText, dbData)
 		}
 	})
 
@@ -420,12 +411,11 @@ func createUpdateButton(
 	sortCategory binding.String,
 	sortOrder binding.Bool,
 	searchText binding.String,
-	selectedRow binding.Int,
 	dbData *MyDataBinding,
 	w fyne.Window,
 ) (updateButton *widget.Button) {
 	updateButton = widget.NewButtonWithIcon("Update", theme.MediaReplayIcon(), func() {
-		selrow, _ := selectedRow.Get()
+		selrow, _ := model.GetSelectedRow()
 		if selrow >= 0 {
 			log.Println("Updating highlighted entry")
 
@@ -436,7 +426,7 @@ func createUpdateButton(
 			dbdata, _ := dbData.Get()
 			dbhandler.UpdateGame(dbdata[selrow][0])
 
-			forceRenderDB(sortCategory, sortOrder, searchText, dbData, selectedRow)
+			forceRenderDB(sortCategory, sortOrder, searchText, dbData)
 		}
 	})
 
@@ -450,7 +440,6 @@ func createTestButton(
 	sortCategory binding.String,
 	sortOrder binding.Bool,
 	searchText binding.String,
-	selectedRow binding.Int,
 	dbData *MyDataBinding,
 	textSize binding.Float,
 	selectedTheme binding.String,
@@ -464,20 +453,20 @@ func createTestButton(
 	return TestButton
 }
 
+// TODO: Try refreshing the widget
 func forceRenderDB(
 	sortCategory binding.String,
 	sortOrder binding.Bool,
 	searchText binding.String,
 	dbData *MyDataBinding,
-	selectedRow binding.Int,
 ) {
 	// update dbData and selectedRow to render changes
 	updateDBData(sortCategory, sortOrder, searchText, dbData)
-	ss, _ := selectedRow.Get()
+	ss, _ := model.GetSelectedRow()
 	if ss == -1 {
-		selectedRow.Set(-2)
+		model.SetSelectedRow(-2)
 	} else {
-		selectedRow.Set(-1)
+		model.SetSelectedRow(-1)
 	}
 }
 
