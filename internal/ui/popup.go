@@ -603,6 +603,6 @@ func PopProgressBar(
 	)
 
 	// create and show the custom dialog
-	customDialog = dialog.NewCustomWithoutButtons("Processing Dialog", content, w)
+	customDialog = dialog.NewCustomWithoutButtons("Processing Window", content, w)
 	customDialog.Show()
 }

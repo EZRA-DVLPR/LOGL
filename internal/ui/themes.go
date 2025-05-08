@@ -103,11 +103,11 @@ func createLDThemes(themesDir string) {
 		AltBackground:        "#f4faff",
 		Foreground:           "#13262f",
 		Primary:              "#729933",
-		ButtonColor:          "#6ac1ff",
+		ButtonColor:          "#a7daff",
 		PlaceholderText:      "#5876ae",
-		HoverColor:           "#c17e5f",
-		InputBackgroundColor: "#c2e4ff",
-		ScrollBarColor:       "#976148",
+		HoverColor:           "#eab676",
+		InputBackgroundColor: "#e5f1fa",
+		ScrollBarColor:       "#e27754",
 	}
 
 	darkTheme := ColorTheme{
@@ -118,7 +118,7 @@ func createLDThemes(themesDir string) {
 		Primary:              "#a371a4",
 		ButtonColor:          "#5b5d5b",
 		PlaceholderText:      "#8db58c",
-		HoverColor:           "#b58c9a",
+		HoverColor:           "#712f45",
 		InputBackgroundColor: "#595959",
 		ScrollBarColor:       "#998cb5",
 	}
