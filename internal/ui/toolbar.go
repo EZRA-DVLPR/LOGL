@@ -30,7 +30,6 @@ var heartSVG []byte
 func createMainWindowToolbar(
 	sortCategory binding.String,
 	sortOrder binding.Bool,
-	searchText binding.String,
 	dbData *MyDataBinding,
 	searchSource binding.String,
 	textSize binding.Float,
@@ -43,24 +42,24 @@ func createMainWindowToolbar(
 		layout.NewHBoxLayout(),
 		createSortButton(sortOrder),
 		layout.NewSpacer(),
-		createAddButton(sortCategory, sortOrder, searchText, dbData, searchSource, selectedTheme, w),
+		createAddButton(sortCategory, sortOrder, dbData, searchSource, selectedTheme, w),
 		layout.NewSpacer(),
-		createUpdateButton(sortCategory, sortOrder, searchText, dbData, w),
+		createUpdateButton(sortCategory, sortOrder, dbData, w),
 		layout.NewSpacer(),
-		createRemoveButton(sortCategory, sortOrder, searchText, dbData),
+		createRemoveButton(sortCategory, sortOrder, dbData),
 		layout.NewSpacer(),
 		createRandomButton(dbData),
 		layout.NewSpacer(),
-		createFaveButton(sortCategory, sortOrder, searchText, dbData),
+		createFaveButton(sortCategory, sortOrder, dbData),
 		layout.NewSpacer(),
 		createExportButton(selectedTheme, w),
 		layout.NewSpacer(),
 		createHelpButton(selectedTheme, w),
 		layout.NewSpacer(),
-		createSettingsButton(a, searchSource, sortCategory, sortOrder, searchText, dbData, textSize, selectedTheme, availableThemes, w),
+		createSettingsButton(a, searchSource, sortCategory, sortOrder, dbData, textSize, selectedTheme, availableThemes, w),
 		// HACK: just keep this for when I need to do some quick testing
 		// layout.NewSpacer(),
-		// createTestButton(a, searchSource, sortCategory, sortOrder, searchText, dbData, textSize, selectedTheme, availableThemes, w),
+		// createTestButton(a, searchSource, sortCategory, sortOrder, dbData, textSize, selectedTheme, availableThemes, w),
 	)
 
 	// PERF: remove text next to buttons and leave as option in settings
@@ -171,7 +170,6 @@ func createSettingsButton(
 	searchSource binding.String,
 	sortCategory binding.String,
 	sortOrder binding.Bool,
-	searchText binding.String,
 	dbData *MyDataBinding,
 	textSize binding.Float,
 	selectedTheme binding.String,
@@ -184,7 +182,6 @@ func createSettingsButton(
 			searchSource,
 			sortCategory,
 			sortOrder,
-			searchText,
 			dbData,
 			textSize,
 			selectedTheme,
@@ -200,7 +197,6 @@ func createSettingsButton(
 func createAddButton(
 	sortCategory binding.String,
 	sortOrder binding.Bool,
-	searchText binding.String,
 	dbData *MyDataBinding,
 	searchSource binding.String,
 	selectedTheme binding.String,
@@ -213,7 +209,6 @@ func createAddButton(
 				searchSource,
 				sortCategory,
 				sortOrder,
-				searchText,
 				dbData,
 				w,
 			)
@@ -222,7 +217,6 @@ func createAddButton(
 			manualEntryPopup(
 				sortCategory,
 				sortOrder,
-				searchText,
 				dbData,
 				w,
 			)
@@ -240,7 +234,7 @@ func createAddButton(
 				defer uri.Close() // close uri when dialog closes
 				PopProgressBar(w, 0)
 				dbhandler.Import(1, ss, uri.URI().Path())
-				forceRenderDB(sortCategory, sortOrder, searchText, dbData)
+				forceRenderDB(sortCategory, sortOrder, dbData)
 			}, w)
 			// set file extension to only allow csv files
 			fileDialog.SetFilter(storage.NewExtensionFileFilter([]string{".csv"}))
@@ -260,7 +254,7 @@ func createAddButton(
 				defer uri.Close()
 				PopProgressBar(w, 2)
 				dbhandler.Import(2, ss, uri.URI().Path())
-				forceRenderDB(sortCategory, sortOrder, searchText, dbData)
+				forceRenderDB(sortCategory, sortOrder, dbData)
 			}, w)
 			fileDialog.SetFilter(storage.NewExtensionFileFilter([]string{".sql"}))
 			fileDialog.Show()
@@ -279,7 +273,7 @@ func createAddButton(
 				defer uri.Close()
 				PopProgressBar(w, 0)
 				dbhandler.Import(3, ss, uri.URI().Path())
-				forceRenderDB(sortCategory, sortOrder, searchText, dbData)
+				forceRenderDB(sortCategory, sortOrder, dbData)
 			}, w)
 			fileDialog.SetFilter(storage.NewExtensionFileFilter([]string{".txt"}))
 			fileDialog.Show()
@@ -318,7 +312,6 @@ func createAddButton(
 func createRemoveButton(
 	sortCategory binding.String,
 	sortOrder binding.Bool,
-	searchText binding.String,
 	dbData *MyDataBinding,
 ) (removeButton *widget.Button) {
 	removeButton = widget.NewButtonWithIcon("Remove Game", theme.ContentRemoveIcon(), func() {
@@ -329,7 +322,7 @@ func createRemoveButton(
 			log.Println("Removing Game:", dbdata[selrow][0])
 			dbhandler.DeleteFromDB(dbdata[selrow][0])
 
-			forceRenderDB(sortCategory, sortOrder, searchText, dbData)
+			forceRenderDB(sortCategory, sortOrder, dbData)
 		}
 	})
 
@@ -388,7 +381,6 @@ func createRandomButton(
 func createFaveButton(
 	sortCategory binding.String,
 	sortOrder binding.Bool,
-	searchText binding.String,
 	dbData *MyDataBinding,
 ) (faveButton *widget.Button) {
 	heartIcon := fyne.NewStaticResource("heart.svg", heartSVG)
@@ -399,7 +391,7 @@ func createFaveButton(
 			dbdata, _ := dbData.Get()
 			dbhandler.ToggleFavorite(dbdata[selrow][0])
 
-			forceRenderDB(sortCategory, sortOrder, searchText, dbData)
+			forceRenderDB(sortCategory, sortOrder, dbData)
 		}
 	})
 
@@ -410,7 +402,6 @@ func createFaveButton(
 func createUpdateButton(
 	sortCategory binding.String,
 	sortOrder binding.Bool,
-	searchText binding.String,
 	dbData *MyDataBinding,
 	w fyne.Window,
 ) (updateButton *widget.Button) {
@@ -426,7 +417,7 @@ func createUpdateButton(
 			dbdata, _ := dbData.Get()
 			dbhandler.UpdateGame(dbdata[selrow][0])
 
-			forceRenderDB(sortCategory, sortOrder, searchText, dbData)
+			forceRenderDB(sortCategory, sortOrder, dbData)
 		}
 	})
 
@@ -439,7 +430,6 @@ func createTestButton(
 	searchSource binding.String,
 	sortCategory binding.String,
 	sortOrder binding.Bool,
-	searchText binding.String,
 	dbData *MyDataBinding,
 	textSize binding.Float,
 	selectedTheme binding.String,
@@ -457,11 +447,10 @@ func createTestButton(
 func forceRenderDB(
 	sortCategory binding.String,
 	sortOrder binding.Bool,
-	searchText binding.String,
 	dbData *MyDataBinding,
 ) {
 	// update dbData and selectedRow to render changes
-	updateDBData(sortCategory, sortOrder, searchText, dbData)
+	updateDBData(sortCategory, sortOrder, dbData)
 	ss, _ := model.GetSelectedRow()
 	if ss == -1 {
 		model.SetSelectedRow(-2)

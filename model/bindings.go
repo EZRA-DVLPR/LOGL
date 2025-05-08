@@ -8,6 +8,7 @@ import (
 
 // define struct that will contain the bindings
 type AppModel struct {
+	SearchText   binding.String
 	SelectedRow  binding.Int
 	MaxProcesses binding.Int
 	Progress     binding.Float
@@ -15,6 +16,7 @@ type AppModel struct {
 
 // create global instance of struct for binding
 var GlobalModel = &AppModel{
+	SearchText:   binding.NewString(),
 	SelectedRow:  binding.NewInt(),
 	MaxProcesses: binding.NewInt(),
 	Progress:     binding.NewFloat(),
@@ -22,12 +24,30 @@ var GlobalModel = &AppModel{
 
 // set initial values
 func init() {
+	GlobalModel.SearchText.Set("")
 	GlobalModel.SelectedRow.Set(1)
 	GlobalModel.MaxProcesses.Set(1)
 	GlobalModel.Progress.Set(0)
 }
 
 // INFO: All below functions are just for convenience on managing the bindings
+
+func GetSearchText() (string, error) {
+	return GlobalModel.SearchText.Get()
+}
+
+func SetSearchText(val string) error {
+	return GlobalModel.SearchText.Set(val)
+}
+
+func AddSearchTextListener(listener func(string)) binding.DataListener {
+	dataListener := binding.NewDataListener(func() {
+		val, _ := GlobalModel.SearchText.Get()
+		listener(val)
+	})
+	GlobalModel.SearchText.AddListener(dataListener)
+	return dataListener
+}
 
 func GetSelectedRow() (int, error) {
 	return GlobalModel.SelectedRow.Get()

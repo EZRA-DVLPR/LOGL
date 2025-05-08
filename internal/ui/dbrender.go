@@ -22,7 +22,6 @@ var prevWidth float32
 func createDBRender(
 	sortCategory binding.String,
 	sortOrder binding.Bool,
-	searchText binding.String,
 	selectedTheme binding.String,
 	dbData *MyDataBinding,
 	availableThemes map[string]ColorTheme,
@@ -111,7 +110,7 @@ func createDBRender(
 	// refresh DBRender when the theme changes
 	selectedTheme.AddListener(binding.NewDataListener(func() {
 		log.Println("Selected Theme changed. Adjusting Table")
-		forceRenderDB(sortCategory, sortOrder, searchText, dbData)
+		forceRenderDB(sortCategory, sortOrder, dbData)
 		updateTableColors(selectedTheme, dbRender, availableThemes)
 		dbRender.Refresh()
 	}))
@@ -120,7 +119,7 @@ func createDBRender(
 	sortOrder.AddListener(binding.NewDataListener(func() {
 		log.Println("Sort Order changed. Adjusting Table")
 		width := w.Content().Size().Width
-		forceRenderDB(sortCategory, sortOrder, searchText, dbData)
+		forceRenderDB(sortCategory, sortOrder, dbData)
 		dbRender = updateTable(sortCategory, dbData, selectedTheme, dbRender, width, availableThemes)
 		dbRender.Refresh()
 	}))
@@ -129,19 +128,19 @@ func createDBRender(
 	sortCategory.AddListener(binding.NewDataListener(func() {
 		log.Println("Sort Category changed. Adjusting Table")
 		width := w.Content().Size().Width
-		forceRenderDB(sortCategory, sortOrder, searchText, dbData)
+		forceRenderDB(sortCategory, sortOrder, dbData)
 		dbRender = updateTable(sortCategory, dbData, selectedTheme, dbRender, width, availableThemes)
 		dbRender.Refresh()
 	}))
 
 	// change contents of dbData binding when search text changes
-	searchText.AddListener(binding.NewDataListener(func() {
+	model.AddSearchTextListener(func(val string) {
 		log.Println("Search Text changed. Adjusting Table")
 		width := w.Content().Size().Width
-		forceRenderDB(sortCategory, sortOrder, searchText, dbData)
+		forceRenderDB(sortCategory, sortOrder, dbData)
 		dbRender = updateTable(sortCategory, dbData, selectedTheme, dbRender, width, availableThemes)
 		dbRender.Refresh()
-	}))
+	})
 
 	// selectedRow changes
 	model.AddSelectedRowListener(func(int) {
@@ -187,12 +186,11 @@ func createDBRender(
 func updateDBData(
 	sortCategory binding.String,
 	sortOrder binding.Bool,
-	searchText binding.String,
 	dbData *MyDataBinding,
 ) {
 	sortcat, _ := sortCategory.Get()
 	sortord, _ := sortOrder.Get()
-	searchtxt, _ := searchText.Get()
+	searchtxt, _ := model.GetSearchText()
 
 	dbData.Set(dbhandler.SortDB(sortcat, sortord, strings.TrimSpace(searchtxt)))
 }

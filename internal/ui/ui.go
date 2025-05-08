@@ -59,7 +59,6 @@ func StartGUI() {
 	searchSource := binding.NewString()
 	textSize := binding.NewFloat()
 	selectedTheme := binding.NewString()
-	searchText := binding.NewString()
 
 	// load sort category from pref storage. default to "name" i.e. Game Name
 	storedSortCategory := prefs.StringWithFallback("sort_category", "name")
@@ -76,7 +75,6 @@ func StartGUI() {
 	// default window size accommodates changing of "ASC"/"DESC" without changing size of window (1140, 400) (W,H)
 	storedWWidth := prefs.FloatWithFallback("w_width", 1080)
 	wWidth.Set(storedWWidth)
-
 	storedWHeight := prefs.FloatWithFallback("w_height", 350)
 	wHeight.Set(storedWHeight)
 
@@ -117,7 +115,6 @@ func StartGUI() {
 			createMainWindowToolbar(
 				sortCategory,
 				sortOrder,
-				searchText,
 				dbData,
 				searchSource,
 				textSize,
@@ -126,14 +123,13 @@ func StartGUI() {
 				a,
 				w,
 			),
-			createSearchBar(searchText),
+			createSearchBar(),
 		),
 		// dont render anything else in space besides DB
 		nil, nil, nil,
 		createDBRender(
 			sortCategory,
 			sortOrder,
-			searchText,
 			selectedTheme,
 			dbData,
 			availableThemes,
