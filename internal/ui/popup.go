@@ -25,10 +25,7 @@ import (
 // window for popup settings menu
 var w2 fyne.Window
 
-func singleGameNameSearchPopup(
-	dbData *MyDataBinding,
-	w fyne.Window,
-) {
+func singleGameNameSearchPopup(dbData *MyDataBinding) {
 	var list []*widget.FormItem
 
 	// widget to enter game name for searching
@@ -54,11 +51,10 @@ func singleGameNameSearchPopup(
 				if valid {
 					// bring up progress menu
 					model.SetMaxProcesses(1)
-					PopProgressBar(w, 0)
+					PopProgressBar(0)
 
-					ss, _ := model.GetSearchSource()
 					// search game data then add to db
-					dbhandler.SearchAddToDB(mainWidget.Text, ss)
+					dbhandler.SearchAddToDB(mainWidget.Text)
 
 					// len(gameNamlen(gameNames)s)update dbData
 					updateDBData(dbData)
@@ -75,10 +71,7 @@ func singleGameNameSearchPopup(
 	)
 }
 
-func manualEntryPopup(
-	dbData *MyDataBinding,
-	w fyne.Window,
-) {
+func manualEntryPopup(dbData *MyDataBinding) {
 	var list []*widget.FormItem
 
 	// entry widgets to obtain the data from user
@@ -163,10 +156,7 @@ func manualEntryPopup(
 	)
 }
 
-func integrationImport(
-	name string,
-	w fyne.Window,
-) {
+func integrationImport(name string) {
 	var main string
 	var cookie string
 
@@ -214,17 +204,17 @@ func integrationImport(
 
 				if valid {
 					ss, _ := model.GetSearchSource()
-					PopProgressBar(w, 0)
+					PopProgressBar(0)
 					log.Println("Sending all fields to integration:", name)
 					switch name {
 					case "gog":
-						integration.GetAllGamesGOG(mainWidget.Text, ss)
+						integration.GetAllGamesGOG(mainWidget.Text)
 					case "psn":
-						integration.GetAllGamesPS(mainWidget.Text, ss)
+						integration.GetAllGamesPS(mainWidget.Text)
 					case "steam":
 						integration.GetAllGamesSteam(mainWidget.Text, cookieWidget.Text, ss)
 					case "epic":
-						integration.GetAllGamesEpicString(mainWidget.Text, ss)
+						integration.GetAllGamesEpicString(mainWidget.Text)
 					default:
 						log.Println("Integration not found:", name)
 					}
@@ -241,10 +231,8 @@ func integrationImport(
 }
 
 func settingsPopup(
-	a fyne.App,
 	dbData *MyDataBinding,
 	availableThemes map[string]ColorTheme,
-	w fyne.Window,
 ) {
 	if w2 != nil {
 		w2.RequestFocus()
@@ -260,11 +248,11 @@ func settingsPopup(
 				layout.NewVBoxLayout(),
 				searchSourceRadioWidget(),
 				widget.NewSeparator(),
-				themeSelector(dbData, availableThemes, a),
+				themeSelector(dbData, availableThemes),
 				widget.NewSeparator(),
-				textSlider(availableThemes, a),
+				textSlider(availableThemes),
 				widget.NewSeparator(),
-				updateAllButton(dbData, w),
+				updateAllButton(dbData),
 				widget.NewSeparator(),
 				deleteAllButton(dbData),
 			),
@@ -310,7 +298,6 @@ func searchSourceRadioWidget() *fyne.Container {
 func themeSelector(
 	dbData *MyDataBinding,
 	availableThemes map[string]ColorTheme,
-	a fyne.App,
 ) *fyne.Container {
 	st, _ := model.GetSelectedTheme()
 	newName := abbrevName(st)
@@ -366,10 +353,7 @@ func themeSelector(
 	)
 }
 
-func textSlider(
-	availableThemes map[string]ColorTheme,
-	a fyne.App,
-) *fyne.Container {
+func textSlider(availableThemes map[string]ColorTheme) *fyne.Container {
 	label := widget.NewLabelWithStyle(
 		"Change Text and Icon Size",
 		fyne.TextAlignCenter,
@@ -409,10 +393,7 @@ func textSlider(
 	)
 }
 
-func updateAllButton(
-	dbData *MyDataBinding,
-	w fyne.Window,
-) *fyne.Container {
+func updateAllButton(dbData *MyDataBinding) *fyne.Container {
 	label := widget.NewLabelWithStyle(
 		"Update All Games",
 		fyne.TextAlignCenter,
@@ -430,7 +411,7 @@ func updateAllButton(
 					dbdata, _ := dbData.Get()
 					if len(dbdata) != 0 {
 						model.SetMaxProcesses(len(dbdata))
-						PopProgressBar(w, 1)
+						PopProgressBar(1)
 
 						log.Println("Updating Entire DB")
 						dbhandler.UpdateEntireDB()
@@ -448,9 +429,7 @@ func updateAllButton(
 	)
 }
 
-func deleteAllButton(
-	dbData *MyDataBinding,
-) *fyne.Container {
+func deleteAllButton(dbData *MyDataBinding) *fyne.Container {
 	label := widget.NewLabelWithStyle(
 		"Delete All Data",
 		fyne.TextAlignCenter,
@@ -497,10 +476,7 @@ func fixedHeightRect(color color.Color) *canvas.Rectangle {
 	return rect
 }
 
-func PopProgressBar(
-	w fyne.Window,
-	option int,
-) {
+func PopProgressBar(option int) {
 	// reset progress for bar and display it
 	model.ResetProgress()
 	progBar := widget.NewProgressBarWithData(model.GlobalModel.Progress)

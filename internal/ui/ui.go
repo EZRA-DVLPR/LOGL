@@ -16,6 +16,12 @@ import (
 	"github.com/EZRA-DVLPR/GameList/model"
 )
 
+// global vars holding the app and main window
+var (
+	a fyne.App
+	w fyne.Window
+)
+
 func StartGUI() {
 	version := "1.0.0"
 
@@ -45,15 +51,14 @@ func StartGUI() {
 	}
 	defer logFile.Close()
 
-	a := app.NewWithID(".EZRA-DVLPR.GameList")
-	w := a.NewWindow(fmt.Sprintf("Main window - GameList v%v", version))
+	a = app.NewWithID(".EZRA-DVLPR.GameList")
+	w = a.NewWindow(fmt.Sprintf("Main window - GameList v%v", version))
 
 	// set up prefs for app
 	prefs := a.Preferences()
 
 	// create all bindings here
 	dbData := NewMyDataBindingEmpty()
-
 	wWidth := binding.NewFloat()
 	wHeight := binding.NewFloat()
 
@@ -111,8 +116,6 @@ func StartGUI() {
 			createMainWindowToolbar(
 				dbData,
 				availableThemes,
-				a,
-				w,
 			),
 			createSearchBar(),
 		),
@@ -121,7 +124,6 @@ func StartGUI() {
 		createDBRender(
 			dbData,
 			availableThemes,
-			w,
 		),
 	)
 

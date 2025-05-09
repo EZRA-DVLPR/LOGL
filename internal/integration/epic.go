@@ -26,7 +26,7 @@ type EPICGame struct {
 	Logo            any    `json:"-"`
 }
 
-func GetAllGamesEpicString(input string, searchSource string) {
+func GetAllGamesEpicString(input string) {
 	log.Println("Getting products from Epic Games string")
 
 	var epicpage EPICPage
@@ -39,7 +39,7 @@ func GetAllGamesEpicString(input string, searchSource string) {
 	model.SetMaxProcesses(len(epicpage.Data.Applications))
 	for _, app := range epicpage.Data.Applications {
 		log.Println("Game found:", app.ApplicationName)
-		dbhandler.SearchAddToDB(app.ApplicationName, searchSource)
+		dbhandler.SearchAddToDB(app.ApplicationName)
 	}
 	log.Println("Finished adding game data from Epic Games")
 }

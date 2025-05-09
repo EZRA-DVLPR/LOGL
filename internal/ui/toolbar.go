@@ -29,16 +29,14 @@ var heartSVG []byte
 func createMainWindowToolbar(
 	dbData *MyDataBinding,
 	availableThemes map[string]ColorTheme,
-	a fyne.App,
-	w fyne.Window,
 ) (toolbar *fyne.Container) {
 	return container.New(
 		layout.NewHBoxLayout(),
 		createSortButton(),
 		layout.NewSpacer(),
-		createAddButton(dbData, w),
+		createAddButton(dbData),
 		layout.NewSpacer(),
-		createUpdateButton(dbData, w),
+		createUpdateButton(dbData),
 		layout.NewSpacer(),
 		createRemoveButton(dbData),
 		layout.NewSpacer(),
@@ -46,14 +44,14 @@ func createMainWindowToolbar(
 		layout.NewSpacer(),
 		createFaveButton(dbData),
 		layout.NewSpacer(),
-		createExportButton(w),
+		createExportButton(),
 		layout.NewSpacer(),
-		createHelpButton(w),
+		createHelpButton(),
 		layout.NewSpacer(),
-		createSettingsButton(a, dbData, availableThemes, w),
+		createSettingsButton(dbData, availableThemes),
 		// HACK: just keep this for when I need to do some quick testing
 		// layout.NewSpacer(),
-		// createTestButton(a, dbData, availableThemes, w),
+		// createTestButton(dbData, availableThemes),
 	)
 
 	// PERF: remove text next to buttons and leave as option in settings
@@ -83,9 +81,7 @@ func createSortButton() (sortButton *widget.Button) {
 }
 
 // export data from db
-func createExportButton(
-	w fyne.Window,
-) (exportButton *widget.Button) {
+func createExportButton() (exportButton *widget.Button) {
 	menuItems := []*fyne.MenuItem{
 		fyne.NewMenuItem("Export to CSV", func() {
 			// idea is to have user pick folder, then entry for filename
@@ -158,17 +154,13 @@ func createExportButton(
 //
 //	find way to implement menu without opening new window for window tiling managers
 func createSettingsButton(
-	a fyne.App,
 	dbData *MyDataBinding,
 	availableThemes map[string]ColorTheme,
-	w fyne.Window,
 ) (settingsButton *widget.Button) {
 	settingsButton = widget.NewButtonWithIcon("", theme.SettingsIcon(), func() {
 		settingsPopup(
-			a,
 			dbData,
 			availableThemes,
-			w,
 		)
 	})
 
@@ -176,23 +168,13 @@ func createSettingsButton(
 }
 
 // get data and add it to the DB
-func createAddButton(
-	dbData *MyDataBinding,
-	w fyne.Window,
-) (addButton *widget.Button) {
-	ss, _ := model.GetSearchSource()
+func createAddButton(dbData *MyDataBinding) (addButton *widget.Button) {
 	menuItems := []*fyne.MenuItem{
 		fyne.NewMenuItem("Game Search", func() {
-			singleGameNameSearchPopup(
-				dbData,
-				w,
-			)
+			singleGameNameSearchPopup(dbData)
 		}),
 		fyne.NewMenuItem("Manual Entry", func() {
-			manualEntryPopup(
-				dbData,
-				w,
-			)
+			manualEntryPopup(dbData)
 		}),
 		fyne.NewMenuItem("From CSV", func() {
 			fileDialog := dialog.NewFileOpen(func(uri fyne.URIReadCloser, err error) {
@@ -205,8 +187,8 @@ func createAddButton(
 					return
 				}
 				defer uri.Close() // close uri when dialog closes
-				PopProgressBar(w, 0)
-				dbhandler.Import(1, ss, uri.URI().Path())
+				PopProgressBar(0)
+				dbhandler.Import(1, uri.URI().Path())
 				forceRenderDB(dbData)
 			}, w)
 			// set file extension to only allow csv files
@@ -225,8 +207,8 @@ func createAddButton(
 					return
 				}
 				defer uri.Close()
-				PopProgressBar(w, 2)
-				dbhandler.Import(2, ss, uri.URI().Path())
+				PopProgressBar(2)
+				dbhandler.Import(2, uri.URI().Path())
 				forceRenderDB(dbData)
 			}, w)
 			fileDialog.SetFilter(storage.NewExtensionFileFilter([]string{".sql"}))
@@ -244,8 +226,8 @@ func createAddButton(
 					return
 				}
 				defer uri.Close()
-				PopProgressBar(w, 0)
-				dbhandler.Import(3, ss, uri.URI().Path())
+				PopProgressBar(0)
+				dbhandler.Import(3, uri.URI().Path())
 				forceRenderDB(dbData)
 			}, w)
 			fileDialog.SetFilter(storage.NewExtensionFileFilter([]string{".txt"}))
@@ -253,16 +235,16 @@ func createAddButton(
 		}),
 		// INFO: These require user input to be completed
 		fyne.NewMenuItem("From Epic", func() {
-			integrationImport("epic", w)
+			integrationImport("epic")
 		}),
 		fyne.NewMenuItem("From GOG", func() {
-			integrationImport("gog", w)
+			integrationImport("gog")
 		}),
 		fyne.NewMenuItem("From PSN", func() {
-			integrationImport("psn", w)
+			integrationImport("psn")
 		}),
 		fyne.NewMenuItem("From Steam", func() {
-			integrationImport("steam", w)
+			integrationImport("steam")
 		}),
 	}
 
@@ -282,9 +264,7 @@ func createAddButton(
 }
 
 // finds selected row game name, and deletes it from DB
-func createRemoveButton(
-	dbData *MyDataBinding,
-) (removeButton *widget.Button) {
+func createRemoveButton(dbData *MyDataBinding) (removeButton *widget.Button) {
 	removeButton = widget.NewButtonWithIcon("Remove Game", theme.ContentRemoveIcon(), func() {
 		selrow, _ := model.GetSelectedRow()
 		if selrow >= 0 {
@@ -301,9 +281,7 @@ func createRemoveButton(
 }
 
 // lists help options such as tutorial, manual, support, etc.
-func createHelpButton(
-	w fyne.Window,
-) (helpButton *widget.Button) {
+func createHelpButton() (helpButton *widget.Button) {
 	menuItems := []*fyne.MenuItem{
 		fyne.NewMenuItem("Video Tutorials", func() {
 			goToWebsite("https://youtube.com/playlist?list=PL_gNvZlhoitBNANmcZFgoQpT1FjZiBs7I&si=GBWYIGHiUd0dP2-L")
@@ -336,9 +314,7 @@ func createHelpButton(
 }
 
 // randomly selects a row to highlight
-func createRandomButton(
-	dbData *MyDataBinding,
-) (removeButton *widget.Button) {
+func createRandomButton(dbData *MyDataBinding) (removeButton *widget.Button) {
 	removeButton = widget.NewButtonWithIcon("Random Row", theme.SearchReplaceIcon(), func() {
 		dbdata, _ := dbData.Get()
 		model.SetSelectedRow(rand.Intn(len(dbdata)))
@@ -348,9 +324,7 @@ func createRandomButton(
 }
 
 // toggle favorite for game defined by selectedRow
-func createFaveButton(
-	dbData *MyDataBinding,
-) (faveButton *widget.Button) {
+func createFaveButton(dbData *MyDataBinding) (faveButton *widget.Button) {
 	heartIcon := fyne.NewStaticResource("heart.svg", heartSVG)
 	faveButton = widget.NewButtonWithIcon("(Un)Favorite", theme.NewThemedResource(heartIcon), func() {
 		selrow, _ := model.GetSelectedRow()
@@ -367,10 +341,7 @@ func createFaveButton(
 }
 
 // update the selected game defined by selectedRow
-func createUpdateButton(
-	dbData *MyDataBinding,
-	w fyne.Window,
-) (updateButton *widget.Button) {
+func createUpdateButton(dbData *MyDataBinding) (updateButton *widget.Button) {
 	updateButton = widget.NewButtonWithIcon("Update", theme.MediaReplayIcon(), func() {
 		selrow, _ := model.GetSelectedRow()
 		if selrow >= 0 {
@@ -378,7 +349,7 @@ func createUpdateButton(
 
 			// bring up progress menu
 			model.SetMaxProcesses(1)
-			PopProgressBar(w, 1)
+			PopProgressBar(1)
 
 			dbdata, _ := dbData.Get()
 			dbhandler.UpdateGame(dbdata[selrow][0])
@@ -392,10 +363,8 @@ func createUpdateButton(
 
 // HACK: just keep this for when I need to do some quick testing
 func createTestButton(
-	a fyne.App,
 	dbData *MyDataBinding,
 	availableThemes map[string]ColorTheme,
-	w fyne.Window,
 ) (TestButton *widget.Button) {
 	TestButton = widget.NewButtonWithIcon("", theme.HomeIcon(), func() {
 		// anything for testing goes here
@@ -405,9 +374,7 @@ func createTestButton(
 }
 
 // TODO: Try refreshing the widget
-func forceRenderDB(
-	dbData *MyDataBinding,
-) {
+func forceRenderDB(dbData *MyDataBinding) {
 	// update dbData and selectedRow to render changes
 	updateDBData(dbData)
 	ss, _ := model.GetSelectedRow()

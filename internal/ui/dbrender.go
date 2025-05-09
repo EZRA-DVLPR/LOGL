@@ -21,7 +21,6 @@ var prevWidth float32
 func createDBRender(
 	dbData *MyDataBinding,
 	availableThemes map[string]ColorTheme,
-	w fyne.Window,
 ) (dbRender *widget.Table) {
 	// given the bindings create the table with the new set of data
 	sortcat, _ := model.GetSortCategory()
@@ -173,7 +172,7 @@ func createDBRender(
 		dbRender.Refresh()
 	})
 
-	go fixTableSize(dbRender, w)
+	go fixTableSize(dbRender)
 
 	return
 }
@@ -329,10 +328,7 @@ func headerSetup(
 }
 
 // check window size every 0.25 and adjust size of table col widths if it changes
-func fixTableSize(
-	dbRender *widget.Table,
-	w fyne.Window,
-) {
+func fixTableSize(dbRender *widget.Table) {
 	ticker := time.NewTicker(250 * time.Millisecond)
 	defer ticker.Stop()
 

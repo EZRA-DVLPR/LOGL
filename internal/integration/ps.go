@@ -13,7 +13,7 @@ import (
 	"github.com/chromedp/chromedp"
 )
 
-func GetAllGamesPS(profile string, searchSource string) {
+func GetAllGamesPS(profile string) {
 	log.Println("Getting games for PSN")
 
 	// final list holding all games from all pages
@@ -34,7 +34,7 @@ func GetAllGamesPS(profile string, searchSource string) {
 	log.Println("Obtained all game titles for profile:", profile)
 	model.SetMaxProcesses(len(gameList))
 	for _, game := range gameList {
-		dbhandler.SearchAddToDB(game, searchSource)
+		dbhandler.SearchAddToDB(game)
 	}
 	log.Println("Finished adding game data from PSN for profile:", profile)
 }

@@ -14,14 +14,14 @@ import (
 )
 
 // selector for importing
-func Import(choice int, searchSource string, filename string) {
+func Import(choice int, filename string) {
 	switch choice {
 	case 1:
 		importCSV(filename)
 	case 2:
 		importSQL(filename)
 	case 3:
-		importTXT(searchSource, filename)
+		importTXT(filename)
 	default:
 		log.Fatal("No such import exists!")
 	}
@@ -141,7 +141,7 @@ func importSQL(filename string) {
 	log.Println("SQL database imported successfully")
 }
 
-func importTXT(searchSource string, filename string) {
+func importTXT(filename string) {
 	log.Println("Importing data from TXT:", filename)
 	db, err := sql.Open("sqlite3", "games.db")
 	if err != nil {
@@ -168,7 +168,7 @@ func importTXT(searchSource string, filename string) {
 	model.SetMaxProcesses(len(gameNames))
 	for _, game := range gameNames {
 		log.Println("Obtaining Data for game", game)
-		SearchAddToDB(game, searchSource)
+		SearchAddToDB(game)
 	}
 
 	log.Println("Finished obtaining data for games in txt file")

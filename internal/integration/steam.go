@@ -62,7 +62,7 @@ func GetAllGamesSteam(profile string, cookie string, searchSource string) {
 	model.SetMaxProcesses(len(gameNames))
 	for _, name := range gameNames {
 		log.Println("Game found:", name)
-		dbhandler.SearchAddToDB(name, searchSource)
+		dbhandler.SearchAddToDB(name)
 	}
 	log.Println("Finished adding game data from Steam")
 }

@@ -136,10 +136,11 @@ func AddToDB(game scraper.Game) {
 }
 
 // given the name of a game & search source(s), add struct to DB
-func SearchAddToDB(gameName string, searchSource string) {
+func SearchAddToDB(gameName string) {
 	// get the data from scraper using sources
 	var newgame scraper.Game
 
+	searchSource, _ := model.GetSearchSource()
 	switch searchSource {
 	case "All":
 		log.Println("Searching from all sources for game data for game:", gameName)

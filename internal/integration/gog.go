@@ -52,7 +52,7 @@ type GOGProduct struct {
 	IsHidden             any    `json:"-"`
 }
 
-func GetAllGamesGOG(cookie string, searchSource string) {
+func GetAllGamesGOG(cookie string) {
 	log.Println("Getting products from GOG")
 
 	log.Println("Setting up HTTP request")
@@ -118,7 +118,7 @@ func GetAllGamesGOG(cookie string, searchSource string) {
 	model.SetMaxProcesses(len(gameList))
 	for _, game := range gameList {
 		log.Println("Game found:", game)
-		dbhandler.SearchAddToDB(game, searchSource)
+		dbhandler.SearchAddToDB(game)
 	}
 	log.Println("Finished adding game data from GOG")
 }
