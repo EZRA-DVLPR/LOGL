@@ -53,7 +53,6 @@ func StartGUI() {
 
 	// create all bindings here
 	dbData := NewMyDataBindingEmpty()
-	searchSource := binding.NewString()
 	selectedTheme := binding.NewString()
 
 	wWidth := binding.NewFloat()
@@ -69,7 +68,7 @@ func StartGUI() {
 
 	// load search sort from preferences storage. default to "All"
 	storedSearchSort := prefs.StringWithFallback("search_source", "All")
-	searchSource.Set(storedSearchSort)
+	model.SetSearchSource(storedSearchSort)
 
 	// default window size accommodates changing of "ASC"/"DESC" without changing size of window (1140, 400) (W,H)
 	storedWWidth := prefs.FloatWithFallback("w_width", 1080)
@@ -112,7 +111,6 @@ func StartGUI() {
 		container.NewVBox(
 			createMainWindowToolbar(
 				dbData,
-				searchSource,
 				selectedTheme,
 				availableThemes,
 				a,
@@ -156,7 +154,7 @@ func StartGUI() {
 		prefs.SetFloat("w_height", wH)
 
 		// save search source
-		ss, _ := searchSource.Get()
+		ss, _ := model.GetSearchSource()
 		prefs.SetString("search_source", ss)
 
 		// save text size

@@ -8,6 +8,7 @@ import (
 
 // define struct that will contain the bindings
 type AppModel struct {
+	SearchSource binding.String
 	SortCategory binding.String
 	SortOrder    binding.Bool
 	TextSize     binding.Float
@@ -19,6 +20,7 @@ type AppModel struct {
 
 // create global instance of struct for binding
 var GlobalModel = &AppModel{
+	SearchSource: binding.NewString(),
 	SortCategory: binding.NewString(),
 	SortOrder:    binding.NewBool(),
 	TextSize:     binding.NewFloat(),
@@ -37,6 +39,23 @@ func init() {
 }
 
 // INFO: All below functions are just for convenience on managing the bindings
+
+func GetSearchSource() (string, error) {
+	return GlobalModel.SearchSource.Get()
+}
+
+func SetSearchSource(val string) error {
+	return GlobalModel.SearchSource.Set(val)
+}
+
+func AddSearchSourceListener(listener func(string)) binding.DataListener {
+	dataListener := binding.NewDataListener(func() {
+		val, _ := GlobalModel.SearchSource.Get()
+		listener(val)
+	})
+	GlobalModel.SearchSource.AddListener(dataListener)
+	return dataListener
+}
 
 func GetSortOrder() (bool, error) {
 	return GlobalModel.SortOrder.Get()

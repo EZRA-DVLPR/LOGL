@@ -26,7 +26,6 @@ import (
 var w2 fyne.Window
 
 func singleGameNameSearchPopup(
-	searchSource binding.String,
 	dbData *MyDataBinding,
 	w fyne.Window,
 ) {
@@ -57,7 +56,7 @@ func singleGameNameSearchPopup(
 					model.SetMaxProcesses(1)
 					PopProgressBar(w, 0)
 
-					ss, _ := searchSource.Get()
+					ss, _ := model.GetSearchSource()
 					// search game data then add to db
 					dbhandler.SearchAddToDB(mainWidget.Text, ss)
 
@@ -165,7 +164,6 @@ func manualEntryPopup(
 }
 
 func integrationImport(
-	searchSource binding.String,
 	name string,
 	w fyne.Window,
 ) {
@@ -215,7 +213,7 @@ func integrationImport(
 				}
 
 				if valid {
-					ss, _ := searchSource.Get()
+					ss, _ := model.GetSearchSource()
 					PopProgressBar(w, 0)
 					log.Println("Sending all fields to integration:", name)
 					switch name {
@@ -244,7 +242,6 @@ func integrationImport(
 
 func settingsPopup(
 	a fyne.App,
-	searchSource binding.String,
 	dbData *MyDataBinding,
 	selectedTheme binding.String,
 	availableThemes map[string]ColorTheme,
@@ -262,7 +259,7 @@ func settingsPopup(
 		container.NewVScroll(
 			container.New(
 				layout.NewVBoxLayout(),
-				searchSourceRadioWidget(searchSource),
+				searchSourceRadioWidget(),
 				widget.NewSeparator(),
 				themeSelector(dbData, selectedTheme, availableThemes, a),
 				widget.NewSeparator(),
@@ -281,7 +278,7 @@ func settingsPopup(
 }
 
 // radio for selection of sources
-func searchSourceRadioWidget(searchSource binding.String) *fyne.Container {
+func searchSourceRadioWidget() *fyne.Container {
 	label := widget.NewLabelWithStyle(
 		"Search Source Selection",
 		fyne.TextAlignCenter,
@@ -294,13 +291,13 @@ func searchSourceRadioWidget(searchSource binding.String) *fyne.Container {
 			"Completionator",
 		},
 		func(value string) {
-			searchSource.Set(value)
+			model.SetSearchSource(value)
 			log.Println("Search Source changed to:", value)
 		},
 	)
 
 	// set default to search source saved
-	ss, _ := searchSource.Get()
+	ss, _ := model.GetSearchSource()
 	radio.SetSelected(ss)
 
 	return container.New(

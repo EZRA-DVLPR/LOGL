@@ -29,7 +29,6 @@ var heartSVG []byte
 // creates the toolbar with the options that will be displayed to manage the rendered DB
 func createMainWindowToolbar(
 	dbData *MyDataBinding,
-	searchSource binding.String,
 	selectedTheme binding.String,
 	availableThemes map[string]ColorTheme,
 	a fyne.App,
@@ -39,7 +38,7 @@ func createMainWindowToolbar(
 		layout.NewHBoxLayout(),
 		createSortButton(),
 		layout.NewSpacer(),
-		createAddButton(dbData, searchSource, selectedTheme, w),
+		createAddButton(dbData, selectedTheme, w),
 		layout.NewSpacer(),
 		createUpdateButton(dbData, w),
 		layout.NewSpacer(),
@@ -53,10 +52,10 @@ func createMainWindowToolbar(
 		layout.NewSpacer(),
 		createHelpButton(selectedTheme, w),
 		layout.NewSpacer(),
-		createSettingsButton(a, searchSource, dbData, selectedTheme, availableThemes, w),
+		createSettingsButton(a, dbData, selectedTheme, availableThemes, w),
 		// HACK: just keep this for when I need to do some quick testing
 		// layout.NewSpacer(),
-		// createTestButton(a, searchSource, dbData, selectedTheme, availableThemes, w),
+		// createTestButton(a, dbData, selectedTheme, availableThemes, w),
 	)
 
 	// PERF: remove text next to buttons and leave as option in settings
@@ -163,7 +162,6 @@ func createExportButton(
 //	find way to implement menu without opening new window for window tiling managers
 func createSettingsButton(
 	a fyne.App,
-	searchSource binding.String,
 	dbData *MyDataBinding,
 	selectedTheme binding.String,
 	availableThemes map[string]ColorTheme,
@@ -172,7 +170,6 @@ func createSettingsButton(
 	settingsButton = widget.NewButtonWithIcon("", theme.SettingsIcon(), func() {
 		settingsPopup(
 			a,
-			searchSource,
 			dbData,
 			selectedTheme,
 			availableThemes,
@@ -186,15 +183,13 @@ func createSettingsButton(
 // get data and add it to the DB
 func createAddButton(
 	dbData *MyDataBinding,
-	searchSource binding.String,
 	selectedTheme binding.String,
 	w fyne.Window,
 ) (addButton *widget.Button) {
-	ss, _ := searchSource.Get()
+	ss, _ := model.GetSearchSource()
 	menuItems := []*fyne.MenuItem{
 		fyne.NewMenuItem("Game Search", func() {
 			singleGameNameSearchPopup(
-				searchSource,
 				dbData,
 				w,
 			)
@@ -264,16 +259,16 @@ func createAddButton(
 		}),
 		// INFO: These require user input to be completed
 		fyne.NewMenuItem("From Epic", func() {
-			integrationImport(searchSource, "epic", w)
+			integrationImport("epic", w)
 		}),
 		fyne.NewMenuItem("From GOG", func() {
-			integrationImport(searchSource, "gog", w)
+			integrationImport("gog", w)
 		}),
 		fyne.NewMenuItem("From PSN", func() {
-			integrationImport(searchSource, "psn", w)
+			integrationImport("psn", w)
 		}),
 		fyne.NewMenuItem("From Steam", func() {
-			integrationImport(searchSource, "steam", w)
+			integrationImport("steam", w)
 		}),
 	}
 
@@ -405,7 +400,6 @@ func createUpdateButton(
 // HACK: just keep this for when I need to do some quick testing
 func createTestButton(
 	a fyne.App,
-	searchSource binding.String,
 	dbData *MyDataBinding,
 	selectedTheme binding.String,
 	availableThemes map[string]ColorTheme,
