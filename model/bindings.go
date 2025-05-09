@@ -48,15 +48,6 @@ func SetSearchSource(val string) error {
 	return GlobalModel.SearchSource.Set(val)
 }
 
-func AddSearchSourceListener(listener func(string)) binding.DataListener {
-	dataListener := binding.NewDataListener(func() {
-		val, _ := GlobalModel.SearchSource.Get()
-		listener(val)
-	})
-	GlobalModel.SearchSource.AddListener(dataListener)
-	return dataListener
-}
-
 func GetSortOrder() (bool, error) {
 	return GlobalModel.SortOrder.Get()
 }
