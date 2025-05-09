@@ -8,26 +8,28 @@ import (
 
 // define struct that will contain the bindings
 type AppModel struct {
-	SearchSource binding.String
-	SortCategory binding.String
-	SortOrder    binding.Bool
-	TextSize     binding.Float
-	SearchText   binding.String
-	SelectedRow  binding.Int
-	MaxProcesses binding.Int
-	Progress     binding.Float
+	SelectedTheme binding.String
+	SearchSource  binding.String
+	SortCategory  binding.String
+	SortOrder     binding.Bool
+	TextSize      binding.Float
+	SearchText    binding.String
+	SelectedRow   binding.Int
+	MaxProcesses  binding.Int
+	Progress      binding.Float
 }
 
 // create global instance of struct for binding
 var GlobalModel = &AppModel{
-	SearchSource: binding.NewString(),
-	SortCategory: binding.NewString(),
-	SortOrder:    binding.NewBool(),
-	TextSize:     binding.NewFloat(),
-	SearchText:   binding.NewString(),
-	SelectedRow:  binding.NewInt(),
-	MaxProcesses: binding.NewInt(),
-	Progress:     binding.NewFloat(),
+	SelectedTheme: binding.NewString(),
+	SearchSource:  binding.NewString(),
+	SortCategory:  binding.NewString(),
+	SortOrder:     binding.NewBool(),
+	TextSize:      binding.NewFloat(),
+	SearchText:    binding.NewString(),
+	SelectedRow:   binding.NewInt(),
+	MaxProcesses:  binding.NewInt(),
+	Progress:      binding.NewFloat(),
 }
 
 // set initial values
@@ -39,6 +41,23 @@ func init() {
 }
 
 // INFO: All below functions are just for convenience on managing the bindings
+
+func GetSelectedTheme() (string, error) {
+	return GlobalModel.SelectedTheme.Get()
+}
+
+func SetSelectedTheme(val string) error {
+	return GlobalModel.SelectedTheme.Set(val)
+}
+
+func AddSelectedThemeListener(listener func(string)) binding.DataListener {
+	dataListener := binding.NewDataListener(func() {
+		val, _ := GlobalModel.SelectedTheme.Get()
+		listener(val)
+	})
+	GlobalModel.SelectedTheme.AddListener(dataListener)
+	return dataListener
+}
 
 func GetSearchSource() (string, error) {
 	return GlobalModel.SearchSource.Get()

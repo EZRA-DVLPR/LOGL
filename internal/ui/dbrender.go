@@ -9,7 +9,6 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
-	"fyne.io/fyne/v2/data/binding"
 	"fyne.io/fyne/v2/widget"
 
 	"github.com/EZRA-DVLPR/GameList/internal/dbhandler"
@@ -20,7 +19,6 @@ var prevWidth float32
 
 // makes the table and reflects changes based on values of bindings
 func createDBRender(
-	selectedTheme binding.String,
 	dbData *MyDataBinding,
 	availableThemes map[string]ColorTheme,
 	w fyne.Window,
@@ -47,7 +45,7 @@ func createDBRender(
 		numRows = len(data)
 	}
 
-	st, _ := selectedTheme.Get()
+	st, _ := model.GetSelectedTheme()
 	currTheme := availableThemes[st]
 
 	log.Println("Creating the table template")
@@ -103,22 +101,22 @@ func createDBRender(
 	// set up the headers
 	log.Println("Setting up table headers")
 	width := w.Content().Size().Width
-	dbRender = headerSetup(selectedTheme, dbRender, width, availableThemes)
+	dbRender = headerSetup(dbRender, width, availableThemes)
 
 	// refresh DBRender when the theme changes
-	selectedTheme.AddListener(binding.NewDataListener(func() {
+	model.AddSelectedThemeListener(func(string) {
 		log.Println("Selected Theme changed. Adjusting Table")
 		forceRenderDB(dbData)
-		updateTableColors(selectedTheme, dbRender, availableThemes)
+		updateTableColors(dbRender, availableThemes)
 		dbRender.Refresh()
-	}))
+	})
 
 	// change contents of dbData binding when sort order changes
 	model.AddSortOrderListener(func(val bool) {
 		log.Println("Sort Order changed. Adjusting Table")
 		width := w.Content().Size().Width
 		forceRenderDB(dbData)
-		dbRender = updateTable(dbData, selectedTheme, dbRender, width, availableThemes)
+		dbRender = updateTable(dbData, dbRender, width, availableThemes)
 		dbRender.Refresh()
 	})
 
@@ -127,7 +125,7 @@ func createDBRender(
 		log.Println("Sort Category changed. Adjusting Table")
 		width := w.Content().Size().Width
 		forceRenderDB(dbData)
-		dbRender = updateTable(dbData, selectedTheme, dbRender, width, availableThemes)
+		dbRender = updateTable(dbData, dbRender, width, availableThemes)
 		dbRender.Refresh()
 	})
 
@@ -136,7 +134,7 @@ func createDBRender(
 		log.Println("Search Text changed. Adjusting Table")
 		width := w.Content().Size().Width
 		forceRenderDB(dbData)
-		dbRender = updateTable(dbData, selectedTheme, dbRender, width, availableThemes)
+		dbRender = updateTable(dbData, dbRender, width, availableThemes)
 		dbRender.Refresh()
 	})
 
@@ -163,7 +161,7 @@ func createDBRender(
 				}
 			}
 		}
-		dbRender = updateTable(dbData, selectedTheme, dbRender, width, availableThemes)
+		dbRender = updateTable(dbData, dbRender, width, availableThemes)
 
 		// scroll to the new location selected
 		var selCell widget.TableCellID
@@ -194,7 +192,6 @@ func updateDBData(
 // update the contents of the given table
 func updateTable(
 	dbData *MyDataBinding,
-	selectedTheme binding.String,
 	dbRender *widget.Table,
 	width float32,
 	availableThemes map[string]ColorTheme,
@@ -208,7 +205,7 @@ func updateTable(
 		numRows = len(data)
 	}
 
-	st, _ := selectedTheme.Get()
+	st, _ := model.GetSelectedTheme()
 	currTheme := availableThemes[st]
 
 	// set dims
@@ -250,7 +247,7 @@ func updateTable(
 	}
 
 	// setup headers
-	dbRender = headerSetup(selectedTheme, dbRender, width, availableThemes)
+	dbRender = headerSetup(dbRender, width, availableThemes)
 
 	// unselect all cells
 	dbRender.UnselectAll()
@@ -258,12 +255,11 @@ func updateTable(
 }
 
 func headerSetup(
-	selectedTheme binding.String,
 	dbTable *widget.Table,
 	width float32,
 	availableThemes map[string]ColorTheme,
 ) *widget.Table {
-	st, _ := selectedTheme.Get()
+	st, _ := model.GetSelectedTheme()
 
 	currTheme := availableThemes[st]
 
@@ -367,12 +363,11 @@ func fixTableSize(
 }
 
 func updateTableColors(
-	selectedTheme binding.String,
 	dbRender *widget.Table,
 	availableThemes map[string]ColorTheme,
 ) {
 	selRow, _ := model.GetSelectedRow()
-	st, _ := selectedTheme.Get()
+	st, _ := model.GetSelectedTheme()
 	currTheme := availableThemes[st]
 	dbRender.UpdateCell = func(id widget.TableCellID, obj fyne.CanvasObject) {
 		// get the label from the stack

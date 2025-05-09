@@ -10,7 +10,6 @@ import (
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/container"
-	"fyne.io/fyne/v2/data/binding"
 	"fyne.io/fyne/v2/dialog"
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/storage"
@@ -29,7 +28,6 @@ var heartSVG []byte
 // creates the toolbar with the options that will be displayed to manage the rendered DB
 func createMainWindowToolbar(
 	dbData *MyDataBinding,
-	selectedTheme binding.String,
 	availableThemes map[string]ColorTheme,
 	a fyne.App,
 	w fyne.Window,
@@ -38,7 +36,7 @@ func createMainWindowToolbar(
 		layout.NewHBoxLayout(),
 		createSortButton(),
 		layout.NewSpacer(),
-		createAddButton(dbData, selectedTheme, w),
+		createAddButton(dbData, w),
 		layout.NewSpacer(),
 		createUpdateButton(dbData, w),
 		layout.NewSpacer(),
@@ -48,14 +46,14 @@ func createMainWindowToolbar(
 		layout.NewSpacer(),
 		createFaveButton(dbData),
 		layout.NewSpacer(),
-		createExportButton(selectedTheme, w),
+		createExportButton(w),
 		layout.NewSpacer(),
-		createHelpButton(selectedTheme, w),
+		createHelpButton(w),
 		layout.NewSpacer(),
-		createSettingsButton(a, dbData, selectedTheme, availableThemes, w),
+		createSettingsButton(a, dbData, availableThemes, w),
 		// HACK: just keep this for when I need to do some quick testing
 		// layout.NewSpacer(),
-		// createTestButton(a, dbData, selectedTheme, availableThemes, w),
+		// createTestButton(a, dbData, availableThemes, w),
 	)
 
 	// PERF: remove text next to buttons and leave as option in settings
@@ -86,7 +84,6 @@ func createSortButton() (sortButton *widget.Button) {
 
 // export data from db
 func createExportButton(
-	selectedTheme binding.String,
 	w fyne.Window,
 ) (exportButton *widget.Button) {
 	menuItems := []*fyne.MenuItem{
@@ -150,9 +147,9 @@ func createExportButton(
 	})
 
 	// refresh menupopup when the theme changes
-	selectedTheme.AddListener(binding.NewDataListener(func() {
+	model.AddSelectedThemeListener(func(string) {
 		menuPopup.Refresh()
-	}))
+	})
 
 	return exportButton
 }
@@ -163,7 +160,6 @@ func createExportButton(
 func createSettingsButton(
 	a fyne.App,
 	dbData *MyDataBinding,
-	selectedTheme binding.String,
 	availableThemes map[string]ColorTheme,
 	w fyne.Window,
 ) (settingsButton *widget.Button) {
@@ -171,7 +167,6 @@ func createSettingsButton(
 		settingsPopup(
 			a,
 			dbData,
-			selectedTheme,
 			availableThemes,
 			w,
 		)
@@ -183,7 +178,6 @@ func createSettingsButton(
 // get data and add it to the DB
 func createAddButton(
 	dbData *MyDataBinding,
-	selectedTheme binding.String,
 	w fyne.Window,
 ) (addButton *widget.Button) {
 	ss, _ := model.GetSearchSource()
@@ -280,9 +274,9 @@ func createAddButton(
 	})
 
 	// refresh menupopup when the theme changes
-	selectedTheme.AddListener(binding.NewDataListener(func() {
+	model.AddSelectedThemeListener(func(string) {
 		menuPopup.Refresh()
-	}))
+	})
 
 	return addButton
 }
@@ -308,7 +302,6 @@ func createRemoveButton(
 
 // lists help options such as tutorial, manual, support, etc.
 func createHelpButton(
-	selectedTheme binding.String,
 	w fyne.Window,
 ) (helpButton *widget.Button) {
 	menuItems := []*fyne.MenuItem{
@@ -335,9 +328,9 @@ func createHelpButton(
 		menuPopup.Show(helpButton.Position().Add(fyne.NewPos(0, helpButton.Size().Height)))
 	})
 
-	selectedTheme.AddListener(binding.NewDataListener(func() {
+	model.AddSelectedThemeListener(func(string) {
 		menuPopup.Refresh()
-	}))
+	})
 
 	return helpButton
 }
@@ -401,7 +394,6 @@ func createUpdateButton(
 func createTestButton(
 	a fyne.App,
 	dbData *MyDataBinding,
-	selectedTheme binding.String,
 	availableThemes map[string]ColorTheme,
 	w fyne.Window,
 ) (TestButton *widget.Button) {

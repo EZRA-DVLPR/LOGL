@@ -53,7 +53,6 @@ func StartGUI() {
 
 	// create all bindings here
 	dbData := NewMyDataBindingEmpty()
-	selectedTheme := binding.NewString()
 
 	wWidth := binding.NewFloat()
 	wHeight := binding.NewFloat()
@@ -96,7 +95,7 @@ func StartGUI() {
 
 	// load saved theme from prefs
 	st := prefs.StringWithFallback("selected_theme", "Light")
-	selectedTheme.Set(st)
+	model.SetSelectedTheme(st)
 	a.Settings().SetTheme(
 		&CustomTheme{
 			Theme:    theme.DefaultTheme(),
@@ -111,7 +110,6 @@ func StartGUI() {
 		container.NewVBox(
 			createMainWindowToolbar(
 				dbData,
-				selectedTheme,
 				availableThemes,
 				a,
 				w,
@@ -121,7 +119,6 @@ func StartGUI() {
 		// dont render anything else in space besides DB
 		nil, nil, nil,
 		createDBRender(
-			selectedTheme,
 			dbData,
 			availableThemes,
 			w,
@@ -162,7 +159,7 @@ func StartGUI() {
 		prefs.SetFloat("text_size", ts)
 
 		// save theme selection
-		sth, _ := selectedTheme.Get()
+		sth, _ := model.GetSelectedTheme()
 		prefs.SetString("selected_theme", sth)
 
 		log.Println("Preferences saved:")

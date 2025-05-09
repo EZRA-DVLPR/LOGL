@@ -243,7 +243,6 @@ func integrationImport(
 func settingsPopup(
 	a fyne.App,
 	dbData *MyDataBinding,
-	selectedTheme binding.String,
 	availableThemes map[string]ColorTheme,
 	w fyne.Window,
 ) {
@@ -261,9 +260,9 @@ func settingsPopup(
 				layout.NewVBoxLayout(),
 				searchSourceRadioWidget(),
 				widget.NewSeparator(),
-				themeSelector(dbData, selectedTheme, availableThemes, a),
+				themeSelector(dbData, availableThemes, a),
 				widget.NewSeparator(),
-				textSlider(selectedTheme, availableThemes, a),
+				textSlider(availableThemes, a),
 				widget.NewSeparator(),
 				updateAllButton(dbData, w),
 				widget.NewSeparator(),
@@ -310,11 +309,10 @@ func searchSourceRadioWidget() *fyne.Container {
 // selector for the theme of the application
 func themeSelector(
 	dbData *MyDataBinding,
-	selectedTheme binding.String,
 	availableThemes map[string]ColorTheme,
 	a fyne.App,
 ) *fyne.Container {
-	st, _ := selectedTheme.Get()
+	st, _ := model.GetSelectedTheme()
 	newName := abbrevName(st)
 	label := widget.NewLabelWithStyle(
 		fmt.Sprintf("Current Theme: %s", newName),
@@ -331,7 +329,7 @@ func themeSelector(
 			return func() {
 				newName = abbrevName(name)
 				label.SetText(fmt.Sprintf("Current Theme: %s", newName))
-				selectedTheme.Set(themeName)
+				model.SetSelectedTheme(themeName)
 				log.Println("Changed Theme to:", themeName)
 				ts, _ := model.GetTextSize()
 				a.Settings().SetTheme(
@@ -369,7 +367,6 @@ func themeSelector(
 }
 
 func textSlider(
-	selectedTheme binding.String,
 	availableThemes map[string]ColorTheme,
 	a fyne.App,
 ) *fyne.Container {
@@ -393,7 +390,7 @@ func textSlider(
 		res32 := float32(res)
 		currSize.SetText(fmt.Sprintf("Current size is: %v", res32))
 		log.Println(fmt.Sprintf("Text Size changed to: %v", res32))
-		st, _ := selectedTheme.Get()
+		st, _ := model.GetSelectedTheme()
 		a.Settings().SetTheme(
 			&CustomTheme{
 				Theme:    theme.DefaultTheme(),
