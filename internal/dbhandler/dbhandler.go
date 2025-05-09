@@ -357,8 +357,8 @@ func SortDB(sortCategory string, sortOrder bool, queryName string) (dbOutput [][
 	return dbOutput
 }
 
-func convertRowToInterface(row []string) []interface{} {
-	result := make([]interface{}, len(row))
+func convertRowToInterface(row []string) []any {
+	result := make([]any, len(row))
 	for i, v := range row {
 		result[i] = v
 	}
@@ -410,23 +410,11 @@ func compareGetGameData(
 	resultGame.HLTBUrl = firstGame.HLTBUrl
 	resultGame.CompletionatorUrl = secondGame.CompletionatorUrl
 
-	// compare the values of each game and take the higher of both from each
-	if firstGame.Main < secondGame.Main {
-		resultGame.Main = secondGame.Main
-	} else {
-		resultGame.Main = firstGame.Main
-	}
-	if firstGame.MainPlus < secondGame.MainPlus {
-		resultGame.MainPlus = secondGame.MainPlus
-	} else {
-		resultGame.MainPlus = firstGame.MainPlus
-	}
-	if firstGame.Comp < secondGame.Comp {
-		resultGame.Comp = secondGame.Comp
-	} else {
-		resultGame.Comp = firstGame.Comp
-	}
+	// compare the values of each game and take the higher
+	resultGame.Main = max(firstGame.Main, secondGame.Main)
+	resultGame.MainPlus = max(firstGame.MainPlus, secondGame.MainPlus)
+	resultGame.Comp = max(firstGame.Comp, secondGame.Comp)
 
-	// INFO: the game that is returned has no name
+	// NOTE: the game that is returned has no name
 	return
 }

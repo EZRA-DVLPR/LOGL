@@ -362,16 +362,16 @@ func createUpdateButton(dbData *MyDataBinding) (updateButton *widget.Button) {
 }
 
 // HACK: just keep this for when I need to do some quick testing
-func createTestButton(
-	dbData *MyDataBinding,
-	availableThemes map[string]ColorTheme,
-) (TestButton *widget.Button) {
-	TestButton = widget.NewButtonWithIcon("", theme.HomeIcon(), func() {
-		// anything for testing goes here
-	})
-
-	return TestButton
-}
+// func createTestButton(
+// 	dbData *MyDataBinding,
+// 	availableThemes map[string]ColorTheme,
+// ) (TestButton *widget.Button) {
+// 	TestButton = widget.NewButtonWithIcon("", theme.HomeIcon(), func() {
+// 		// anything for testing goes here
+// 	})
+//
+// 	return TestButton
+// }
 
 // TODO: Try refreshing the widget
 func forceRenderDB(dbData *MyDataBinding) {

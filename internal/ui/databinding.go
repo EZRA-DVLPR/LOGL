@@ -37,7 +37,7 @@ func (b *MyDataBinding) Get() ([][]string, error) {
 }
 
 // set updates to data and notify the listeners
-func (b *MyDataBinding) Set(v interface{}) error {
+func (b *MyDataBinding) Set(v any) error {
 	b.lock.Lock()
 	defer b.lock.Unlock()
 
