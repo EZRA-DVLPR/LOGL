@@ -123,7 +123,6 @@ func manualEntryPopup() {
 					}
 
 					// check if the URLs are given
-					// NOTE: this doesn't affect inputting into DB
 					if hltbURL.Text == "" {
 						log.Println("No HLTB URL given for manual entry for game", strings.TrimSpace(gamename.Text))
 					}
@@ -201,7 +200,6 @@ func integrationImport(name string) {
 				}
 
 				if valid {
-					ss, _ := model.GetSearchSource()
 					PopProgressBar(0)
 					log.Println("Sending all fields to integration:", name)
 					switch name {
@@ -210,7 +208,7 @@ func integrationImport(name string) {
 					case "psn":
 						integration.GetAllGamesPS(mainWidget.Text)
 					case "steam":
-						integration.GetAllGamesSteam(mainWidget.Text, cookieWidget.Text, ss)
+						integration.GetAllGamesSteam(mainWidget.Text, cookieWidget.Text)
 					case "epic":
 						integration.GetAllGamesEpicString(mainWidget.Text)
 					default:

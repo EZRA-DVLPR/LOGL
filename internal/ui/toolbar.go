@@ -149,9 +149,6 @@ func createExportButton() (exportButton *widget.Button) {
 	return exportButton
 }
 
-// PERF:
-//
-//	find way to implement menu without opening new window for window tiling managers
 func createSettingsButton(availableThemes map[string]ColorTheme) (settingsButton *widget.Button) {
 	settingsButton = widget.NewButtonWithIcon("", theme.SettingsIcon(), func() {
 		settingsPopup(availableThemes)
@@ -226,7 +223,6 @@ func createAddButton() (addButton *widget.Button) {
 			fileDialog.SetFilter(storage.NewExtensionFileFilter([]string{".txt"}))
 			fileDialog.Show()
 		}),
-		// INFO: These require user input to be completed
 		fyne.NewMenuItem("From Epic", func() {
 			integrationImport("epic")
 		}),

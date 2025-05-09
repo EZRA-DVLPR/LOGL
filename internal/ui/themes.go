@@ -67,11 +67,9 @@ func (t *CustomTheme) Size(name fyne.ThemeSizeName) float32 {
 }
 
 // convert string of hex color to color.Color
-// INFO: colors are in RGB format. capitalization doesnt matter
-// eg. #RRGGBB -- #010101
+// INFO: colors are in RGB format & caps dont matter (eg. #RRGGBB -- #abc123 === #ABC123)
 // which gets turned into color as RRGGBBA where A = 255
-// PERF: Allow diff colors and color styles to be used
-// eg. CMYK, RGBA, etc.
+// PERF: Allow diff color styles to be used (eg. CMYK, RGBA, etc.)
 func hexToColor(hex string) color.Color {
 	var r, g, b, a uint8 = 0, 0, 0, 255
 	fmt.Sscanf(hex, "#%02x%02x%02x", &r, &g, &b)

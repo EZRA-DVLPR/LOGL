@@ -8,8 +8,7 @@ import (
 )
 
 // create the struct for handling the data -> [][]string
-// PERF: Change name of MyDataBinding to something more descriptive like matrix/tablestring
-type MyDataBinding struct {
+type String2DBinding struct {
 	data     [][]string
 	listener []binding.DataListener
 	// manages goroutines to read/write properly
@@ -17,12 +16,12 @@ type MyDataBinding struct {
 }
 
 // create a new data binding obj with no initial data
-func NewMyDataBindingEmpty() *MyDataBinding {
-	return &MyDataBinding{data: [][]string{}}
+func NewString2DBindingEmpty() *String2DBinding {
+	return &String2DBinding{data: [][]string{}}
 }
 
 // return the data from the binding, and error
-func (b *MyDataBinding) Get() ([][]string, error) {
+func (b *String2DBinding) Get() ([][]string, error) {
 	// prevent other goroutines from writing to this binding while we read it
 	b.lock.Lock()
 
@@ -32,7 +31,7 @@ func (b *MyDataBinding) Get() ([][]string, error) {
 }
 
 // set updates to data and notify the listeners
-func (b *MyDataBinding) Set(v any) error {
+func (b *String2DBinding) Set(v any) error {
 	b.lock.Lock()
 	defer b.lock.Unlock()
 
@@ -53,7 +52,7 @@ func (b *MyDataBinding) Set(v any) error {
 }
 
 // register a listener for changes
-func (b *MyDataBinding) AddListener(listener binding.DataListener) {
+func (b *String2DBinding) AddListener(listener binding.DataListener) {
 	b.lock.Lock()
 	defer b.lock.Unlock()
 

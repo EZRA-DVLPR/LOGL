@@ -3,7 +3,6 @@ package ui
 import (
 	"fmt"
 	"log"
-	"strings"
 	"time"
 
 	"fyne.io/fyne/v2"
@@ -19,16 +18,12 @@ var prevWidth float32
 
 // makes the table and reflects changes based on values of bindings
 func createDBRender(availableThemes map[string]ColorTheme) (dbRender *widget.Table) {
-	// given the bindings create the table with the new set of data
-	sortcat, _ := model.GetSortCategory()
-	sortord, _ := model.GetSortOrder()
-
 	// if db exists then get the data
 	log.Println("Checking existence of local DB")
 	if dbhandler.CheckDBExists() {
 		log.Println("DB exists. Obtaining data with stored defaults")
 		// no initial search query so use ""
-		dbData.Set(dbhandler.SortDB(sortcat, sortord, ""))
+		dbData.Set(dbhandler.SortDB())
 	} else {
 		log.Println("No DB found!")
 		dbhandler.CreateDB()
@@ -176,11 +171,8 @@ func createDBRender(availableThemes map[string]ColorTheme) (dbRender *widget.Tab
 
 // sets dbData with given opts
 func UpdateDBData() {
-	sortcat, _ := model.GetSortCategory()
-	sortord, _ := model.GetSortOrder()
-	searchtxt, _ := model.GetSearchText()
 	model.SetSelectedRow(-1)
-	dbData.Set(dbhandler.SortDB(sortcat, sortord, strings.TrimSpace(searchtxt)))
+	dbData.Set(dbhandler.SortDB())
 }
 
 // update the contents of the given table

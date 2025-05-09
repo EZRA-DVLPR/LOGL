@@ -73,8 +73,8 @@ func exportCSV(filename string) {
 	// write rows of data
 	log.Println("Writing game data to csv file")
 	for rows.Next() {
-		values := make([]interface{}, len(cols))
-		valuePtrs := make([]interface{}, len(cols))
+		values := make([]any, len(cols))
+		valuePtrs := make([]any, len(cols))
 		for i := range values {
 			valuePtrs[i] = &values[i]
 		}
@@ -170,8 +170,8 @@ func exportSQL(filename string) {
 		numCols := len(cols)
 
 		// prepare for value scanning
-		values := make([]interface{}, numCols)
-		valuePtrs := make([]interface{}, numCols)
+		values := make([]any, numCols)
+		valuePtrs := make([]any, numCols)
 		for i := range values {
 			valuePtrs[i] = &values[i]
 		}

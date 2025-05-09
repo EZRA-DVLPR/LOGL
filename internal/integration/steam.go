@@ -11,7 +11,7 @@ import (
 	"github.com/chromedp/chromedp"
 )
 
-func GetAllGamesSteam(profile string, cookie string, searchSource string) {
+func GetAllGamesSteam(profile string, cookie string) {
 	log.Println("Getting products from Steam for given profile:", profile)
 
 	// define the cookie

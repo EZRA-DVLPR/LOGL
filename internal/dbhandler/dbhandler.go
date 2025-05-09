@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"strconv"
+	"strings"
 
 	"github.com/EZRA-DVLPR/GameList/internal/scraper"
 	"github.com/EZRA-DVLPR/GameList/model"
@@ -286,12 +287,18 @@ func ToggleFavorite(gameName string) {
 }
 
 // returns query from db as [][]string given cat, ord, and query
-func SortDB(sortCategory string, sortOrder bool, queryName string) (dbOutput [][]string) {
+func SortDB() (dbOutput [][]string) {
 	db, err := sql.Open("sqlite3", "games.db")
 	if err != nil {
 		log.Fatal("Error accessing local dB: ", err)
 	}
 	defer db.Close()
+
+	// get values for processing
+	sortOrder, _ := model.GetSortOrder()
+	sortCategory, _ := model.GetSortCategory()
+	st, _ := model.GetSearchText()
+	queryName := strings.TrimSpace(st)
 
 	// if sortOrder is true => ASC. false => DESC
 	so := ""

@@ -20,7 +20,7 @@ import (
 var (
 	a      fyne.App
 	w      fyne.Window
-	dbData *MyDataBinding
+	dbData *String2DBinding
 )
 
 func StartGUI() {
@@ -59,7 +59,7 @@ func StartGUI() {
 	prefs := a.Preferences()
 
 	// create all bindings here
-	dbData = NewMyDataBindingEmpty()
+	dbData = NewString2DBindingEmpty()
 	wWidth := binding.NewFloat()
 	wHeight := binding.NewFloat()
 
