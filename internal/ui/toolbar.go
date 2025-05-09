@@ -27,31 +27,30 @@ var heartSVG []byte
 
 // creates the toolbar with the options that will be displayed to manage the rendered DB
 func createMainWindowToolbar(
-	dbData *MyDataBinding,
 	availableThemes map[string]ColorTheme,
 ) (toolbar *fyne.Container) {
 	return container.New(
 		layout.NewHBoxLayout(),
 		createSortButton(),
 		layout.NewSpacer(),
-		createAddButton(dbData),
+		createAddButton(),
 		layout.NewSpacer(),
-		createUpdateButton(dbData),
+		createUpdateButton(),
 		layout.NewSpacer(),
-		createRemoveButton(dbData),
+		createRemoveButton(),
 		layout.NewSpacer(),
-		createRandomButton(dbData),
+		createRandomButton(),
 		layout.NewSpacer(),
-		createFaveButton(dbData),
+		createFaveButton(),
 		layout.NewSpacer(),
 		createExportButton(),
 		layout.NewSpacer(),
 		createHelpButton(),
 		layout.NewSpacer(),
-		createSettingsButton(dbData, availableThemes),
+		createSettingsButton(availableThemes),
 		// HACK: just keep this for when I need to do some quick testing
 		// layout.NewSpacer(),
-		// createTestButton(dbData, availableThemes),
+		// createTestButton(availableThemes),
 	)
 
 	// PERF: remove text next to buttons and leave as option in settings
@@ -153,28 +152,22 @@ func createExportButton() (exportButton *widget.Button) {
 // PERF:
 //
 //	find way to implement menu without opening new window for window tiling managers
-func createSettingsButton(
-	dbData *MyDataBinding,
-	availableThemes map[string]ColorTheme,
-) (settingsButton *widget.Button) {
+func createSettingsButton(availableThemes map[string]ColorTheme) (settingsButton *widget.Button) {
 	settingsButton = widget.NewButtonWithIcon("", theme.SettingsIcon(), func() {
-		settingsPopup(
-			dbData,
-			availableThemes,
-		)
+		settingsPopup(availableThemes)
 	})
 
 	return settingsButton
 }
 
 // get data and add it to the DB
-func createAddButton(dbData *MyDataBinding) (addButton *widget.Button) {
+func createAddButton() (addButton *widget.Button) {
 	menuItems := []*fyne.MenuItem{
 		fyne.NewMenuItem("Game Search", func() {
-			singleGameNameSearchPopup(dbData)
+			singleGameNameSearchPopup()
 		}),
 		fyne.NewMenuItem("Manual Entry", func() {
-			manualEntryPopup(dbData)
+			manualEntryPopup()
 		}),
 		fyne.NewMenuItem("From CSV", func() {
 			fileDialog := dialog.NewFileOpen(func(uri fyne.URIReadCloser, err error) {
@@ -189,7 +182,7 @@ func createAddButton(dbData *MyDataBinding) (addButton *widget.Button) {
 				defer uri.Close() // close uri when dialog closes
 				PopProgressBar(0)
 				dbhandler.Import(1, uri.URI().Path())
-				forceRenderDB(dbData)
+				UpdateDBData()
 			}, w)
 			// set file extension to only allow csv files
 			fileDialog.SetFilter(storage.NewExtensionFileFilter([]string{".csv"}))
@@ -209,7 +202,7 @@ func createAddButton(dbData *MyDataBinding) (addButton *widget.Button) {
 				defer uri.Close()
 				PopProgressBar(2)
 				dbhandler.Import(2, uri.URI().Path())
-				forceRenderDB(dbData)
+				UpdateDBData()
 			}, w)
 			fileDialog.SetFilter(storage.NewExtensionFileFilter([]string{".sql"}))
 			fileDialog.Show()
@@ -228,7 +221,7 @@ func createAddButton(dbData *MyDataBinding) (addButton *widget.Button) {
 				defer uri.Close()
 				PopProgressBar(0)
 				dbhandler.Import(3, uri.URI().Path())
-				forceRenderDB(dbData)
+				UpdateDBData()
 			}, w)
 			fileDialog.SetFilter(storage.NewExtensionFileFilter([]string{".txt"}))
 			fileDialog.Show()
@@ -264,7 +257,7 @@ func createAddButton(dbData *MyDataBinding) (addButton *widget.Button) {
 }
 
 // finds selected row game name, and deletes it from DB
-func createRemoveButton(dbData *MyDataBinding) (removeButton *widget.Button) {
+func createRemoveButton() (removeButton *widget.Button) {
 	removeButton = widget.NewButtonWithIcon("Remove Game", theme.ContentRemoveIcon(), func() {
 		selrow, _ := model.GetSelectedRow()
 		if selrow >= 0 {
@@ -273,7 +266,7 @@ func createRemoveButton(dbData *MyDataBinding) (removeButton *widget.Button) {
 			log.Println("Removing Game:", dbdata[selrow][0])
 			dbhandler.DeleteFromDB(dbdata[selrow][0])
 
-			forceRenderDB(dbData)
+			UpdateDBData()
 		}
 	})
 
@@ -314,7 +307,7 @@ func createHelpButton() (helpButton *widget.Button) {
 }
 
 // randomly selects a row to highlight
-func createRandomButton(dbData *MyDataBinding) (removeButton *widget.Button) {
+func createRandomButton() (removeButton *widget.Button) {
 	removeButton = widget.NewButtonWithIcon("Random Row", theme.SearchReplaceIcon(), func() {
 		dbdata, _ := dbData.Get()
 		model.SetSelectedRow(rand.Intn(len(dbdata)))
@@ -324,7 +317,7 @@ func createRandomButton(dbData *MyDataBinding) (removeButton *widget.Button) {
 }
 
 // toggle favorite for game defined by selectedRow
-func createFaveButton(dbData *MyDataBinding) (faveButton *widget.Button) {
+func createFaveButton() (faveButton *widget.Button) {
 	heartIcon := fyne.NewStaticResource("heart.svg", heartSVG)
 	faveButton = widget.NewButtonWithIcon("(Un)Favorite", theme.NewThemedResource(heartIcon), func() {
 		selrow, _ := model.GetSelectedRow()
@@ -333,7 +326,7 @@ func createFaveButton(dbData *MyDataBinding) (faveButton *widget.Button) {
 			dbdata, _ := dbData.Get()
 			dbhandler.ToggleFavorite(dbdata[selrow][0])
 
-			forceRenderDB(dbData)
+			UpdateDBData()
 		}
 	})
 
@@ -341,7 +334,7 @@ func createFaveButton(dbData *MyDataBinding) (faveButton *widget.Button) {
 }
 
 // update the selected game defined by selectedRow
-func createUpdateButton(dbData *MyDataBinding) (updateButton *widget.Button) {
+func createUpdateButton() (updateButton *widget.Button) {
 	updateButton = widget.NewButtonWithIcon("Update", theme.MediaReplayIcon(), func() {
 		selrow, _ := model.GetSelectedRow()
 		if selrow >= 0 {
@@ -354,7 +347,7 @@ func createUpdateButton(dbData *MyDataBinding) (updateButton *widget.Button) {
 			dbdata, _ := dbData.Get()
 			dbhandler.UpdateGame(dbdata[selrow][0])
 
-			forceRenderDB(dbData)
+			UpdateDBData()
 		}
 	})
 
@@ -362,28 +355,13 @@ func createUpdateButton(dbData *MyDataBinding) (updateButton *widget.Button) {
 }
 
 // HACK: just keep this for when I need to do some quick testing
-// func createTestButton(
-// 	dbData *MyDataBinding,
-// 	availableThemes map[string]ColorTheme,
-// ) (TestButton *widget.Button) {
+// func createTestButton(availableThemes map[string]ColorTheme) (TestButton *widget.Button) {
 // 	TestButton = widget.NewButtonWithIcon("", theme.HomeIcon(), func() {
 // 		// anything for testing goes here
 // 	})
 //
 // 	return TestButton
 // }
-
-// TODO: Try refreshing the widget
-func forceRenderDB(dbData *MyDataBinding) {
-	// update dbData and selectedRow to render changes
-	updateDBData(dbData)
-	ss, _ := model.GetSelectedRow()
-	if ss == -1 {
-		model.SetSelectedRow(-2)
-	} else {
-		model.SetSelectedRow(-1)
-	}
-}
 
 func goToWebsite(link string) {
 	var cmd *exec.Cmd

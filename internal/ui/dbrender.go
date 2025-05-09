@@ -18,10 +18,7 @@ import (
 var prevWidth float32
 
 // makes the table and reflects changes based on values of bindings
-func createDBRender(
-	dbData *MyDataBinding,
-	availableThemes map[string]ColorTheme,
-) (dbRender *widget.Table) {
+func createDBRender(availableThemes map[string]ColorTheme) (dbRender *widget.Table) {
 	// given the bindings create the table with the new set of data
 	sortcat, _ := model.GetSortCategory()
 	sortord, _ := model.GetSortOrder()
@@ -105,7 +102,7 @@ func createDBRender(
 	// refresh DBRender when the theme changes
 	model.AddSelectedThemeListener(func(string) {
 		log.Println("Selected Theme changed. Adjusting Table")
-		forceRenderDB(dbData)
+		UpdateDBData()
 		updateTableColors(dbRender, availableThemes)
 		dbRender.Refresh()
 	})
@@ -114,8 +111,8 @@ func createDBRender(
 	model.AddSortOrderListener(func(val bool) {
 		log.Println("Sort Order changed. Adjusting Table")
 		width := w.Content().Size().Width
-		forceRenderDB(dbData)
-		dbRender = updateTable(dbData, dbRender, width, availableThemes)
+		UpdateDBData()
+		dbRender = updateTable(dbRender, width, availableThemes)
 		dbRender.Refresh()
 	})
 
@@ -123,8 +120,8 @@ func createDBRender(
 	model.AddSortCategoryListener(func(val string) {
 		log.Println("Sort Category changed. Adjusting Table")
 		width := w.Content().Size().Width
-		forceRenderDB(dbData)
-		dbRender = updateTable(dbData, dbRender, width, availableThemes)
+		UpdateDBData()
+		dbRender = updateTable(dbRender, width, availableThemes)
 		dbRender.Refresh()
 	})
 
@@ -132,8 +129,8 @@ func createDBRender(
 	model.AddSearchTextListener(func(val string) {
 		log.Println("Search Text changed. Adjusting Table")
 		width := w.Content().Size().Width
-		forceRenderDB(dbData)
-		dbRender = updateTable(dbData, dbRender, width, availableThemes)
+		UpdateDBData()
+		dbRender = updateTable(dbRender, width, availableThemes)
 		dbRender.Refresh()
 	})
 
@@ -160,7 +157,7 @@ func createDBRender(
 				}
 			}
 		}
-		dbRender = updateTable(dbData, dbRender, width, availableThemes)
+		dbRender = updateTable(dbRender, width, availableThemes)
 
 		// scroll to the new location selected
 		var selCell widget.TableCellID
@@ -178,19 +175,16 @@ func createDBRender(
 }
 
 // sets dbData with given opts
-func updateDBData(
-	dbData *MyDataBinding,
-) {
+func UpdateDBData() {
 	sortcat, _ := model.GetSortCategory()
 	sortord, _ := model.GetSortOrder()
 	searchtxt, _ := model.GetSearchText()
-
+	model.SetSelectedRow(-1)
 	dbData.Set(dbhandler.SortDB(sortcat, sortord, strings.TrimSpace(searchtxt)))
 }
 
 // update the contents of the given table
 func updateTable(
-	dbData *MyDataBinding,
 	dbRender *widget.Table,
 	width float32,
 	availableThemes map[string]ColorTheme,

@@ -25,7 +25,7 @@ import (
 // window for popup settings menu
 var w2 fyne.Window
 
-func singleGameNameSearchPopup(dbData *MyDataBinding) {
+func singleGameNameSearchPopup() {
 	var list []*widget.FormItem
 
 	// widget to enter game name for searching
@@ -56,9 +56,7 @@ func singleGameNameSearchPopup(dbData *MyDataBinding) {
 					// search game data then add to db
 					dbhandler.SearchAddToDB(mainWidget.Text)
 
-					// len(gameNamlen(gameNames)s)update dbData
-					updateDBData(dbData)
-					forceRenderDB(dbData)
+					UpdateDBData()
 
 				} else {
 					log.Println("No Game Name given for search")
@@ -71,7 +69,7 @@ func singleGameNameSearchPopup(dbData *MyDataBinding) {
 	)
 }
 
-func manualEntryPopup(dbData *MyDataBinding) {
+func manualEntryPopup() {
 	var list []*widget.FormItem
 
 	// entry widgets to obtain the data from user
@@ -144,7 +142,7 @@ func manualEntryPopup(dbData *MyDataBinding) {
 					newgame.Favorite = 0
 
 					dbhandler.AddToDB(newgame)
-					forceRenderDB(dbData)
+					UpdateDBData()
 				} else {
 					log.Println("No Game Name given for search")
 				}
@@ -230,10 +228,7 @@ func integrationImport(name string) {
 	)
 }
 
-func settingsPopup(
-	dbData *MyDataBinding,
-	availableThemes map[string]ColorTheme,
-) {
+func settingsPopup(availableThemes map[string]ColorTheme) {
 	if w2 != nil {
 		w2.RequestFocus()
 		return
@@ -248,13 +243,13 @@ func settingsPopup(
 				layout.NewVBoxLayout(),
 				searchSourceRadioWidget(),
 				widget.NewSeparator(),
-				themeSelector(dbData, availableThemes),
+				themeSelector(availableThemes),
 				widget.NewSeparator(),
 				textSlider(availableThemes),
 				widget.NewSeparator(),
-				updateAllButton(dbData),
+				updateAllButton(),
 				widget.NewSeparator(),
-				deleteAllButton(dbData),
+				deleteAllButton(),
 			),
 		),
 	)
@@ -295,10 +290,7 @@ func searchSourceRadioWidget() *fyne.Container {
 }
 
 // selector for the theme of the application
-func themeSelector(
-	dbData *MyDataBinding,
-	availableThemes map[string]ColorTheme,
-) *fyne.Container {
+func themeSelector(availableThemes map[string]ColorTheme) *fyne.Container {
 	st, _ := model.GetSelectedTheme()
 	newName := abbrevName(st)
 	label := widget.NewLabelWithStyle(
@@ -326,7 +318,7 @@ func themeSelector(
 						colors:   availableThemes[themeName],
 					},
 				)
-				forceRenderDB(dbData)
+				UpdateDBData()
 			}
 		}(themeName, themeColors))
 		themeList.Add(button)
@@ -393,7 +385,7 @@ func textSlider(availableThemes map[string]ColorTheme) *fyne.Container {
 	)
 }
 
-func updateAllButton(dbData *MyDataBinding) *fyne.Container {
+func updateAllButton() *fyne.Container {
 	label := widget.NewLabelWithStyle(
 		"Update All Games",
 		fyne.TextAlignCenter,
@@ -415,7 +407,7 @@ func updateAllButton(dbData *MyDataBinding) *fyne.Container {
 
 						log.Println("Updating Entire DB")
 						dbhandler.UpdateEntireDB()
-						forceRenderDB(dbData)
+						UpdateDBData()
 					}
 				}
 			},
@@ -429,7 +421,7 @@ func updateAllButton(dbData *MyDataBinding) *fyne.Container {
 	)
 }
 
-func deleteAllButton(dbData *MyDataBinding) *fyne.Container {
+func deleteAllButton() *fyne.Container {
 	label := widget.NewLabelWithStyle(
 		"Delete All Data",
 		fyne.TextAlignCenter,
@@ -444,7 +436,7 @@ func deleteAllButton(dbData *MyDataBinding) *fyne.Container {
 				if submitted {
 					log.Println("Deleting data in DB")
 					dbhandler.DeleteAllDBData()
-					forceRenderDB(dbData)
+					UpdateDBData()
 					w2.Close()
 				}
 			},

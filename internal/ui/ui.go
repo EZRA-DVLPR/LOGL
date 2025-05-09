@@ -16,10 +16,11 @@ import (
 	"github.com/EZRA-DVLPR/GameList/model"
 )
 
-// global vars holding the app and main window
+// global vars holding the app, main window, and dbData
 var (
-	a fyne.App
-	w fyne.Window
+	a      fyne.App
+	w      fyne.Window
+	dbData *MyDataBinding
 )
 
 func StartGUI() {
@@ -58,7 +59,7 @@ func StartGUI() {
 	prefs := a.Preferences()
 
 	// create all bindings here
-	dbData := NewMyDataBindingEmpty()
+	dbData = NewMyDataBindingEmpty()
 	wWidth := binding.NewFloat()
 	wHeight := binding.NewFloat()
 
@@ -113,18 +114,12 @@ func StartGUI() {
 	content := container.NewBorder(
 		// top is toolbar + searchbar
 		container.NewVBox(
-			createMainWindowToolbar(
-				dbData,
-				availableThemes,
-			),
+			createMainWindowToolbar(availableThemes),
 			createSearchBar(),
 		),
 		// dont render anything else in space besides DB
 		nil, nil, nil,
-		createDBRender(
-			dbData,
-			availableThemes,
-		),
+		createDBRender(availableThemes),
 	)
 
 	w.SetContent(content)
