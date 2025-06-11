@@ -97,6 +97,7 @@ func AddToDB(game scraper.Game) {
 		(game.MainPlus == -1) &&
 		(game.Comp == -1) {
 		log.Println("No game data received for associate game.")
+		model.IncrementProgress()
 		return
 	}
 
@@ -113,6 +114,7 @@ func AddToDB(game scraper.Game) {
 	}
 	if exists {
 		log.Println("Game already exists in local DB! Skipping insertion")
+		model.IncrementProgress()
 		return
 	}
 

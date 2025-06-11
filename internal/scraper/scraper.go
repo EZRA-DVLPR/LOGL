@@ -57,6 +57,9 @@ func FetchHLTB(link string) (game Game) {
 	// log that there was a problem accessing the URL
 	c.OnError(func(_ *colly.Response, err error) {
 		log.Println("Something went wrong:", err)
+		game.Main = -1
+		game.MainPlus = -1
+		game.Comp = -1
 	})
 
 	// update the Main Story, Main + Sides, and Completionist fields of the game struct
@@ -160,6 +163,9 @@ func FetchCompletionator(link string) (game Game) {
 	// log that there was a problem accessing the URL
 	c.OnError(func(_ *colly.Response, err error) {
 		log.Println("Something went wrong:", err)
+		game.Main = -1
+		game.MainPlus = -1
+		game.Comp = -1
 	})
 
 	// update the Main Story, Main + Sides, and Completionist fields of the game struct
