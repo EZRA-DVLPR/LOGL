@@ -8,7 +8,6 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
-	"fyne.io/fyne/v2/data/binding"
 	"fyne.io/fyne/v2/widget"
 
 	"github.com/EZRA-DVLPR/GameList/internal/dbhandler"
@@ -163,10 +162,6 @@ func createDBRender(availableThemes map[string]ColorTheme) (dbRender *widget.Tab
 		dbRender.ScrollToLeading()
 	})
 
-	dbData.AddListener(binding.NewDataListener(func() {
-		dbRender.Refresh()
-	}))
-
 	go fixTableSize(dbRender)
 
 	return
@@ -174,8 +169,8 @@ func createDBRender(availableThemes map[string]ColorTheme) (dbRender *widget.Tab
 
 // sets dbData with given opts
 func UpdateDBData() {
-	model.SetSelectedRow(-1)
 	dbData.Set(dbhandler.SortDB())
+	model.SetSelectedRow(-1)
 }
 
 // update the contents of the given table
