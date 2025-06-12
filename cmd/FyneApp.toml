@@ -3,7 +3,7 @@
   Name = "LOGL"
   ID = ".EZRA-DVLPR.GameList"
   Version = "1.0.0"
-  Build = 31
+  Build = 32
 
 [LinuxAndBSD]
   GenericName = "Library of Game Lengths"

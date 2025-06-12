@@ -51,7 +51,7 @@ func importCSV(filename string) {
 		log.Fatal("CSV file is empty or improperly formatted")
 	}
 
-	model.SetMaxProcesses(len(rows))
+	model.SetMaxProcesses(len(rows) - 1)
 	// create the table if it does not exist
 	var exists int
 	err = db.QueryRow("SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name='games'").Scan(&exists)
