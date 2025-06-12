@@ -93,7 +93,7 @@ func createExportButton() (exportButton *widget.Button) {
 					log.Println("No file Selected to export to CSV")
 					return
 				}
-				defer uri.Close() // close uri when dialog closes
+				uri.Close() // close uri when dialog closes
 
 				// delete the partially created file as i will create it in export function
 				os.Remove(uri.URI().Path())
@@ -112,7 +112,7 @@ func createExportButton() (exportButton *widget.Button) {
 					log.Println("No file Selected to export to SQL")
 					return
 				}
-				defer uri.Close() // close uri when dialog closes
+				uri.Close() // close uri when dialog closes
 				os.Remove(uri.URI().Path())
 				dbhandler.Export(2, uri.URI().Path())
 			}, w)
@@ -127,7 +127,7 @@ func createExportButton() (exportButton *widget.Button) {
 					log.Println("No file Selected to export to MD")
 					return
 				}
-				defer uri.Close() // close uri when dialog closes
+				uri.Close() // close uri when dialog closes
 				os.Remove(uri.URI().Path())
 				dbhandler.Export(3, uri.URI().Path())
 			}, w)

@@ -170,7 +170,13 @@ func createDBRender(availableThemes map[string]ColorTheme) (dbRender *widget.Tab
 // sets dbData with given opts
 func UpdateDBData() {
 	dbData.Set(dbhandler.SortDB())
-	model.SetSelectedRow(-1)
+	sr, _ := model.GetSelectedRow()
+	// ensures updates occur when there is no selected row
+	if sr != -1 {
+		model.SetSelectedRow(-1)
+	} else {
+		model.SetSelectedRow(-2)
+	}
 }
 
 // update the contents of the given table

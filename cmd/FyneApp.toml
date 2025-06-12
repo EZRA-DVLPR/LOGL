@@ -1,12 +1,12 @@
 [Details]
-Icon = "../LOGL-drawing-20250525-512.png"
-Name = "LOGL"
-ID = ".EZRA-DVLPR.GameList"
-Version = "1.0.0"
-Build = 23
+  Icon = "../LOGL-drawing-20250525-512.png"
+  Name = "LOGL"
+  ID = ".EZRA-DVLPR.GameList"
+  Version = "1.0.0"
+  Build = 31
 
 [LinuxAndBSD]
-GenericName = "Library of Game Lengths"
-Categories = ["Recreation", "Gaming", "Entertainment"]
-Comment = "Makes a list of time data to beat games"
-Keywords = ["game", "games"]
+  GenericName = "Library of Game Lengths"
+  Categories = ["Recreation", "Gaming", "Entertainment"]
+  Comment = "Makes a list of time data to beat games"
+  Keywords = ["game", "games"]
