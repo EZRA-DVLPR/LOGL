@@ -132,15 +132,17 @@ This program was created with a single window to be used in mind.
 
 ## Windows:
 
-1) Download the `LOGL.exe` file
-2) Drag and drop onto whatever location in your file system you like
-3) Enjoy!
+1) Download the `W-LOGL.zip` file
+2) Unzip the folder (Winrar/7Zip is good)
+3) Drag and drop `LOGL.exe` onto whatever location in your file system you like
+4) Enjoy!
 
 ## MacOS
 
-1) Download the `LOGL.app` file
-2) Drag and drop into the `Applications` folder
-3) Enjoy!
+1) Download the `D-LOGL.zip` file
+2) Unzip the folder (Winrar/7Zip is good)
+3) Drag and drop `LOGL.app` into the `Applications` folder
+4) Enjoy!
 
 ## Linux
 
