@@ -140,7 +140,7 @@ This program was created with a single window to be used in mind.
 ## MacOS
 
 1) Download the `D-LOGL.zip` file
-2) Unzip the folder (Winrar/7Zip is good)
+2) Unzip the folder (The Unarchiver is good)
 3) Drag and drop `LOGL.app` into the `Applications` folder
 4) Enjoy!
 
